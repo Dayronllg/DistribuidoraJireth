@@ -1,42 +1,104 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(135deg, #22b3e2, #1798c9, #f5d8a2);
+  height: 100vh;
+}
+
+.formulario {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background: white;
+  border-radius: 10px;
+}
+
+.formulario h1 {
   text-align: center;
+  padding: 0 0 20px 0;
+  border-bottom: 1px solid silver;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.formulario form {
+  padding: 0 40px;
+  box-sizing: border-box;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+form .nombreUsuario {
+  position: relative;
+  border-bottom: 2px solid #adadad;
+  margin: 30px 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.nombreUsuario input {
+  width: 100%;
+  padding: 0 5px;
+  height: 40px;
+  font-size: 16px;
+  border: none;
+  background: none;
+  outline: none;
 }
 
-.card {
-  padding: 2em;
+.nombreUsuario label {
+  position: absolute;
+  top: 10%;
+  left: 5px;
+  color: #adadad;
+  transform: translateY(50%);
+  font-size: 16px;
+  pointer-events: none;
 }
 
-.read-the-docs {
-  color: #888;
+.nombreUsuario span::before {
+  content: '';
+  position: absolute;
+  top: 40px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #6c3483;
+}
+
+.nombreUsuario input:focus~label,
+.nombreUsuario input:valid~label {
+  top: -20px;
+  color: #6C3483;
+  transition: top 0.3s ease, color 0.3s ease;
+}
+
+.nombreUsuario input:focus~span::before,
+.nombreUsuario input:focus~span::before {
+  width: 100%;
+}
+
+.recordar {
+  margin: -5px 0 20px 5px;
+  color: blue;
+  cursor: pointer;
+}
+
+.recordar:hover {
+  text-decoration: underline;
+}
+
+input[type="submit"] {
+  width: 100%;
+  height: 50px;
+  margin-bottom: 10px;
+  border: 1px solid;
+  background: #6C3483;
+  border-radius: 25px;
+  font-size: 18px;
+  color: white;
+  cursor: pointer;
+  outline: none;
+}
+
+input[type="submit"]:hover {
+  border-color: purple;
+  transition: .5s;
 }
