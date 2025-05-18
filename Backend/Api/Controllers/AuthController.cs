@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Api.Controllers
 {
-    [EnableCors("Mypolici")]
+    [EnableCors("Mypolicy")]
     [Route("api/[controller]")]
     [AllowAnonymous]
     [ApiController]
