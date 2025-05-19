@@ -2,6 +2,7 @@ using System.Text;
 using Api.Models;
 using Api.Repositery;
 using Api.Repositery.IRepositery;
+using Api.Repositery.ServiceRepositery;
 using Api.Security;
 using Api.Validaciones.IValidationsService;
 using Api.Validaciones.ValidationServices;
@@ -25,6 +26,8 @@ builder.Services.AddScoped<DistribuidoraContext>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSingleton<Utilidad>();
 builder.Services.AddScoped<IUserValidation, UserValidation>();
+builder.Services.AddScoped<IValidationProduct, ValidationProduct>();
+builder.Services.AddScoped<IProductService, Product_service>();
 builder.Services.AddAutoMapper(typeof(Api.MapConfig));
 builder.Services.AddAuthentication(config =>
 {
