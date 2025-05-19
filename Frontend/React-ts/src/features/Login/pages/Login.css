@@ -103,14 +103,15 @@ input[type="submit"]:hover {
   transition: .5s;
 }
 
-.flexdiv{
+.flexdiv {
   display: flex;
   justify-content: center;
 }
-.message-align{
- 
+
+.message-align {
+
   position: relative;
   padding-top: 5px;
   padding-bottom: 5px;
- color: blue;
+  color: blue;
 }
