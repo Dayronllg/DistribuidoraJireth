@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./Login.css";
 import axios from "axios";
+// import Input from "../../../shared/components/input/Input";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -33,6 +34,7 @@ function Login() {
 
   return (
     <>
+      {/* <Input label="Mondongo" backgroundColor="red" />; */}
       <div className="formulario">
         <h1>Inicio de Sesión</h1>
         <form method="post" onSubmit={handleSubmit}>
