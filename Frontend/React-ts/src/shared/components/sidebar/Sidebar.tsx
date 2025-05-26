@@ -2,14 +2,24 @@ import * as React from "react";
 import { createTheme, styled } from "@mui/material/styles";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import DescriptionIcon from "@mui/icons-material/Description";
-import LayersIcon from "@mui/icons-material/Layers";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import type { Navigation, Router } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import { PageContainer } from "@toolpad/core/PageContainer";
 import Grid from "@mui/material/Grid";
+import {
+  Cookie,
+  Engineering,
+  Equalizer,
+  Groups,
+  LocalAtm,
+  LocalShipping,
+  LunchDining,
+  Payment,
+  PermMedia,
+  PointOfSale,
+  Store,
+} from "@mui/icons-material";
 
 const NAVIGATION: Navigation = [
   {
@@ -17,13 +27,18 @@ const NAVIGATION: Navigation = [
     title: "Main items",
   },
   {
-    segment: "dashboard",
-    title: "Dashboard",
+    segment: "ventas",
+    title: "Ventas",
     icon: <DashboardIcon />,
   },
   {
-    segment: "orders",
-    title: "Orders",
+    segment: "pedidos",
+    title: "Pedidos",
+    icon: <LocalShipping />,
+  },
+  {
+    segment: "compras",
+    title: "Compras",
     icon: <ShoppingCartIcon />,
   },
   {
@@ -34,26 +49,58 @@ const NAVIGATION: Navigation = [
     title: "Analytics",
   },
   {
-    segment: "reports",
-    title: "Reports",
-    icon: <BarChartIcon />,
+    segment: "devoluciones",
+    title: "Devoluciones",
+    icon: <LocalAtm />,
     children: [
       {
-        segment: "sales",
-        title: "Sales",
-        icon: <DescriptionIcon />,
+        segment: "devolucionVentas",
+        title: "Devoluciones de Ventas",
+        icon: <PointOfSale />,
       },
       {
-        segment: "traffic",
-        title: "Traffic",
-        icon: <DescriptionIcon />,
+        segment: "devolucionCompras",
+        title: "Devoluciones de Compras",
+        icon: <Payment />,
       },
     ],
   },
   {
-    segment: "integrations",
-    title: "Integrations",
-    icon: <LayersIcon />,
+    segment: "productos",
+    title: "Productos",
+    icon: <LunchDining />,
+    children: [
+      {
+        segment: "productos",
+        title: "Productos",
+        icon: <Cookie />,
+      },
+      {
+        segment: "marcas",
+        title: "Marcas",
+        icon: <Store />,
+      },
+      {
+        segment: "presentaciones",
+        title: "Presentaciones",
+        icon: <PermMedia />,
+      },
+    ],
+  },
+  {
+    segment: "usuarios",
+    title: "Usuarios",
+    icon: <Groups />,
+  },
+  {
+    segment: "trabajadores",
+    title: "Trabajadores",
+    icon: <Engineering />,
+  },
+  {
+    segment: "reportes",
+    title: "Reportes",
+    icon: <Equalizer />,
   },
 ];
 
