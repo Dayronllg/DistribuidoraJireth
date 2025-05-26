@@ -1,9 +1,11 @@
 import { useState } from "react";
 import "./Login.css";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 // import Input from "../../../shared/components/input/Input";
 
 function Login() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     nombreUsuario: "",
     contrasena: "",
@@ -24,11 +26,15 @@ function Login() {
         formData
       );
       console.log("Token recibido:", response.data.token);
-      setMessage("Login Exitoso");
+      setMessage("Login Exitoso. Redirigiendo....");
       // Aquí se puede guardar el token si querés: localStorage.setItem("token", response.data.token)
+      setTimeout(() => {
+        // Redirige a /Inicio después de 1 segundo
+        navigate("/Inicio");
+      }, 1000);
     } catch (error) {
       console.error(error);
-      setMessage("Error al iniciar sesión");
+      setMessage("Error al iniciar sesión. Intente otra vez");
     }
   };
 
@@ -71,7 +77,7 @@ function Login() {
             </a>
           </div>
           {/** Boton Iniciar */}
-          <input type="submit" value="Iniciar"></input>
+          <button type="submit">Iniciar Sesión</button>
           <div className="flexdiv">
             <a className="message-align">{message}</a>
           </div>
