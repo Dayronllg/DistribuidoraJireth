@@ -8,4 +8,6 @@ public interface IService<T> where T : class
     Task<Result<T>> create(T entity);
     Task Save();
 
+    Task<Result<List<T>>> GetAll();
+
 }
