@@ -17,7 +17,7 @@ public partial class Trabajadore
 
     public string Telefono { get; set; } = null!;
 
-    public string? Estado { get; set; }
+    public string Estado { get; set; } = null!;
 
     public virtual ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();
 }
