@@ -407,7 +407,7 @@ public partial class DistribuidoraContext : DbContext
             entity.HasOne(d => d.IdRolNavigation).WithMany(p => p.Usuarios)
                 .HasForeignKey(d => d.IdRol)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Rol_Usuario");
+                .HasConstraintName("FK_Usuario_Roles");
 
             entity.HasOne(d => d.IdTrabajadorNavigation).WithMany(p => p.Usuarios)
                 .HasForeignKey(d => d.IdTrabajador)

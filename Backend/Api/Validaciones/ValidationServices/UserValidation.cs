@@ -27,9 +27,14 @@ public class UserValidation : IUserValidation
     {
         string password = _utilidad.encriptar( usuariolog.Contrasena);
 
-        var usuario = await _context.Usuarios.FirstOrDefaultAsync(x => x.Contrasena == password
-        && usuariolog.NombreUsuario == x.NombreUsuario);
-
+        var usuario =await _context.Usuarios.Include(x => x.IdRolNavigation).Where(x => x.Contrasena == password
+        && usuariolog.NombreUsuario == x.NombreUsuario && x.Estado == "Activo").Select(x=> new UsuarioDto
+        {
+            IdUsuario= x.IdUsuario,
+            NombreUsuario=x.NombreUsuario,
+            Rol= x.IdRolNavigation.Nombre
+            
+        }).FirstOrDefaultAsync();
         if (usuario == null)
         {
             return Result<UsuarioDto>.Fail("Credenciales Incorrectas");
@@ -47,5 +52,7 @@ public class UserValidation : IUserValidation
 
         return Result<Usuario>.Ok(usuario);
     }
-    
+    //await _context.Usuarios.FirstOrDefaultAsync(x => x.Contrasena == password
+       // && usuariolog.NombreUsuario == x.NombreUsuario && x.Estado=="Activo" );
+
 }

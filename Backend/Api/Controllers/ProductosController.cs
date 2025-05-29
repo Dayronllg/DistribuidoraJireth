@@ -18,6 +18,8 @@ namespace Api.Controllers
 
         [HttpPost("CrearProducto")]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CrearProducto([FromBody] ProductoDto productoDto)
         {
             if (!ModelState.IsValid)
@@ -28,8 +30,8 @@ namespace Api.Controllers
             if (ProductResult.Failed)
                 return Conflict(ProductResult.Error);
 
-            return Created("api/[controller]/CrearProducto",ProductResult.Value);
-            
+            return Created("api/[controller]/CrearProducto", ProductResult.Value);
+
         }
     }
 }

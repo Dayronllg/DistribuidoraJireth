@@ -9,4 +9,6 @@ public class UsuarioLogDto
 
     public string Contrasena { get; set; } = null!;
 
+   
+
 }
