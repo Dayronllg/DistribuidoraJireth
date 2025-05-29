@@ -2,6 +2,8 @@ using System;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using System.Transactions;
+using Api.Dto;
 using Api.Models;
 using Api.Repositery.IRepositery;
 using Api.Validaciones;
@@ -26,30 +28,49 @@ public class Service<T> : IService<T> where T : class
 
     public virtual async Task<Result<T>> create(T entity)
     {
-        await dbset.AddAsync(entity);
-        await Save();
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
 
-        return Result<T>.Ok(entity);
+            await dbset.AddAsync(entity);
+            await transaction.CommitAsync();
+            await Save();
+            return Result<T>.Ok(entity);
+        }
+        catch (Exception e)
+        {
+
+            return Result<T>.Fail(e.Message);
+        }
     }
 
-    public Task<Result<List<T>>> GetAll()
+    public async Task<PaginacionResultado<T>> PaginarAsync(IQueryable<T> query, int pagina, int tamanioPagina)
     {
-        throw new NotImplementedException();
+        if (pagina < 1) pagina = 1;
+        if (tamanioPagina < 1) tamanioPagina = 10;
+
+        var totalRegistros = await query.CountAsync();
+        var totalPaginas = (int)Math.Ceiling(totalRegistros / (double)tamanioPagina);
+
+        var datos = await query
+            .Skip((pagina - 1) * tamanioPagina)
+            .Take(tamanioPagina)
+            .ToListAsync();
+
+        return new PaginacionResultado<T>
+        {
+            Datos = datos,
+            PaginaActual = pagina,
+            TotalPaginas = totalPaginas,
+            TotalRegistros = totalRegistros,
+            TamanioPagina = tamanioPagina
+        };
     }
 
-    /* public async Task<Result<List<T>>> GetAll(Expression<Func<T,bool>>? func=null)
-     {
-         IQueryable<T> query = dbset;
-         if (func != null)
-         {
-             List<T> list = await query.ToListAsync();
 
-             return Result<List<T>>.Ok(list);
-         }
-     }
- //*/
     public async Task Save()
     {
         await _context.SaveChangesAsync();
     }
+
 }
