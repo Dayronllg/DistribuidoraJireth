@@ -45,6 +45,8 @@ public partial class DistribuidoraContext : DbContext
 
     public virtual DbSet<Proveedore> Proveedores { get; set; }
 
+    public virtual DbSet<Role> Roles { get; set; }
+
     public virtual DbSet<Trabajadore> Trabajadores { get; set; }
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
@@ -53,7 +55,7 @@ public partial class DistribuidoraContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=LAPTOP-GJAFQBRR; Database=Distribuidora; Trusted_Connection=True;TrustServerCertificate=true");
+        => optionsBuilder.UseSqlServer("Server=LAPTOP-GJAFQBRR;Database=Distribuidora;Trusted_Connection=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -144,7 +146,7 @@ public partial class DistribuidoraContext : DbContext
 
         modelBuilder.Entity<DetalleCompra>(entity =>
         {
-            entity.HasKey(e => e.IdDetalleCmpra);
+            entity.HasKey(e => new { e.IdCompra, e.IdProducto }).HasName("PK__DetalleC__1AC4527DC1C658E7");
 
             entity.ToTable("DetalleCompra");
 
@@ -159,12 +161,13 @@ public partial class DistribuidoraContext : DbContext
 
             entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.DetalleCompras)
                 .HasForeignKey(d => d.IdProducto)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DetalleCompra_Productos");
         });
 
         modelBuilder.Entity<DetalleDevVentum>(entity =>
         {
-            entity.HasKey(e => e.IdDetalle);
+            entity.HasKey(e => new { e.IdDevVenta, e.IdProducto }).HasName("PK__DetalleD__C55019E978E75319");
 
             entity.Property(e => e.Cantidad)
                 .HasMaxLength(50)
@@ -178,12 +181,12 @@ public partial class DistribuidoraContext : DbContext
             entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.DetalleDevVenta)
                 .HasForeignKey(d => d.IdProducto)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_DetalleDevVenta_Productos");
+                .HasConstraintName("FK_DetalleDevVenta_Producto");
         });
 
         modelBuilder.Entity<DetalleDevoCompra>(entity =>
         {
-            entity.HasKey(e => e.IdDetalle);
+            entity.HasKey(e => new { e.IdDevCompra, e.IdProducto }).HasName("PK__DetalleD__600F0F8E08973070");
 
             entity.ToTable("DetalleDevoCompra");
 
@@ -195,32 +198,33 @@ public partial class DistribuidoraContext : DbContext
             entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.DetalleDevoCompras)
                 .HasForeignKey(d => d.IdProducto)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_DetalleDevoCompra_Productos");
+                .HasConstraintName("FK_DetalleDevoCompra_Producto");
         });
 
         modelBuilder.Entity<DetallePedido>(entity =>
         {
-            entity.HasKey(e => new { e.IdDetalle, e.CantidadProducto, e.Estado });
+            entity.HasKey(e => new { e.IdPedido, e.IdProducto }).HasName("PK__DetalleP__8DABD4E2A1898FF6");
 
             entity.ToTable("DetallePedido");
 
-            entity.Property(e => e.IdDetalle).ValueGeneratedOnAdd();
             entity.Property(e => e.Estado)
                 .HasMaxLength(10)
                 .IsUnicode(false);
 
             entity.HasOne(d => d.IdPedidoNavigation).WithMany(p => p.DetallePedidos)
                 .HasForeignKey(d => d.IdPedido)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DetallePedido_Pedidos");
 
             entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.DetallePedidos)
                 .HasForeignKey(d => d.IdProducto)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DetallePedido_Productos");
         });
 
         modelBuilder.Entity<DetalleVenta>(entity =>
         {
-            entity.HasKey(e => e.IdDetalle);
+            entity.HasKey(e => new { e.IdVenta, e.IdProducto }).HasName("PK__DetalleV__AC8AC99C14535C8D");
 
             entity.Property(e => e.Precio).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.Subtotal)
@@ -341,6 +345,19 @@ public partial class DistribuidoraContext : DbContext
                 .IsFixedLength();
         });
 
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.HasKey(e => e.IdRol).HasName("PK__Roles__2A49584C2F33B0A6");
+
+            entity.Property(e => e.Estado)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasDefaultValue("Activo");
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(30)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<Trabajadore>(entity =>
         {
             entity.HasKey(e => e.IdTrabajador);
@@ -386,10 +403,11 @@ public partial class DistribuidoraContext : DbContext
             entity.Property(e => e.NombreUsuario)
                 .HasMaxLength(50)
                 .IsUnicode(false);
-            entity.Property(e => e.Rol)
-                .HasMaxLength(30)
-                .IsUnicode(false)
-                .HasColumnName("rol");
+
+            entity.HasOne(d => d.IdRolNavigation).WithMany(p => p.Usuarios)
+                .HasForeignKey(d => d.IdRol)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Usuario_Roles");
 
             entity.HasOne(d => d.IdTrabajadorNavigation).WithMany(p => p.Usuarios)
                 .HasForeignKey(d => d.IdTrabajador)

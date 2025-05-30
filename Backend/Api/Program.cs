@@ -2,6 +2,8 @@ using System.Text;
 using Api.Models;
 using Api.Repositery;
 using Api.Repositery.IRepositery;
+using Api.Repositery.IRepositery.ITrabajadorRepositery;
+using Api.Repositery.ServiceRepositery;
 using Api.Security;
 using Api.Validaciones.IValidationsService;
 using Api.Validaciones.ValidationServices;
@@ -25,6 +27,9 @@ builder.Services.AddScoped<DistribuidoraContext>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSingleton<Utilidad>();
 builder.Services.AddScoped<IUserValidation, UserValidation>();
+builder.Services.AddScoped<IValidationProduct, ValidationProduct>();
+builder.Services.AddScoped<IProductService, Product_service>();
+builder.Services.AddScoped<ITrabajador, TrabajadorService>();
 builder.Services.AddAutoMapper(typeof(Api.MapConfig));
 builder.Services.AddAuthentication(config =>
 {
@@ -65,9 +70,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI( 
     );
 }
-
+ 
 app.UseHttpsRedirection();
-app.UseCors();
+app.UseCors("Mypolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
