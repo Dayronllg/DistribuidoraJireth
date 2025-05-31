@@ -1,4 +1,5 @@
 using System;
+using Api.Dto;
 using Api.Dto.ProductosDto;
 using Api.Dto.TrabajadorDtos;
 using Api.Dto.UsuariosDto;
@@ -17,7 +18,8 @@ public class MapConfig:Profile
         //Mapeo Producto
         CreateMap<Producto, ProductoDto>().ReverseMap();
         //Mapeo trabajador
-         CreateMap<Trabajadore, CrearTrabajadorDto>().ReverseMap();
+        CreateMap<Trabajadore, CrearTrabajadorDto>().ReverseMap();
+        CreateMap<PaginarTrabajadorDto, Trabajadore>().ReverseMap();
         
         
     }

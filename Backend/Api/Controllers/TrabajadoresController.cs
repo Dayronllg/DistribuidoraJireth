@@ -32,5 +32,25 @@ namespace Api.Controllers
 
             return Ok(RespuestaProducto.Value);
         }
+
+        [HttpGet("ObtenerTrabajadores")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAll(int pagina, int tamanioPagina)
+        {
+            var result = await _trabajador.PaginarTrabajador(pagina, tamanioPagina);
+
+            return Ok(result);
+        }
+
+        [HttpPut("BajaTrabajadores")]
+        public async Task<IActionResult> Baja(int id)
+        {
+            var result = await _trabajador.BajaTrabajador(id);
+            if (result.Failed)
+                return NotFound(result.Error);
+
+            return Ok();
+
+        }
     }
 }
