@@ -21,15 +21,16 @@ public class TrabajadorService : Service<Trabajadore>, ITrabajador
 
     public async Task<ResultNoValue> BajaTrabajador(int id)
     {
-        var entity = await base.Exists(x => x.IdTrabajador == id && x.Estado == "activo");
+        var entity = await base.Exists(x => x.IdTrabajador == id && x.Estado == "Activo");
         if (entity.Failed)
-            return ResultNoValue.Fail(entity.Error);
+            return ResultNoValue.Fail(entity.Error,Status.NotFound);
+            
         entity.Value.Estado = "Inactivo";
         
        var SuccessUpdated= await base.UpdateEntity(entity.Value);
 
         if (SuccessUpdated.Failed)
-            return ResultNoValue.Fail(SuccessUpdated.Error);
+            return ResultNoValue.Fail(SuccessUpdated.Error, Status.WithoutChanges);
 
         return ResultNoValue.Ok();
     }

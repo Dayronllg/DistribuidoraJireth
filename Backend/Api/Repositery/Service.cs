@@ -47,7 +47,7 @@ public class Service<T> : IService<T> where T : class
         var EntityExist = await dbset.FirstOrDefaultAsync(func);
 
         if (EntityExist == null)
-            return Result<T>.Fail("El registro no existe");
+            return Result<T>.Fail("El registro no existe",Status.NotFound);
 
         return Result<T>.Ok(EntityExist);
     }
@@ -89,7 +89,9 @@ public class Service<T> : IService<T> where T : class
         _context.Update(entity);
         var AfectedRows = await Save();
         if (AfectedRows == 0)
-            return Result<T>.Fail("0 registros afectados");
+            return Result<T>.Fail("0 registros afectados",Status.WithoutChanges);
+
+      
 
         return Result<T>.Ok(entity);
     }
