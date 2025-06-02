@@ -12,7 +12,7 @@ public class Result<T>
     public string Error { get; private set; }
     public T Value { get; private set; }
     
-    Status? status { get; set; }
+    public Status? status { get; set; }
     
 
     public bool Failed => !Success;

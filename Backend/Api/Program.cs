@@ -31,6 +31,7 @@ builder.Services.AddScoped<IValidationProduct, ValidationProduct>();
 builder.Services.AddScoped<IProductService, Product_service>();
 builder.Services.AddScoped<ITrabajador, TrabajadorService>();
 builder.Services.AddScoped<IRolService, RolService>();
+builder.Services.AddScoped<IMarcaService, MarcaService>();
 builder.Services.AddAutoMapper(typeof(Api.MapConfig));
 builder.Services.AddAuthentication(config =>
 {
