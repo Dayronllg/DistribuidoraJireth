@@ -19,6 +19,24 @@ public class TrabajadorService : Service<Trabajadore>, ITrabajador
         _mapper = mapper;
     }
 
+    public async Task<Result<TrabajadorDto>> ActualizarTrabajador(TrabajadorDto ActualizarTrabajador)
+    {
+        var TrabajadorRespuesta = await base.Exists(x => x.IdTrabajador == ActualizarTrabajador.IdTrabajador
+                                        && x.Estado == "Activo");
+
+        if (TrabajadorRespuesta.Failed)
+            return Result<TrabajadorDto>.Fail(TrabajadorRespuesta.Error, TrabajadorRespuesta.status);
+
+        _mapper.Map(ActualizarTrabajador,TrabajadorRespuesta.Value);
+
+        var SuccessUpdated = await base.UpdateEntity( _mapper.Map(ActualizarTrabajador,TrabajadorRespuesta.Value));
+
+        if (SuccessUpdated.Failed)
+            return Result<TrabajadorDto>.Fail(SuccessUpdated.Error, SuccessUpdated.status);
+
+        return Result<TrabajadorDto>.Ok(_mapper.Map<TrabajadorDto>(SuccessUpdated.Value));
+    }
+
     public async Task<ResultNoValue> BajaTrabajador(int id)
     {
         var entity = await base.Exists(x => x.IdTrabajador == id && x.Estado == "Activo");
@@ -47,7 +65,7 @@ public class TrabajadorService : Service<Trabajadore>, ITrabajador
     public async Task<PaginacionResultado<PaginarTrabajadorDto>> PaginarTrabajador( int pagina, int tamanioPagina)
     {
         var query =  _Context.Trabajadores.AsQueryable();
-        var PagTrabajador = await base.PaginarAsync(query, pagina, 20, x=>x.Estado=="Activo");
+        var PagTrabajador = await base.PaginarAsync(query, pagina, tamanioPagina, x=>x.Estado=="Activo");
 
         return MapearPaginador.MapearPaginacion<Trabajadore, PaginarTrabajadorDto>(PagTrabajador,_mapper);
     }

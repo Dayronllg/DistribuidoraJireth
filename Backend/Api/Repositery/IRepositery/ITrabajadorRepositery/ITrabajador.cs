@@ -11,8 +11,8 @@ public interface ITrabajador : IService<Trabajadore>
 
     Task<Result<CrearTrabajadorDto>> CrearTrabajador(CrearTrabajadorDto CrearTrabajador);
     Task<PaginacionResultado<PaginarTrabajadorDto>> PaginarTrabajador(int pagina, int tamanioPagina);
-
-    Task<ResultNoValue>BajaTrabajador(int id);
+    Task<ResultNoValue> BajaTrabajador(int id);
+    Task<Result<TrabajadorDto>> ActualizarTrabajador(TrabajadorDto ActualizarTrabajador);
     
    
 
