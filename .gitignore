@@ -45,3 +45,4 @@ obj/
 *.nupkg
 .dotnet_tool_manifest.json
 ScaffoldingReadMe.txt
+*.Development.json
