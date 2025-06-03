@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./Login.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+//import { LocalActivity } from "@mui/icons-material";
 // import Input from "../../../shared/components/input/Input";
 
 function Login() {
@@ -20,17 +21,35 @@ function Login() {
     e.preventDefault();
     setMessage("Iniciando sesión...");
 
+    // ✅ Token y datos del usuario
     try {
       const response = await axios.post(
         "http://localhost:5187/api/Auth/Login",
         formData
       );
+
+      const { token, rol } = response.data;
+      console.log("Token recibido: ", token, " Rol: ", rol);
+
+      // Guarda el token y el rol en localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("rol", rol);
+
       console.log("Token recibido:", response.data.token);
       setMessage("Login Exitoso. Redirigiendo....");
       // Aquí se puede guardar el token si querés: localStorage.setItem("token", response.data.token)
+      // ✅ Redirección (simple o según rol)
       setTimeout(() => {
-        // Redirige a /Inicio después de 1 segundo
-        navigate("/Inicio");
+        if (rol === "admin") {
+          navigate("/admin");
+        } else if (rol === "usuario") {
+          navigate("/usuario");
+        } else if (rol === "almacen") {
+          navigate("/jefeBodega");
+        } else {
+          // Redirige a /Inicio después de 1 segundo
+          navigate("/inicio");
+        }
       }, 1000);
     } catch (error) {
       console.error(error);
