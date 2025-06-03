@@ -1,4 +1,5 @@
 using Api.Dto;
+using Api.Dto.UsuariosDto;
 using Api.Models;
 using Api.Repositery.IRepositery;
 using Api.Security;
@@ -44,7 +45,11 @@ namespace Api.Controllers
                 return Unauthorized(usuario.Error);
             }
 
-            return Ok(_utilidad.GenerarToken(usuario.Value));
+            UsuarioAuthorized authorized = new(_utilidad.GenerarToken(usuario.Value),usuario.Value.Rol);
+            
+            
+                
+            return Ok(authorized);
 
         }
     }

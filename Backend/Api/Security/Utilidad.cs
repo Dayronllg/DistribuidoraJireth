@@ -49,9 +49,10 @@ public class Utilidad
         var credentials = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256Signature);
         var jwtDetail = new JwtSecurityToken(
             claims: userClaims,
-            expires: DateTime.UtcNow.AddMinutes(10),
+            expires: DateTime.UtcNow.AddMinutes(60),
             signingCredentials: credentials
         );
+         
 
         return new JwtSecurityTokenHandler().WriteToken(jwtDetail);
     }
