@@ -37,7 +37,7 @@ public class UserValidation : IUserValidation
         }).FirstOrDefaultAsync();
         if (usuario == null)
         {
-            return Result<UsuarioDto>.Fail("Credenciales Incorrectas");
+            return Result<UsuarioDto>.Fail("credenciales incorrectas");
         }
 
         return Result<UsuarioDto>.Ok(_map.Map<UsuarioDto>(usuario));
@@ -47,7 +47,7 @@ public class UserValidation : IUserValidation
     {
         if (await _context.Usuarios.AnyAsync(x => x.NombreUsuario == usuario.NombreUsuario) == true)
         {
-            return Result<Usuario>.Fail("El nombre de Usuario ya existe");
+            return Result<Usuario>.Fail("El nombre de Usuario ya existe",Status.NotFound);
         }
 
         return Result<Usuario>.Ok(usuario);
