@@ -27,12 +27,17 @@ public class UserValidation : IUserValidation
     {
         string password = _utilidad.encriptar( usuariolog.Contrasena);
 
-        var usuario = await _context.Usuarios.FirstOrDefaultAsync(x => x.Contrasena == password
-        && usuariolog.NombreUsuario == x.NombreUsuario);
-
+        var usuario =await _context.Usuarios.Include(x => x.IdRolNavigation).Where(x => x.Contrasena == password
+        && usuariolog.NombreUsuario == x.NombreUsuario && x.Estado == "Activo").Select(x=> new UsuarioDto
+        {
+            IdUsuario= x.IdUsuario,
+            NombreUsuario=x.NombreUsuario,
+            Rol= x.IdRolNavigation.Nombre
+            
+        }).FirstOrDefaultAsync();
         if (usuario == null)
         {
-            return Result<UsuarioDto>.Fail("Credenciales Incorrectas");
+            return Result<UsuarioDto>.Fail("credenciales incorrectas");
         }
 
         return Result<UsuarioDto>.Ok(_map.Map<UsuarioDto>(usuario));
@@ -42,10 +47,12 @@ public class UserValidation : IUserValidation
     {
         if (await _context.Usuarios.AnyAsync(x => x.NombreUsuario == usuario.NombreUsuario) == true)
         {
-            return Result<Usuario>.Fail("El nombre de Usuario ya existe");
+            return Result<Usuario>.Fail("El nombre de Usuario ya existe",Status.NotFound);
         }
 
         return Result<Usuario>.Ok(usuario);
     }
-    
+    //await _context.Usuarios.FirstOrDefaultAsync(x => x.Contrasena == password
+       // && usuariolog.NombreUsuario == x.NombreUsuario && x.Estado=="Activo" );
+
 }

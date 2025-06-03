@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 
-namespace Api.Models;
+namespace Api.Dto.TrabajadorDtos;
 
-public partial class Trabajadore
+public class PaginarTrabajadorDto
 {
     public int IdTrabajador { get; set; }
 
@@ -17,7 +16,5 @@ public partial class Trabajadore
 
     public string Telefono { get; set; } = null!;
 
-    public string Estado { get; set; } = null!;
 
-    public virtual ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();
 }

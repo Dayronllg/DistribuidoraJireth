@@ -11,11 +11,11 @@ public partial class DetallePedido
 
     public string Estado { get; set; } = null!;
 
-    public int? IdPedido { get; set; }
+    public int IdPedido { get; set; }
 
-    public int? IdProducto { get; set; }
+    public int IdProducto { get; set; }
 
-    public virtual Pedido? IdPedidoNavigation { get; set; }
+    public virtual Pedido IdPedidoNavigation { get; set; } = null!;
 
-    public virtual Producto? IdProductoNavigation { get; set; }
+    public virtual Producto IdProductoNavigation { get; set; } = null!;
 }

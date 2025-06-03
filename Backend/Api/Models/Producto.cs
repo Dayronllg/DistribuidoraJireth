@@ -11,6 +11,8 @@ public partial class Producto
 
     public decimal Precio { get; set; }
 
+    public int Cantidad { get; set; }
+
     public string Estado { get; set; } = null!;
 
     public int IdMarca { get; set; }

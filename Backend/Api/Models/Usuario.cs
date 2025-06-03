@@ -11,11 +11,13 @@ public partial class Usuario
 
     public string Contrasena { get; set; } = null!;
 
-    public string Rol { get; set; } = null!;
-
     public string Estado { get; set; } = null!;
 
     public int IdTrabajador { get; set; }
+
+    public int IdRol { get; set; }
+
+    public virtual Role IdRolNavigation { get; set; } = null!;
 
     public virtual Trabajadore IdTrabajadorNavigation { get; set; } = null!;
 

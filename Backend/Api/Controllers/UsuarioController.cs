@@ -12,7 +12,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 namespace Api.Controllers
 {
     [Route("api/[controller]")]
-    [AllowAnonymous]
     [ApiController]
     public class UsuarioController : ControllerBase
     {
@@ -26,7 +25,7 @@ namespace Api.Controllers
             _mapper = mapper;
             _utilidad = utilidad;
         }
-
+        [Authorize(Roles ="Administrador")]
         [HttpPost("Crear")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
