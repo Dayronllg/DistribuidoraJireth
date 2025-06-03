@@ -9,6 +9,7 @@ using Api.Validaciones.IValidationsService;
 using Api.Validaciones.ValidationServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -20,8 +21,13 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 //builder.Services.AddAuthorization();
 //builder.Services.AddAuthentication("Bearer").AddJwtBearer();//
+builder.Services.AddDbContext<DistribuidoraContext>(option =>
+{
+    option.UseSqlServer(builder.Configuration.GetConnectionString("Connection"));
+});
 
 builder.Services.AddScoped<DistribuidoraContext>();
 builder.Services.AddScoped<IUserService, UserService>();
