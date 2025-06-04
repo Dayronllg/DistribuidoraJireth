@@ -7,6 +7,7 @@ using Api.Repositery.IRepositery;
 using Api.Validaciones;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 
 namespace Api.Repositery;
@@ -30,13 +31,16 @@ public class Service<T> : IService<T> where T : class
         {
 
             await dbset.AddAsync(entity);
-            await transaction.CommitAsync();
             await Save();
+            await transaction.CommitAsync();
             return Result<T>.Ok(entity);
         }
         catch (Exception e)
         {
-            await transaction.RollbackAsync();
+           if (transaction.GetDbTransaction().Connection != null)
+            {
+                await transaction.RollbackAsync();
+            }
             return Result<T>.Fail(e.Message);
         }
     }
