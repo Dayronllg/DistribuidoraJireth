@@ -53,8 +53,7 @@ public partial class DistribuidoraContext : DbContext
 
     public virtual DbSet<Venta> Ventas { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Cliente>(entity =>
@@ -144,7 +143,7 @@ public partial class DistribuidoraContext : DbContext
 
         modelBuilder.Entity<DetalleCompra>(entity =>
         {
-            entity.HasKey(e => new { e.IdCompra, e.IdProducto }).HasName("PK__DetalleC__1AC4527DC1C658E7");
+            entity.HasKey(e => new { e.IdCompra, e.IdProducto }).HasName("PK__DetalleC__1AC4527D88F02D31");
 
             entity.ToTable("DetalleCompra");
 
@@ -165,7 +164,7 @@ public partial class DistribuidoraContext : DbContext
 
         modelBuilder.Entity<DetalleDevVentum>(entity =>
         {
-            entity.HasKey(e => new { e.IdDevVenta, e.IdProducto }).HasName("PK__DetalleD__C55019E978E75319");
+            entity.HasKey(e => new { e.IdDevVenta, e.IdProducto }).HasName("PK__DetalleD__C55019E971C2A141");
 
             entity.Property(e => e.Cantidad)
                 .HasMaxLength(50)
@@ -184,7 +183,7 @@ public partial class DistribuidoraContext : DbContext
 
         modelBuilder.Entity<DetalleDevoCompra>(entity =>
         {
-            entity.HasKey(e => new { e.IdDevCompra, e.IdProducto }).HasName("PK__DetalleD__600F0F8E08973070");
+            entity.HasKey(e => new { e.IdDevCompra, e.IdProducto }).HasName("PK__DetalleD__600F0F8EE45B32F7");
 
             entity.ToTable("DetalleDevoCompra");
 
@@ -201,7 +200,7 @@ public partial class DistribuidoraContext : DbContext
 
         modelBuilder.Entity<DetallePedido>(entity =>
         {
-            entity.HasKey(e => new { e.IdPedido, e.IdProducto }).HasName("PK__DetalleP__8DABD4E2A1898FF6");
+            entity.HasKey(e => new { e.IdPedido, e.IdProducto }).HasName("PK__DetalleP__8DABD4E2556FCA2F");
 
             entity.ToTable("DetallePedido");
 
@@ -222,7 +221,7 @@ public partial class DistribuidoraContext : DbContext
 
         modelBuilder.Entity<DetalleVenta>(entity =>
         {
-            entity.HasKey(e => new { e.IdVenta, e.IdProducto }).HasName("PK__DetalleV__AC8AC99C14535C8D");
+            entity.HasKey(e => new { e.IdVenta, e.IdProducto }).HasName("PK__DetalleV__AC8AC99C457E6033");
 
             entity.Property(e => e.Precio).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.Subtotal)
@@ -345,7 +344,7 @@ public partial class DistribuidoraContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.IdRol).HasName("PK__Roles__2A49584C2F33B0A6");
+            entity.HasKey(e => e.IdRol).HasName("PK__Roles__2A49584CB99F2E2C");
 
             entity.Property(e => e.Estado)
                 .HasMaxLength(10)
@@ -389,7 +388,6 @@ public partial class DistribuidoraContext : DbContext
 
             entity.ToTable("Usuario");
 
-            entity.Property(e => e.IdUsuario).ValueGeneratedNever();
             entity.Property(e => e.Contrasena)
                 .HasMaxLength(200)
                 .IsUnicode(false);
