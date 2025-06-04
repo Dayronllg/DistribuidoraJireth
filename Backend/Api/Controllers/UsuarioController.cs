@@ -25,7 +25,7 @@ namespace Api.Controllers
             _mapper = mapper;
             _utilidad = utilidad;
         }
-        [Authorize(Roles ="Administrador")]
+        //[Authorize(Roles ="Administrador")]
         [HttpPost("Crear")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
