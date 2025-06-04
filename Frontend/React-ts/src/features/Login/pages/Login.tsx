@@ -40,7 +40,7 @@ function Login() {
       // Aquí se puede guardar el token si querés: localStorage.setItem("token", response.data.token)
       // ✅ Redirección (simple o según rol)
       setTimeout(() => {
-        if (rol === "admin") {
+        if (rol === "Administrador") {
           navigate("/admin");
         } else if (rol === "usuario") {
           navigate("/usuario");
