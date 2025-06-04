@@ -25,6 +25,7 @@ public class MapConfig:Profile
         CreateMap<TrabajadorDto, Trabajadore>().ReverseMap();
         //MapeoRol
         CreateMap<Role, RolDto>().ReverseMap();
+        CreateMap<Role, CrearRolDto>().ReverseMap();
         // Mapeo Marca
         CreateMap<CrearMarcaDto, Marca>().ReverseMap();
          CreateMap<MarcaDto, Marca>().ReverseMap();

@@ -22,7 +22,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> CrearTrabajador([FromBody] RolDto crear)
+        public async Task<IActionResult> CrearTrabajador([FromBody] CrearRolDto crear)
         {
             if (!ModelState.IsValid)
                 return BadRequest();

@@ -36,12 +36,12 @@ public class RolService : Service<Role>, IRolService
         return ResultNoValue.Ok();
     }
 
-    public async Task<Result<RolDto>> CrearRol(RolDto CrearROl)
+    public async Task<Result<RolDto>> CrearRol(CrearRolDto CrearROl)
     {
         var MapRol = _mapper.Map<Role>(CrearROl);
         var result = await base.create(MapRol);
 
-        return Result<RolDto>.Ok(CrearROl);
+        return Result<RolDto>.Ok(_mapper.Map<RolDto>(result.Value));
     }
 
     public async Task<PaginacionResultado<RolDto>> PaginarRol(int pagina, int tamanioPagina)

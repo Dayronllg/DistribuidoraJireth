@@ -8,7 +8,7 @@ namespace Api.Repositery.IRepositery;
 
 public interface IRolService: IService<Role>
 {
-    Task<Result<RolDto>> CrearRol(RolDto CrearROl);
+    Task<Result<RolDto>> CrearRol(CrearRolDto CrearROl);
     Task<PaginacionResultado<RolDto>> PaginarRol(int pagina, int tamanioPagina);
 
     Task<ResultNoValue>BajaRol(int id);
