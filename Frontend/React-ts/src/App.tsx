@@ -1,10 +1,10 @@
 import { Routes, Route } from "react-router-dom";
 import Login from "./features/Login/pages/Login";
-
-//import AdminInicio from "./features/Inicio/pages/Inicio";
-import AdminVentas from "../src/features/Ventas/pages/Admin/AdminVentas";
+import Ventas from "./features/Ventas/pages/Ventas";
 import NoFoundPage from "./features/NoFoundPage";
-import SidebarAdmin from "./features/Inicio/components/SidebarAdmin";
+import Sidebar from "./features/Inicio/components/Sidebar";
+import Pedidos from "./features/Pedidos/pages/Pedidos";
+import Compras from "./features/compras/pages/Compras";
 //import AdminPedidos from "./features/Ventas/pages/Admin/AdminPedidos";
 //import ProtectedRoute from "./features/Login/ProtectedRoute";
 
@@ -18,16 +18,20 @@ export default function App() {
       <Route path="/" element={<Login />}></Route>
 
       {/* Ruta para admin */}
-      <Route path="/admin" element={<SidebarAdmin />}>
+      <Route path="/Administrador" element={<Sidebar />}>
         {/* <Route index element={<AdminVentas />} /> Página por defecto */}
-        <Route path="ventas" element={<AdminVentas />} />
+        <Route path="ventas" element={<Ventas />} />
+        <Route path="pedidos" element={<Pedidos />} />
+        <Route path="compras" element={<Compras />} />
         <Route path="*" element={<NoFoundPage />} />
       </Route>
 
       {/* Ruta para usuario */}
-      <Route path="/usuario" element={<SidebarAdmin />}>
+      <Route path="/Usuario" element={<Sidebar />}>
         {/* <Route index element={<AdminVentas />} /> Página por defecto */}
-        <Route path="ventas" element={<AdminVentas />} />
+        <Route path="ventas" element={<Ventas />} />
+        <Route path="pedidos" element={<Pedidos />} />
+        <Route path="compras" element={<Compras />} />
         <Route path="*" element={<NoFoundPage />} />
       </Route>
 

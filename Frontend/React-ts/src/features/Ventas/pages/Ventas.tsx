@@ -10,14 +10,16 @@
 //   return <div>Sales</div>;
 // };
 
-import Table from "../../components/Table";
+import TablaVentas from "../components/TablaVentas";
+import TablaFiltroProductos from "../components/TablaFiltroProductos";
 
-function AdminVentas() {
+function Ventas() {
   return (
     <div>
-      <Table />
+      <TablaVentas />
+      <TablaFiltroProductos />
     </div>
   );
 }
 
-export default AdminVentas;
+export default Ventas;

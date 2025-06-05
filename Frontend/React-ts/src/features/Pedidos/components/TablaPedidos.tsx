@@ -158,36 +158,55 @@ export default function FullFeaturedCrudGrid() {
   };
 
   const columns: GridColDef[] = [
-    { field: "name", headerName: "Name", width: 180, editable: true },
     {
-      field: "age",
-      headerName: "Age",
-      type: "number",
-      width: 80,
-      align: "left",
-      headerAlign: "left",
-      editable: true,
-    },
-    {
-      field: "joinDate",
-      headerName: "Join date",
+      field: "fecha",
+      headerName: "Fecha",
+      headerAlign: "center",
+      align: "center",
       type: "date",
-      width: 180,
+      flex: 1,
+      minWidth: 150,
       editable: true,
     },
     {
-      field: "role",
-      headerName: "Department",
-      width: 220,
+      field: "ruc",
+      headerName: "RUC",
+      headerAlign: "center",
+      align: "center",
+      type: "number",
+      flex: 1,
+      minWidth: 150,
       editable: true,
+    },
+    {
+      field: "estado",
+      headerName: "Estado",
+      headerAlign: "center",
+      align: "center",
       type: "singleSelect",
-      valueOptions: ["Market", "Finance", "Development"],
+      valueOptions: ["Realizado", "Cancelado"],
+      flex: 1,
+      minWidth: 150,
+      editable: true,
+    },
+    {
+      field: "idUsuario",
+      headerName: "IdUsuario",
+      headerAlign: "center",
+      align: "center",
+      type: "number",
+      flex: 1,
+      minWidth: 150,
+      editable: true,
     },
     {
       field: "actions",
+      headerName: "Acciones",
+      headerAlign: "center",
+      align: "center",
       type: "actions",
-      headerName: "Actions",
-      width: 100,
+      flex: 1,
+      minWidth: 150,
       cellClassName: "actions",
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -213,7 +232,6 @@ export default function FullFeaturedCrudGrid() {
             />,
           ];
         }
-
         return [
           <GridActionsCellItem
             icon={<EditIcon />}
@@ -232,11 +250,10 @@ export default function FullFeaturedCrudGrid() {
       },
     },
   ];
-
   return (
     <Box
       sx={{
-        height: 500,
+        height: 700,
         width: "100%",
         "& .actions": {
           color: "text.secondary",
@@ -244,6 +261,7 @@ export default function FullFeaturedCrudGrid() {
         "& .textPrimary": {
           color: "text.primary",
         },
+        ml: -22,
       }}
     >
       <DataGrid

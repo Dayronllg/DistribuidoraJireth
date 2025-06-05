@@ -41,14 +41,14 @@ function Login() {
       // ✅ Redirección (simple o según rol)
       setTimeout(() => {
         if (rol === "Administrador") {
-          navigate("/admin");
-        } else if (rol === "usuario") {
-          navigate("/usuario");
+          navigate("/" + rol);
+        } else if (rol === "Usuario") {
+          navigate("/" + rol);
         } else if (rol === "almacen") {
           navigate("/jefeBodega");
         } else {
           // Redirige a /Inicio después de 1 segundo
-          navigate("/inicio");
+          navigate("/" + rol);
         }
       }, 1000);
     } catch (error) {

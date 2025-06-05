@@ -31,17 +31,17 @@ const NAVIGATION: Navigation = [
     title: "Gestión de Operaciones",
   },
   {
-    segment: "admin/ventas",
+    segment: rol + "/ventas",
     title: "Ventas",
     icon: <DashboardIcon />,
   },
   {
-    segment: "pedidos",
+    segment: rol + "/pedidos",
     title: "Pedidos",
     icon: <LocalShipping />,
   },
   {
-    segment: "compras",
+    segment: rol + "/compras",
     title: "Compras",
     icon: <ShoppingCartIcon />,
   },
@@ -53,17 +53,17 @@ const NAVIGATION: Navigation = [
     title: "Estadísticas",
   },
   {
-    segment: "devoluciones",
+    segment: "/devoluciones",
     title: "Devoluciones",
     icon: <LocalAtm />,
     children: [
       {
-        segment: "devolucionVentas",
+        segment: rol + "/devolucionVentas",
         title: "Devoluciones de Ventas",
         icon: <PointOfSale />,
       },
       {
-        segment: "devolucionCompras",
+        segment: rol + "/devolucionCompras",
         title: "Devoluciones de Compras",
         icon: <Payment />,
       },
@@ -91,7 +91,7 @@ const NAVIGATION: Navigation = [
       },
     ],
   },
-  ...(rol === "admin"
+  ...(rol === "Administrador" //|| rol === "Usuario"
     ? [
         {
           segment: "usuarios",
