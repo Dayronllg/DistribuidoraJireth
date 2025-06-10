@@ -12,14 +12,16 @@
 
 import TablaVentas from "../components/TablaVentas";
 import TablaFiltroProductos from "../components/TablaFiltroProductos";
+import Prueba from "../components/Prueba";
 
-function Ventas() {
+function GestionarVentas() {
   return (
     <div>
+      <Prueba />
       <TablaVentas />
       <TablaFiltroProductos />
     </div>
   );
 }
 
-export default Ventas;
+export default GestionarVentas;

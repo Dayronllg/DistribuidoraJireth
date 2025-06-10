@@ -6,6 +6,8 @@ import type { Navigation } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import { PageContainer } from "@toolpad/core/PageContainer";
 import {
+  AssignmentAdd,
+  AttachMoney,
   Cookie,
   Engineering,
   Equalizer,
@@ -31,9 +33,21 @@ const NAVIGATION: Navigation = [
     title: "Gestión de Operaciones",
   },
   {
-    segment: rol + "/ventas",
+    segment: rol + "",
     title: "Ventas",
     icon: <DashboardIcon />,
+    children: [
+      {
+        segment: "gestionarVentas",
+        title: "Gestionar Ventas",
+        icon: <AttachMoney />,
+      },
+      {
+        segment: "reporteVentas",
+        title: "Registro de Ventas",
+        icon: <AssignmentAdd />,
+      },
+    ],
   },
   {
     segment: rol + "/pedidos",
