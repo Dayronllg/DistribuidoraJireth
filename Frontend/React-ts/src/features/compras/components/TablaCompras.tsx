@@ -251,7 +251,7 @@ export default function FullFeaturedCrudGrid() {
         "& .textPrimary": {
           color: "text.primary",
         },
-        ml: -22,
+        // ml: -22,
       }}
     >
       <DataGrid

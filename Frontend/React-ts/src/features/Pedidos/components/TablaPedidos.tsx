@@ -254,14 +254,14 @@ export default function FullFeaturedCrudGrid() {
     <Box
       sx={{
         height: 700,
-        width: "100%",
+        width: "90%",
         "& .actions": {
           color: "text.secondary",
         },
         "& .textPrimary": {
           color: "text.primary",
         },
-        ml: -22,
+        // ml: -22,
       }}
     >
       <DataGrid

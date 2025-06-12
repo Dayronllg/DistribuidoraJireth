@@ -1,11 +1,11 @@
 import { Routes, Route } from "react-router-dom";
 import Login from "./features/Login/pages/Login";
-import GestionarVentas from "./features/Ventas/pages/GestionarVentas";
+import GestionarVentas from "./features/GestionarVentas/pages/GestionarVentas";
 import NoFoundPage from "./features/NoFoundPage";
 import Sidebar from "./features/Inicio/components/Sidebar";
 import Pedidos from "./features/Pedidos/pages/Pedidos";
-import Compras from "./features/compras/pages/Compras";
-//import AdminPedidos from "./features/Ventas/pages/Admin/AdminPedidos";
+import Compras from "./features/Compras/pages/Compras";
+import RegistroVentas from "./features/RegistroVentas/pages/RegistroVentas";
 //import ProtectedRoute from "./features/Login/ProtectedRoute";
 
 // {<ProtectedRoute allowedRoles={["admin"]}>
@@ -21,6 +21,7 @@ export default function App() {
       <Route path="/Administrador" element={<Sidebar />}>
         {/* <Route index element={<AdminVentas />} /> Página por defecto */}
         <Route path="gestionarVentas" element={<GestionarVentas />} />
+        <Route path="registroVentas" element={<RegistroVentas />} />
         <Route path="pedidos" element={<Pedidos />} />
         <Route path="compras" element={<Compras />} />
         <Route path="*" element={<NoFoundPage />} />
@@ -30,6 +31,7 @@ export default function App() {
       <Route path="/Usuario" element={<Sidebar />}>
         {/* <Route index element={<AdminVentas />} /> Página por defecto */}
         <Route path="gestionarVentas" element={<GestionarVentas />} />
+        <Route path="registroVentas" element={<RegistroVentas />} />
         <Route path="pedidos" element={<Pedidos />} />
         <Route path="compras" element={<Compras />} />
         <Route path="*" element={<NoFoundPage />} />

@@ -1,0 +1,40 @@
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.form-label {
+    margin-bottom: 0.25rem;
+    font-weight: bold;
+    font-size: 0.875rem;
+    color: #ccc;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background-color: #121212;
+    padding: 0.5rem;
+}
+
+.input-wrapper span {
+    color: #ccc;
+    margin-right: 0.5rem;
+    font-size: 1rem;
+}
+
+.input-wrapper input {
+    background-color: transparent;
+    border: none;
+    color: white;
+    outline: none;
+    width: 100%;
+    font-size: 1rem;
+}
+
+.input-wrapper input::placeholder {
+    color: #555;
+}

@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 
+// Definir el tipo de valor de cada fila (producto)
 type Row = {
   id: number;
   nombre: string;
@@ -8,6 +9,7 @@ type Row = {
   estado: string;
 };
 
+// Lista temporal solo para probar
 const initialRows: Row[] = [
   { id: 1, nombre: "Jon", precio: 35, cantidad: 3, estado: "Snow" },
   { id: 2, nombre: "Cersei", precio: 42, cantidad: 5, estado: "Lannister" },
@@ -16,74 +18,117 @@ const initialRows: Row[] = [
   { id: 5, nombre: "Daenerys", precio: 29, cantidad: 6, estado: "Targaryen" },
 ];
 
-//Máximo de filas a mostrar para el empaginado
-const ROWS_PER_PAGE = 2;
+type Props = {
+  AgregarSeleccionado: (rows: Row[]) => void; // función para notificar al componente padre qué productos se van a agregar.
+  productosYaAgregados: Row[]; // lista de productos que ya fueron agregados (para prevenir duplicados).
+};
 
-export default function CustomTable() {
-  const [rows] = useState<Row[]>(initialRows);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [filterText, setFilterText] = useState("");
+const FILAS_POR_PAGINA = 3;
+
+export default function TablaFiltroProductos({
+  AgregarSeleccionado,
+  productosYaAgregados,
+}: Props) {
+  const [rows] = useState<Row[]>(initialRows); // Lista de productos base
+  const [IDSeleccionado, setIDSeleccionado] = useState<number[]>([]); // IDs seleccionados
+  const [textoFiltrado, setFilterText] = useState(""); // Texto de filtro
   const [isClicked, setIsClicked] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [isPrevClicked, setIsPrevClicked] = useState(false);
+  const [isNextClicked, setIsNextClicked] = useState(false);
+  const [paginaActual, setpaginaActual] = useState(1); // Página actual
+  const [mensajeError, setMensajeError] = useState<string | null>(null); // Mensaje de error
 
-  const filteredRows = useMemo(() => {
-    const lowerFilter = filterText.toLowerCase();
+  const FilasFiltradas = useMemo(() => {
+    const lowerFilter = textoFiltrado.toLowerCase();
     return rows.filter(
       (row) =>
         (row.nombre ?? "").toLowerCase().includes(lowerFilter) ||
         row.estado.toLowerCase().includes(lowerFilter)
     );
-  }, [filterText, rows]);
+  }, [textoFiltrado, rows]);
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredRows.length / ROWS_PER_PAGE)
+    Math.ceil(FilasFiltradas.length / FILAS_POR_PAGINA)
   );
 
-  // Ajustar currentPage si se pasa del total al filtrar
-  React.useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
+  useEffect(() => {
+    if (paginaActual > totalPages) {
+      setpaginaActual(totalPages);
     }
-  }, [totalPages, currentPage]);
+  }, [totalPages, paginaActual]);
 
-  // Filas a mostrar en la página actual
+  // Mostrar cierta cantidad de filas por página
   const paginatedRows = useMemo(() => {
-    const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
-    return filteredRows.slice(startIndex, startIndex + ROWS_PER_PAGE);
-  }, [filteredRows, currentPage]);
+    const startIndex = (paginaActual - 1) * FILAS_POR_PAGINA;
+    return FilasFiltradas.slice(startIndex, startIndex + FILAS_POR_PAGINA);
+  }, [FilasFiltradas, paginaActual]);
 
+  // Alterna selección individual
   const handleSelect = (id: number) => {
-    setSelectedIds((prev) =>
+    setIDSeleccionado((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
   };
 
+  // Selecciona todas las visibles
   const handleSelectAll = () => {
-    if (selectedIds.length === paginatedRows.length) {
-      setSelectedIds([]);
+    if (IDSeleccionado.length === paginatedRows.length) {
+      setIDSeleccionado([]);
     } else {
-      setSelectedIds(paginatedRows.map((row) => row.id));
+      setIDSeleccionado(paginatedRows.map((row) => row.id));
     }
   };
 
   const handleAddSelected = () => {
-    if (selectedIds.length === 0) return;
+    if (IDSeleccionado.length === 0) return;
+    // Obtiene productos seleccionados
+    const nuevosSeleccionados = rows
+      .filter((row) => IDSeleccionado.includes(row.id))
+      .map((row) => ({ ...row, cantidad: 1 }));
+
+    const yaAgregados = nuevosSeleccionados.filter((row) =>
+      productosYaAgregados.some((p) => p.id === row.id)
+    );
+
+    // Mostrar error si hay duplicados
+    if (yaAgregados.length > 0) {
+      setMensajeError(
+        `Los siguientes productos ya fueron agregados: ${yaAgregados.map((r) => r.nombre).join(", ")}`
+      );
+      return;
+    }
 
     setIsClicked(true);
     setTimeout(() => setIsClicked(false), 150);
-
-    const selectedRows = rows.filter((row) => selectedIds.includes(row.id));
-    console.log("Filas seleccionadas para agregar:", selectedRows);
-    // Aquí haces lo que necesites con selectedRows
+    // Llama al padre para agregarlos
+    AgregarSeleccionado(nuevosSeleccionados);
+    setIDSeleccionado([]); // limpiar selección tras agregar
   };
 
-  const goToPreviousPage = () => {
-    setCurrentPage((page) => Math.max(1, page - 1));
+  // Muestra un mensaje de error por 3 segundos si se intenta agregar un producto duplicado.
+  useEffect(() => {
+    if (mensajeError) {
+      const timer = setTimeout(() => setMensajeError(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [mensajeError]);
+
+  // Actualizan paginaActual respetando los límites de la paginación.
+  const IrPaginaAnterior = () => {
+    if (paginaActual > 1) {
+      setIsPrevClicked(true);
+      setTimeout(() => setIsPrevClicked(false), 150);
+      setpaginaActual((page) => Math.max(1, page - 1));
+    }
   };
 
-  const goToNextPage = () => {
-    setCurrentPage((page) => Math.min(totalPages, page + 1));
+  const IrPaginaSiguiente = () => {
+    if (paginaActual < totalPages) {
+      setIsNextClicked(true);
+      setTimeout(() => setIsNextClicked(false), 150);
+      setpaginaActual((page) => Math.min(totalPages, page + 1));
+    }
   };
 
   return (
@@ -92,7 +137,7 @@ export default function CustomTable() {
         padding: "1rem",
         background: "#121212",
         color: "#fff",
-        maxWidth: "800px",
+        maxWidth: "1000px",
         margin: "auto",
       }}
     >
@@ -103,13 +148,13 @@ export default function CustomTable() {
           gap: "0.5rem",
           flexWrap: "wrap",
           alignItems: "center",
-          maxWidth: "400px",
+          maxWidth: "500px",
         }}
       >
         <input
           type="text"
           placeholder="Filtrar por nombre o estado"
-          value={filterText}
+          value={textoFiltrado}
           onChange={(e) => setFilterText(e.target.value)}
           style={{
             flexGrow: 1,
@@ -123,14 +168,14 @@ export default function CustomTable() {
         />
         <button
           onClick={handleAddSelected}
-          disabled={selectedIds.length === 0}
+          disabled={IDSeleccionado.length === 0}
           style={{
             padding: "0.5rem 1rem",
             borderRadius: "4px",
             border: "none",
-            backgroundColor: selectedIds.length === 0 ? "#555" : "#007bff",
+            backgroundColor: IDSeleccionado.length === 0 ? "#555" : "#007bff",
             color: "#fff",
-            cursor: selectedIds.length === 0 ? "not-allowed" : "pointer",
+            cursor: IDSeleccionado.length === 0 ? "not-allowed" : "pointer",
             userSelect: "none",
             transform: isClicked ? "scale(0.95)" : "scale(1)",
             transition: "transform 150ms ease",
@@ -141,6 +186,20 @@ export default function CustomTable() {
         </button>
       </div>
 
+      {mensajeError && (
+        <div
+          style={{
+            backgroundColor: "#ff4d4d",
+            color: "#fff",
+            padding: "0.5rem",
+            borderRadius: "4px",
+            marginBottom: "1rem",
+          }}
+        >
+          {mensajeError}
+        </div>
+      )}
+
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
@@ -149,13 +208,13 @@ export default function CustomTable() {
                 type="checkbox"
                 checked={
                   paginatedRows.length > 0 &&
-                  selectedIds.length === paginatedRows.length
+                  IDSeleccionado.length === paginatedRows.length
                 }
                 ref={(input) => {
                   if (input) {
                     input.indeterminate =
-                      selectedIds.length > 0 &&
-                      selectedIds.length < paginatedRows.length;
+                      IDSeleccionado.length > 0 &&
+                      IDSeleccionado.length < paginatedRows.length;
                   }
                 }}
                 onChange={handleSelectAll}
@@ -176,7 +235,7 @@ export default function CustomTable() {
               <tr
                 key={row.id}
                 style={{
-                  backgroundColor: selectedIds.includes(row.id)
+                  backgroundColor: IDSeleccionado.includes(row.id)
                     ? "#1f1f1f"
                     : "inherit",
                 }}
@@ -184,13 +243,12 @@ export default function CustomTable() {
                 <td style={tdStyle}>
                   <input
                     type="checkbox"
-                    checked={selectedIds.includes(row.id)}
+                    checked={IDSeleccionado.includes(row.id)}
                     onChange={() => handleSelect(row.id)}
                     aria-label={`Select row with ID ${row.id}`}
                     style={{ cursor: "pointer" }}
                   />
                 </td>
-                {/* Encabezados de la tabla */}
                 <td style={tdStyle}>{row.id}</td>
                 <td style={tdStyle}>{row.nombre}</td>
                 <td style={tdStyle}>{row.precio}</td>
@@ -200,15 +258,14 @@ export default function CustomTable() {
             ))
           ) : (
             <tr>
-              <td style={tdStyle} colSpan={5} align="center">
-                No rows found
+              <td style={tdStyle} colSpan={6} align="center">
+                Sin filas encontradas
               </td>
             </tr>
           )}
         </tbody>
       </table>
 
-      {/* Controles de paginación */}
       <div
         style={{
           marginTop: "1rem",
@@ -220,35 +277,39 @@ export default function CustomTable() {
         }}
       >
         <button
-          onClick={goToPreviousPage}
-          disabled={currentPage === 1}
+          onClick={IrPaginaAnterior}
+          disabled={paginaActual === 1}
           style={{
             padding: "0.4rem 0.8rem",
             borderRadius: "4px",
             border: "none",
-            backgroundColor: currentPage === 1 ? "#555" : "#007bff",
+            backgroundColor: paginaActual === 1 ? "#555" : "#007bff",
             color: "#fff",
-            cursor: currentPage === 1 ? "not-allowed" : "pointer",
+            cursor: paginaActual === 1 ? "not-allowed" : "pointer",
+            transform: isPrevClicked ? "scale(0.95)" : "scale(1)",
+            transition: "transform 150ms ease",
           }}
-          aria-label="Previous page"
+          aria-label="Página Anterior"
         >
           Anterior
         </button>
         <span>
-          Página {currentPage} de {totalPages}
+          Página {paginaActual} de {totalPages}
         </span>
         <button
-          onClick={goToNextPage}
-          disabled={currentPage === totalPages}
+          onClick={IrPaginaSiguiente}
+          disabled={paginaActual === totalPages}
           style={{
             padding: "0.4rem 0.8rem",
             borderRadius: "4px",
             border: "none",
-            backgroundColor: currentPage === totalPages ? "#555" : "#007bff",
+            backgroundColor: paginaActual === totalPages ? "#555" : "#007bff",
             color: "#fff",
-            cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+            cursor: paginaActual === totalPages ? "not-allowed" : "pointer",
+            transform: isNextClicked ? "scale(0.95)" : "scale(1)",
+            transition: "transform 150ms ease",
           }}
-          aria-label="Next page"
+          aria-label="Siguiente Página"
         >
           Siguiente
         </button>

@@ -109,7 +109,7 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
   );
 }
 
-export default function FullFeaturedCrudGrid() {
+export default function TablaRegistroVentas() {
   const [rows, setRows] = React.useState(initialRows);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
@@ -124,19 +124,19 @@ export default function FullFeaturedCrudGrid() {
     }
   };
 
-  const handleEditClick = (id: GridRowId) => () => {
+  const MantenerClickEditar = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
-  const handleSaveClick = (id: GridRowId) => () => {
+  const MantenerClickGuardar = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-  const handleDeleteClick = (id: GridRowId) => () => {
+  const MantenerClickBorrar = (id: GridRowId) => () => {
     setRows(rows.filter((row) => row.id !== id));
   };
 
-  const handleCancelClick = (id: GridRowId) => () => {
+  const MantenerClickCancelar = (id: GridRowId) => () => {
     setRowModesModel({
       ...rowModesModel,
       [id]: { mode: GridRowModes.View, ignoreModifications: true },
@@ -232,13 +232,13 @@ export default function FullFeaturedCrudGrid() {
                   color: "primary.main",
                 },
               }}
-              onClick={handleSaveClick(id)}
+              onClick={MantenerClickGuardar(id)}
             />,
             <GridActionsCellItem
               icon={<CancelIcon />}
               label="Cancel"
               className="textPrimary"
-              onClick={handleCancelClick(id)}
+              onClick={MantenerClickCancelar(id)}
               color="inherit"
             />,
           ];
@@ -249,13 +249,13 @@ export default function FullFeaturedCrudGrid() {
             icon={<EditIcon />}
             label="Edit"
             className="textPrimary"
-            onClick={handleEditClick(id)}
+            onClick={MantenerClickEditar(id)}
             color="inherit"
           />,
           <GridActionsCellItem
             icon={<DeleteIcon />}
             label="Delete"
-            onClick={handleDeleteClick(id)}
+            onClick={MantenerClickBorrar(id)}
             color="inherit"
           />,
         ];
@@ -274,7 +274,7 @@ export default function FullFeaturedCrudGrid() {
         "& .textPrimary": {
           color: "text.primary",
         },
-        ml: -22,
+        // ml: -22,
       }}
     >
       <DataGrid
