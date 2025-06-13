@@ -1,36 +1,35 @@
 import React, { useState, useMemo, useEffect } from "react";
 
 // Definir el tipo de valor de cada fila (producto)
-type FilaProductos = {
+type FilaClientes = {
   id: number;
   nombre: string;
-  precio: number;
-  cantidad: number;
-  estado: string;
+  telefono: string;
 };
 
 // Lista temporal solo para probar
-const initialRows: FilaProductos[] = [
-  { id: 1, nombre: "Jon", precio: 35, cantidad: 3, estado: "Snow" },
-  { id: 2, nombre: "Cersei", precio: 42, cantidad: 5, estado: "Lannister" },
-  { id: 3, nombre: "Jaime", precio: 45, cantidad: 7, estado: "Lannister" },
-  { id: 4, nombre: "Arya", precio: 16, cantidad: 2, estado: "Stark" },
-  { id: 5, nombre: "Daenerys", precio: 29, cantidad: 6, estado: "Targaryen" },
+const initialRows: FilaClientes[] = [
+  { id: 1, nombre: "Jon", telefono: "9063-9012" },
+  { id: 2, nombre: "Cersei", telefono: "8439-1045" },
+  { id: 3, nombre: "Jaime", telefono: "4298-5134" },
+  { id: 4, nombre: "Arya", telefono: "3589-4126" },
+  { id: 5, nombre: "Daenerys", telefono: "9318-6312" },
 ];
 
 type Props = {
-  AgregarSeleccionado: (rows: FilaProductos[]) => void; // función para notificar al componente padre qué productos se van a agregar.
-  productosYaAgregados: FilaProductos[]; // lista de productos que ya fueron agregados (para prevenir duplicados).
+  // Cambio para que reciba un solo cliente, no un array
+  AgregarSeleccionado: (cliente: FilaClientes) => void;
+  onSelectSingle: (cliente: FilaClientes) => void;
 };
 
 const FILAS_POR_PAGINA = 3;
 
-export default function TablaFiltroProductos({
+export default function TablaFiltroClientes({
   AgregarSeleccionado,
-  productosYaAgregados,
+  onSelectSingle,
 }: Props) {
-  const [rows] = useState<FilaProductos[]>(initialRows); // Lista de productos base
-  const [IDSeleccionado, setIDSeleccionado] = useState<number[]>([]); // IDs seleccionados
+  const [rows] = useState<FilaClientes[]>(initialRows); // Lista de clientes base
+  const [IDSeleccionado, setIDSeleccionado] = useState<number | null>(null); // IDs seleccionados
   const [textoFiltrado, setFilterText] = useState(""); // Texto de filtro
   const [isClicked, setIsClicked] = useState(false);
   const [isPrevClicked, setIsPrevClicked] = useState(false);
@@ -43,7 +42,7 @@ export default function TablaFiltroProductos({
     return rows.filter(
       (row) =>
         (row.nombre ?? "").toLowerCase().includes(lowerFilter) ||
-        row.estado.toLowerCase().includes(lowerFilter)
+        row.telefono.toLowerCase().includes(lowerFilter)
     );
   }, [textoFiltrado, rows]);
 
@@ -58,52 +57,25 @@ export default function TablaFiltroProductos({
     }
   }, [totalPages, paginaActual]);
 
-  // Mostrar cierta cantidad de filas por página
   const paginatedRows = useMemo(() => {
     const startIndex = (paginaActual - 1) * FILAS_POR_PAGINA;
     return FilasFiltradas.slice(startIndex, startIndex + FILAS_POR_PAGINA);
   }, [FilasFiltradas, paginaActual]);
 
-  // Alterna selección individual
-  const handleSelect = (id: number) => {
-    setIDSeleccionado((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-
-  // Selecciona todas las visibles
-  const handleSelectAll = () => {
-    if (IDSeleccionado.length === paginatedRows.length) {
-      setIDSeleccionado([]);
-    } else {
-      setIDSeleccionado(paginatedRows.map((row) => row.id));
-    }
-  };
-
+  // Cambié para manejar un solo ID seleccionado
   const handleAddSelected = () => {
-    if (IDSeleccionado.length === 0) return;
-    // Obtiene productos seleccionados
-    const nuevosSeleccionados = rows
-      .filter((row) => IDSeleccionado.includes(row.id))
-      .map((row) => ({ ...row, cantidad: 1 }));
+    if (IDSeleccionado === null) return;
 
-    const yaAgregados = nuevosSeleccionados.filter((row) =>
-      productosYaAgregados.some((p) => p.id === row.id)
-    );
+    const cliente = rows.find((r) => r.id === IDSeleccionado);
+    if (!cliente) return;
 
-    // Mostrar error si hay duplicados
-    if (yaAgregados.length > 0) {
-      setMensajeError(
-        `Los siguientes productos ya fueron agregados: ${yaAgregados.map((r) => r.nombre).join(", ")}`
-      );
-      return;
-    }
+    // Ya no es necesario verificar cliente duplicado porque solo hay uno
+    onSelectSingle(cliente);
+    AgregarSeleccionado(cliente);
 
     setIsClicked(true);
     setTimeout(() => setIsClicked(false), 150);
-    // Llama al padre para agregarlos
-    AgregarSeleccionado(nuevosSeleccionados);
-    setIDSeleccionado([]); // limpiar selección tras agregar
+    setIDSeleccionado(null);
   };
 
   // Muestra un mensaje de error por 3 segundos si se intenta agregar un producto duplicado.
@@ -131,15 +103,18 @@ export default function TablaFiltroProductos({
     }
   };
 
+  // Cambié para manejar solo un ID seleccionado
+  const handleSelect = (id: number) => {
+    setIDSeleccionado(id);
+  };
+
   return (
     <div
       style={{
         padding: "1rem",
         background: "#121212",
         color: "#fff",
-        maxWidth: "1000px",
-        //margin: "auto", // Centrar tabla
-        margin: "0", // Alinear tabla a la izquierda en lugar de centrarla
+        maxWidth: "600px",
       }}
     >
       <div
@@ -154,7 +129,7 @@ export default function TablaFiltroProductos({
       >
         <input
           type="text"
-          placeholder="Filtrar por nombre o estado"
+          placeholder="Filtrar por nombre o número"
           value={textoFiltrado}
           onChange={(e) => setFilterText(e.target.value)}
           style={{
@@ -165,23 +140,23 @@ export default function TablaFiltroProductos({
             backgroundColor: "#1f1f1f",
             color: "#fff",
           }}
-          aria-label="Filtrar por nombre o estado"
+          aria-label="Filtrar por nombre o número"
         />
         <button
           onClick={handleAddSelected}
-          disabled={IDSeleccionado.length === 0}
+          disabled={IDSeleccionado === null}
           style={{
             padding: "0.5rem 1rem",
             borderRadius: "4px",
             border: "none",
-            backgroundColor: IDSeleccionado.length === 0 ? "#555" : "#007bff",
+            backgroundColor: IDSeleccionado === null ? "#555" : "#007bff",
             color: "#fff",
-            cursor: IDSeleccionado.length === 0 ? "not-allowed" : "pointer",
+            cursor: IDSeleccionado === null ? "not-allowed" : "pointer",
             userSelect: "none",
             transform: isClicked ? "scale(0.95)" : "scale(1)",
             transition: "transform 150ms ease",
           }}
-          aria-label="Añadir filas seleccionadas"
+          aria-label="Añadir cliente seleccionado"
         >
           Agregar
         </button>
@@ -204,30 +179,10 @@ export default function TablaFiltroProductos({
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
-            <th style={thStyle}>
-              <input
-                type="checkbox"
-                checked={
-                  paginatedRows.length > 0 &&
-                  IDSeleccionado.length === paginatedRows.length
-                }
-                ref={(input) => {
-                  if (input) {
-                    input.indeterminate =
-                      IDSeleccionado.length > 0 &&
-                      IDSeleccionado.length < paginatedRows.length;
-                  }
-                }}
-                onChange={handleSelectAll}
-                aria-label="Select all rows on current page"
-                style={{ cursor: "pointer" }}
-              />
-            </th>
+            <th style={thStyle}></th>
             <th style={thStyle}>ID</th>
             <th style={thStyle}>Nombre</th>
-            <th style={thStyle}>Precio (C$)</th>
-            <th style={thStyle}>Cantidad</th>
-            <th style={thStyle}>Estado</th>
+            <th style={thStyle}>Telefono</th>
           </tr>
         </thead>
         <tbody>
@@ -236,15 +191,14 @@ export default function TablaFiltroProductos({
               <tr
                 key={row.id}
                 style={{
-                  backgroundColor: IDSeleccionado.includes(row.id)
-                    ? "#1f1f1f"
-                    : "inherit",
+                  backgroundColor:
+                    IDSeleccionado === row.id ? "#1f1f1f" : "inherit",
                 }}
               >
                 <td style={tdStyle}>
                   <input
-                    type="checkbox"
-                    checked={IDSeleccionado.includes(row.id)}
+                    type="radio"
+                    checked={IDSeleccionado === row.id}
                     onChange={() => handleSelect(row.id)}
                     aria-label={`Select row with ID ${row.id}`}
                     style={{ cursor: "pointer" }}
@@ -252,15 +206,13 @@ export default function TablaFiltroProductos({
                 </td>
                 <td style={tdStyle}>{row.id}</td>
                 <td style={tdStyle}>{row.nombre}</td>
-                <td style={tdStyle}>{row.precio}</td>
-                <td style={tdStyle}>{row.cantidad}</td>
-                <td style={tdStyle}>{row.estado}</td>
+                <td style={tdStyle}>{row.telefono}</td>
               </tr>
             ))
           ) : (
             <tr>
               {/* No se encontraron resultados similares */}
-              <td style={tdStyle} colSpan={6} align="center">
+              <td style={tdStyle} colSpan={4} align="center">
                 Sin resultados encontrados
               </td>
             </tr>
