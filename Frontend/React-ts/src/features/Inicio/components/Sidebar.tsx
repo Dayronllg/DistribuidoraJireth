@@ -65,39 +65,37 @@ const NAVIGATION: Navigation = [
     title: "Estadísticas",
   },
   {
-    segment: "/devoluciones",
     title: "Devoluciones",
     icon: <LocalAtm />,
     children: [
       {
-        segment: rol + "/devolucionVentas",
+        segment: rol + "/devolucionesVentas",
         title: "Devoluciones de Ventas",
         icon: <PointOfSale />,
       },
       {
-        segment: rol + "/devolucionCompras",
+        segment: rol + "/devolucionesCompras",
         title: "Devoluciones de Compras",
         icon: <Payment />,
       },
     ],
   },
   {
-    segment: "productos",
     title: "Productos",
     icon: <LunchDining />,
     children: [
       {
-        segment: "productos",
+        segment: rol + "/productos",
         title: "Productos",
         icon: <Cookie />,
       },
       {
-        segment: "marcas",
+        segment: rol + "/marcas",
         title: "Marcas",
         icon: <Store />,
       },
       {
-        segment: "presentaciones",
+        segment: rol + "/presentaciones",
         title: "Presentaciones",
         icon: <PermMedia />,
       },
@@ -106,17 +104,17 @@ const NAVIGATION: Navigation = [
   ...(rol === "Administrador" //|| rol === "Usuario"
     ? [
         {
-          segment: "usuarios",
+          segment: rol + "/usuarios",
           title: "Usuarios",
           icon: <Groups />,
         },
         {
-          segment: "trabajadores",
+          segment: rol + "/trabajadores",
           title: "Trabajadores",
           icon: <Engineering />,
         },
         {
-          segment: "reportes",
+          segment: rol + "/reportes",
           title: "Reportes",
           icon: <Equalizer />,
         },

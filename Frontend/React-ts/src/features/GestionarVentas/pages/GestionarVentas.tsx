@@ -4,6 +4,7 @@ import TablaFiltroProductos from "../components/TablaFiltroProductos";
 import AmountInput from "../components/AmountInput";
 import TablaFiltroClientes from "../components/TablaFiltroClientes";
 import ClienteInput from "../components/ClienteInput";
+import BotonAgregar from "../components/BotonAgregar";
 
 type FilaProductos = {
   id: number;
@@ -97,6 +98,8 @@ export default function GestionarVentas() {
       <div style={{ padding: "2rem" }}>
         {/* Input del Total a Pagar C$ */}
         <AmountInput />
+        {/* Boton Agregar */}
+        <BotonAgregar />
       </div>
     </div>
   );

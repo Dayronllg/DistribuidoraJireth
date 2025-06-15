@@ -6,10 +6,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
+import Button from "@mui/material/Button";
+
 import {
   GridRowModes,
   Toolbar,
-  ToolbarButton,
   GridRowEditStopReasons,
   GridActionsCellItem,
   DataGrid,
@@ -83,8 +84,16 @@ declare module "@mui/x-data-grid" {
   }
 }
 
+// Toolbar de Agregar
 function EditToolbar(props: GridSlotProps["toolbar"]) {
   const { setRows, setRowModesModel } = props;
+
+  // Obtener rol de localStorage
+  const rol = localStorage.getItem("rol");
+
+  if (rol !== "Administrador") {
+    return null; // Así no se renderiza nada de la Toolbar
+  }
 
   const handleClick = () => {
     const id = randomId();
@@ -101,9 +110,19 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
   return (
     <Toolbar>
       <Tooltip title="Agregar">
-        <ToolbarButton onClick={handleClick}>
-          <AddIcon fontSize="small" />
-        </ToolbarButton>
+        <Button
+          onClick={handleClick}
+          startIcon={<AddIcon />}
+          variant="contained"
+          sx={{
+            borderRadius: "10px",
+            color: "white",
+            backgroundColor: "#007bff",
+            "&:hover": { backgroundColor: "#0056b3" },
+          }}
+        >
+          Agregar
+        </Button>
       </Tooltip>
     </Toolbar>
   );
@@ -158,7 +177,11 @@ export default function TablaRegistroVentas() {
     setRowModesModel(newRowModesModel);
   };
 
-  const columns: GridColDef[] = [
+  // Leer rol
+  const rol = localStorage.getItem("rol");
+
+  // Primero declarar las columnas comunes:
+  const baseColumns: GridColDef[] = [
     {
       field: "total",
       headerName: "Total Venta",
@@ -210,64 +233,62 @@ export default function TablaRegistroVentas() {
       minWidth: 150,
       editable: true,
     },
-    {
-      field: "actions",
-      headerName: "Acciones",
-      headerAlign: "center",
-      align: "center",
-      type: "actions",
-      flex: 1,
-      minWidth: 150,
-      cellClassName: "actions",
-      getActions: ({ id }) => {
-        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-
-        if (isInEditMode) {
-          return [
-            <GridActionsCellItem
-              icon={<SaveIcon />}
-              label="Save"
-              material={{
-                sx: {
-                  color: "primary.main",
-                },
-              }}
-              onClick={MantenerClickGuardar(id)}
-            />,
-            <GridActionsCellItem
-              icon={<CancelIcon />}
-              label="Cancel"
-              className="textPrimary"
-              onClick={MantenerClickCancelar(id)}
-              color="inherit"
-            />,
-          ];
-        }
-
-        return [
-          <GridActionsCellItem
-            icon={<EditIcon />}
-            label="Edit"
-            className="textPrimary"
-            onClick={MantenerClickEditar(id)}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={MantenerClickBorrar(id)}
-            color="inherit"
-          />,
-        ];
-      },
-    },
   ];
+
+  // Después de forma condicional se renderiza o no la columna de actions:
+  const columns: GridColDef[] =
+    rol === "Administrador"
+      ? [
+          ...baseColumns,
+          {
+            field: "actions",
+            headerName: "Acciones",
+            headerAlign: "center",
+            align: "center",
+            type: "actions",
+            flex: 1,
+            minWidth: 150,
+            cellClassName: "actions",
+            getActions: ({ id }) => {
+              const isInEditMode =
+                rowModesModel[id]?.mode === GridRowModes.Edit;
+
+              if (isInEditMode) {
+                return [
+                  <GridActionsCellItem
+                    icon={<SaveIcon />}
+                    label="Save"
+                    onClick={MantenerClickGuardar(id)}
+                  />,
+                  <GridActionsCellItem
+                    icon={<CancelIcon />}
+                    label="Cancel"
+                    onClick={MantenerClickCancelar(id)}
+                  />,
+                ];
+              }
+              return [
+                <GridActionsCellItem
+                  icon={<EditIcon />}
+                  label="Edit"
+                  onClick={MantenerClickEditar(id)}
+                />,
+                <GridActionsCellItem
+                  icon={<DeleteIcon />}
+                  label="Delete"
+                  onClick={MantenerClickBorrar(id)}
+                />,
+              ];
+            },
+          },
+        ]
+      : baseColumns;
 
   return (
     <Box
       sx={{
-        height: 400,
-        width: "90%",
+        height: 700,
+        width: "100%",
         "& .actions": {
           color: "text.secondary",
         },
@@ -286,10 +307,19 @@ export default function TablaRegistroVentas() {
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
         slots={{ toolbar: EditToolbar }}
-        slotProps={{
-          toolbar: { setRows, setRowModesModel },
-        }}
+        slotProps={{ toolbar: { setRows, setRowModesModel } }}
         showToolbar
+        sx={{
+          "& .MuiDataGrid-columnHeaders": {
+            backgroundColor: "#007bff",
+            color: "#ffffff",
+            fontWeight: "bold",
+            fontSize: "1rem",
+          },
+          "& .MuiDataGrid-columnHeaders .MuiDataGrid-columnTitle": {
+            padding: "0.5rem",
+          },
+        }}
       />
     </Box>
   );

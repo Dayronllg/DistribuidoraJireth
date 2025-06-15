@@ -1,6 +1,6 @@
-import TablaRegistroVentas from "../components/TablaRegistroVentas";
+import React from "react";
 
-function RegistroVentas() {
+function Trabajadores() {
   return (
     <div
       style={{
@@ -11,11 +11,11 @@ function RegistroVentas() {
       }}
     >
       <h2 style={{ marginBottom: "1.5rem", textAlign: "center" }}>
-        Registro de Ventas
+        Trabajadores
       </h2>
-      <TablaRegistroVentas />
+      {/* <TablaPedidos /> */}
     </div>
   );
 }
 
-export default RegistroVentas;
+export default Trabajadores;
