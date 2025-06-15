@@ -85,6 +85,7 @@ export default function TablaFiltroProductos({
     // Obtiene productos seleccionados
     const nuevosSeleccionados = rows
       .filter((row) => IDSeleccionado.includes(row.id))
+      // Aqui los productos al agregarse la cantidad por defecto siempre será 1
       .map((row) => ({ ...row, cantidad: 1 }));
 
     const yaAgregados = nuevosSeleccionados.filter((row) =>

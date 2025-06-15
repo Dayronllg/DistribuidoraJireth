@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-type Row = {
+type FilaPedidos = {
   id: number;
   fecha: Date;
   ruc: number;
@@ -9,28 +9,33 @@ type Row = {
 };
 
 type Props = {
-  data: Row[]; // Lista de productos a mostrar
-  Eliminar: (id: number) => void; // Función para eliminar un producto por ID
-  Editar: (filaEditada: Row) => void; // Función para editar un producto
+  data: FilaPedidos[];
+  Eliminar: (id: number) => void;
+  Editar: (filaEditada: FilaPedidos) => void;
+  pedidoSeleccionadoId: number | null;
+  seleccionarPedido: (id: number) => void;
 };
 
-export default function TablaPedidos({ data, Eliminar, Editar }: Props) {
-  const [editarID, setEditarID] = useState<number | null>(null); // Almacena el id de la fila que está siendo editada actualmente.
-  const [editForm, setEditForm] = useState<Partial<Row>>({}); // Almacena temporalmente los valores del formulario de edición.
+export default function TablaCompras({
+  data,
+  Eliminar,
+  Editar,
+  pedidoSeleccionadoId,
+  seleccionarPedido,
+}: Props) {
+  const [editarID, setEditarID] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState<Partial<FilaPedidos>>({});
 
-  // Editar una Fila
-  const empezarEditar = (fila: Row) => {
+  const empezarEditar = (fila: FilaPedidos) => {
     setEditarID(fila.id);
     setEditForm(fila);
   };
 
-  // Cancelar edición
   const cancelarEditar = () => {
     setEditarID(null);
     setEditForm({});
   };
 
-  // Manejar cambios en los inputs del formulario
   const manejarCambio = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -46,7 +51,6 @@ export default function TablaPedidos({ data, Eliminar, Editar }: Props) {
     }));
   };
 
-  // Guardar los cambios editados
   const guardarEditar = () => {
     if (
       editarID !== null &&
@@ -55,7 +59,7 @@ export default function TablaPedidos({ data, Eliminar, Editar }: Props) {
       editForm.estado !== undefined &&
       editForm.idusuario !== undefined
     ) {
-      Editar(editForm as Row);
+      Editar(editForm as FilaPedidos);
       setEditarID(null);
       setEditForm({});
     }
@@ -70,10 +74,11 @@ export default function TablaPedidos({ data, Eliminar, Editar }: Props) {
         color: "#fff",
       }}
     >
-      <h3 style={{ textAlign: "center" }}>Productos a Pedir</h3>
+      <h3 style={{ textAlign: "center" }}>Pedidos Seleccionados</h3>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
+            <th style={thStyle}></th> {/* Columna para radio button */}
             <th style={thStyle}>ID</th>
             <th style={thStyle}>Fecha</th>
             <th style={thStyle}>RUC</th>
@@ -85,6 +90,14 @@ export default function TablaPedidos({ data, Eliminar, Editar }: Props) {
         <tbody>
           {data.map((row) => (
             <tr key={row.id}>
+              <td style={tdStyle}>
+                <input
+                  type="radio"
+                  name="pedido"
+                  checked={pedidoSeleccionadoId === row.id}
+                  onChange={() => seleccionarPedido(row.id)}
+                />
+              </td>
               <td style={tdStyle}>{row.id}</td>
               {editarID === row.id ? (
                 <>
@@ -93,7 +106,7 @@ export default function TablaPedidos({ data, Eliminar, Editar }: Props) {
                       type="date"
                       name="fecha"
                       value={
-                        editForm.fecha // toISOString() produce algo así: 2025-06-15T00:00:00.000Z
+                        editForm.fecha // toISOString() produce algo asi: 2025-06-15T00:00:00.000Z
                           ? editForm.fecha.toISOString().split("T")[0] // El split('T')[0] deja solo la parte de la fecha (2025-06-15) que necesita el input
                           : ""
                       }
@@ -173,7 +186,6 @@ export default function TablaPedidos({ data, Eliminar, Editar }: Props) {
   );
 }
 
-// borde y padding de celdas.
 const thStyle: React.CSSProperties = {
   border: "1px solid #333",
   padding: "0.5rem",
@@ -183,13 +195,14 @@ const thStyle: React.CSSProperties = {
 const tdStyle: React.CSSProperties = {
   border: "1px solid #333",
   padding: "0.5rem",
+  textAlign: "center",
 };
 
-// botones de acción (Modificar, Eliminar, etc.).
 const actionButton: React.CSSProperties = {
   marginRight: "0.3rem",
-  padding: "0.6rem 0.5rem", // más compacto
+  padding: "0.1rem 0.2rem",
   fontSize: "1rem",
+  fontWeight: "bold",
   backgroundColor: "#007bff",
   border: "none",
   color: "#fff",
@@ -198,7 +211,6 @@ const actionButton: React.CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-// apariencia de los inputs al editar.
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "0.3rem",

@@ -143,13 +143,16 @@ export default function TablaPedidos({ data, Eliminar, Editar }: Props) {
                   <td style={tdStyle}>
                     <button
                       onClick={() => empezarEditar(row)}
-                      style={actionButton}
+                      style={{ ...actionButton }}
                     >
                       Modificar
                     </button>
                     <button
                       onClick={() => Eliminar(row.id)}
-                      style={{ ...actionButton, backgroundColor: "#dc3545" }}
+                      style={{
+                        ...actionButton,
+                        backgroundColor: "#dc3545",
+                      }}
                     >
                       Eliminar
                     </button>
@@ -174,6 +177,7 @@ const thStyle: React.CSSProperties = {
 const tdStyle: React.CSSProperties = {
   border: "1px solid #333",
   padding: "0.5rem",
+  textAlign: "center",
 };
 
 // botones de acción (Modificar, Eliminar, etc.).
@@ -181,6 +185,7 @@ const actionButton: React.CSSProperties = {
   marginRight: "0.3rem",
   padding: "0.6rem 0.5rem", // más compacto
   fontSize: "1rem",
+  fontWeight: "bold",
   backgroundColor: "#007bff",
   border: "none",
   color: "#fff",

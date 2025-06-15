@@ -14,11 +14,7 @@ type Props = {
   Editar: (filaEditada: Row) => void; // Función para editar un producto
 };
 
-export default function TablaProductosVender({
-  data,
-  Eliminar,
-  Editar,
-}: Props) {
+export default function TablaVentas({ data, Eliminar, Editar }: Props) {
   const [editarID, setEditarID] = useState<number | null>(null); // Almacena el id de la fila que está siendo editada actualmente.
   const [editForm, setEditForm] = useState<Partial<Row>>({}); // Almacena temporalmente los valores del formulario de edición.
 
@@ -178,6 +174,7 @@ const thStyle: React.CSSProperties = {
 const tdStyle: React.CSSProperties = {
   border: "1px solid #333",
   padding: "0.5rem",
+  textAlign: "center",
 };
 
 // botones de acción (Modificar, Eliminar, etc.).
@@ -185,6 +182,7 @@ const actionButton: React.CSSProperties = {
   marginRight: "0.3rem",
   padding: "0.6rem 0.5rem", // más compacto
   fontSize: "1rem",
+  fontWeight: "bold",
   backgroundColor: "#007bff",
   border: "none",
   color: "#fff",

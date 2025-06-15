@@ -1,5 +1,5 @@
 import { useState } from "react";
-import TablaProductosVender from "../components/TablaProductosVender";
+import TablaVentas from "../components/TablaVentas";
 import TablaFiltroProductos from "../components/TablaFiltroProductos";
 import AmountInput from "../components/AmountInput";
 import TablaFiltroClientes from "../components/TablaFiltroClientes";
@@ -90,7 +90,7 @@ export default function GestionarVentas() {
         )}
       </div>
 
-      <TablaProductosVender
+      <TablaVentas
         data={FilasSeleccionadas}
         Eliminar={EliminarFilasSeleccionadas}
         Editar={EditarFilaSeleccionada}
