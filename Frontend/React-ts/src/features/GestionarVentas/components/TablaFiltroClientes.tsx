@@ -3,17 +3,17 @@ import React, { useState, useMemo, useEffect } from "react";
 // Definir el tipo de valor de cada fila (producto)
 type FilaClientes = {
   id: number;
-  nombre: string;
+  nombreCliente: string;
   telefono: string;
 };
 
 // Lista temporal solo para probar
 const initialRows: FilaClientes[] = [
-  { id: 1, nombre: "Jon", telefono: "9063-9012" },
-  { id: 2, nombre: "Cersei", telefono: "8439-1045" },
-  { id: 3, nombre: "Jaime", telefono: "4298-5134" },
-  { id: 4, nombre: "Arya", telefono: "3589-4126" },
-  { id: 5, nombre: "Daenerys", telefono: "9318-6312" },
+  { id: 1, nombreCliente: "Jon", telefono: "9063-9012" },
+  { id: 2, nombreCliente: "Cersei", telefono: "8439-1045" },
+  { id: 3, nombreCliente: "Jaime", telefono: "4298-5134" },
+  { id: 4, nombreCliente: "Arya", telefono: "3589-4126" },
+  { id: 5, nombreCliente: "Daenerys", telefono: "9318-6312" },
 ];
 
 type Props = {
@@ -41,7 +41,7 @@ export default function TablaFiltroClientes({
     const lowerFilter = textoFiltrado.toLowerCase();
     return rows.filter(
       (row) =>
-        (row.nombre ?? "").toLowerCase().includes(lowerFilter) ||
+        (row.nombreCliente ?? "").toLowerCase().includes(lowerFilter) ||
         row.telefono.toLowerCase().includes(lowerFilter)
     );
   }, [textoFiltrado, rows]);
@@ -129,7 +129,7 @@ export default function TablaFiltroClientes({
       >
         <input
           type="text"
-          placeholder="Filtrar por nombre o número"
+          placeholder="Filtrar por nombre del cliente o número"
           value={textoFiltrado}
           onChange={(e) => setFilterText(e.target.value)}
           style={{
@@ -140,7 +140,7 @@ export default function TablaFiltroClientes({
             backgroundColor: "#1f1f1f",
             color: "#fff",
           }}
-          aria-label="Filtrar por nombre o número"
+          aria-label="Filtrar por nombre del cliente o número"
         />
         <button
           onClick={handleAddSelected}
@@ -181,7 +181,7 @@ export default function TablaFiltroClientes({
           <tr>
             <th style={thStyle}></th>
             <th style={thStyle}>ID</th>
-            <th style={thStyle}>Nombre</th>
+            <th style={thStyle}>Nombre Cliente</th>
             <th style={thStyle}>Telefono</th>
           </tr>
         </thead>
@@ -205,7 +205,7 @@ export default function TablaFiltroClientes({
                   />
                 </td>
                 <td style={tdStyle}>{row.id}</td>
-                <td style={tdStyle}>{row.nombre}</td>
+                <td style={tdStyle}>{row.nombreCliente}</td>
                 <td style={tdStyle}>{row.telefono}</td>
               </tr>
             ))

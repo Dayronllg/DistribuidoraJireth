@@ -1,6 +1,18 @@
-import React from "react";
+import { useState } from "react";
+import TablaFiltroMarcas from "../components/TablaFiltroMarcas";
+import MarcaInput from "../components/MarcaInput";
+import TablaProductos from "../components/TablaProductos";
+
+type FilaMarca = {
+  id: number;
+  nombreMarca: string;
+  estado: string;
+};
 
 function Productos() {
+  //Pasar datos del componente TablaFiltroClientes al componente ClienteInput
+  const [marcaUnicoSeleccionado, setMarcaUnicoSeleccionado] =
+    useState<FilaMarca | null>(null);
   return (
     <div
       style={{
@@ -11,7 +23,32 @@ function Productos() {
       }}
     >
       <h2 style={{ marginBottom: "1.5rem", textAlign: "center" }}>Productos</h2>
-      {/* <TablaPedidos /> */}
+      <div
+        style={{
+          display: "flex",
+          gap: "2rem",
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ flex: 1, minWidth: "1000px" }}>
+          <TablaFiltroMarcas
+            AgregarSeleccionado={(marca) => setMarcaUnicoSeleccionado(marca)}
+            onSelectSingle={(marca) => setMarcaUnicoSeleccionado(marca)}
+          />
+        </div>
+      </div>
+      {/* Render para mostrar el cliente seleccionado */}
+      <div style={{ marginTop: "30px", marginBottom: "30px" }}>
+        {marcaUnicoSeleccionado && (
+          <MarcaInput marca={marcaUnicoSeleccionado} />
+        )}
+      </div>
+      <div>
+        <h2 style={{ marginBottom: "1.5rem", textAlign: "center" }}>
+          Agregar Producto
+        </h2>
+        <TablaProductos />
+      </div>
     </div>
   );
 }

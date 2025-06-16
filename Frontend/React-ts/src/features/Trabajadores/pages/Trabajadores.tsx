@@ -1,4 +1,4 @@
-import React from "react";
+import TablaTrabajadores from "../components/TablaTrabajadores";
 
 function Trabajadores() {
   return (
@@ -13,7 +13,7 @@ function Trabajadores() {
       <h2 style={{ marginBottom: "1.5rem", textAlign: "center" }}>
         Trabajadores
       </h2>
-      {/* <TablaPedidos /> */}
+      <TablaTrabajadores />
     </div>
   );
 }

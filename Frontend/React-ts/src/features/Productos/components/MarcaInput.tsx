@@ -1,21 +1,21 @@
-type FilaProveedores = {
-  ruc: number;
-  nombreProveedor: string;
-  telefono: string;
+type FilaMarcas = {
+  id: number;
+  nombreMarca: string;
+  estado: string;
 };
 
 type Props = {
-  proveedores: FilaProveedores;
+  marca: FilaMarcas;
 };
 
-export default function ClienteInput({ proveedores }: Props) {
+export default function MarcaInput({ marca }: Props) {
   return (
     <div style={{ padding: "1rem", background: "#121212", color: "#fff" }}>
       <h3 style={{ color: "#fff", marginBottom: "1rem" }}>
-        Información del Proveedor
+        Información de la Marca
       </h3>
 
-      {/* RUC */}
+      {/* ID */}
       <div style={{ marginBottom: "1rem" }}>
         <label
           style={{
@@ -25,7 +25,7 @@ export default function ClienteInput({ proveedores }: Props) {
             marginBottom: "0.5rem",
           }}
         >
-          RUC
+          ID
         </label>
         <div
           style={{
@@ -45,7 +45,7 @@ export default function ClienteInput({ proveedores }: Props) {
               color: "#fff",
               outline: "none",
             }}
-            value={proveedores.ruc}
+            value={marca.id}
             readOnly
           />
         </div>
@@ -61,7 +61,7 @@ export default function ClienteInput({ proveedores }: Props) {
             marginBottom: "0.5rem",
           }}
         >
-          Nombre Proveedor
+          Marca
         </label>
         <div
           style={{
@@ -80,13 +80,13 @@ export default function ClienteInput({ proveedores }: Props) {
               color: "#fff",
               outline: "none",
             }}
-            value={proveedores.nombreProveedor}
+            value={marca.nombreMarca}
             readOnly
           />
         </div>
       </div>
 
-      {/* Telefono */}
+      {/* Estado */}
       <div style={{ marginBottom: "1rem" }}>
         <label
           style={{
@@ -96,7 +96,7 @@ export default function ClienteInput({ proveedores }: Props) {
             marginBottom: "0.5rem",
           }}
         >
-          Telefono
+          Estado
         </label>
         <div
           style={{
@@ -115,7 +115,7 @@ export default function ClienteInput({ proveedores }: Props) {
               color: "#fff",
               outline: "none",
             }}
-            value={proveedores.telefono}
+            value={marca.estado}
             readOnly
           />
         </div>

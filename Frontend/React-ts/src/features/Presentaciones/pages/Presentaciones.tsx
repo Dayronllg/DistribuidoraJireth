@@ -1,4 +1,4 @@
-import React from "react";
+import TablaPresentaciones from "../components/TablaPresentaciones";
 
 function Presentaciones() {
   return (
@@ -13,7 +13,7 @@ function Presentaciones() {
       <h2 style={{ marginBottom: "1.5rem", textAlign: "center" }}>
         Presentaciones
       </h2>
-      {/* <TablaPedidos /> */}
+      <TablaPresentaciones />
     </div>
   );
 }

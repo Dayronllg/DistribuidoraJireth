@@ -1,35 +1,66 @@
 import React, { useState, useMemo, useEffect } from "react";
 
 // Definir el tipo de valor de cada fila (producto)
-type FilaProveedores = {
-  ruc: number;
-  nombreProveedor: string;
+type FilaTrabajadores = {
+  id: number;
+  primerNombre: string;
+  primerApellido: string;
   telefono: string;
+  estado: string;
 };
 
 // Lista temporal solo para probar
-const initialRows: FilaProveedores[] = [
-  { ruc: 1, nombreProveedor: "Jon", telefono: "9063-9012" },
-  { ruc: 2, nombreProveedor: "Cersei", telefono: "8439-1045" },
-  { ruc: 3, nombreProveedor: "Jaime", telefono: "4298-5134" },
-  { ruc: 4, nombreProveedor: "Arya", telefono: "3589-4126" },
-  { ruc: 5, nombreProveedor: "Daenerys", telefono: "9318-6312" },
+const initialRows: FilaTrabajadores[] = [
+  {
+    id: 1,
+    primerNombre: "Jon",
+    primerApellido: "Sanchez",
+    telefono: "9023-0932",
+    estado: "Trabajando",
+  },
+  {
+    id: 2,
+    primerNombre: "Cersei",
+    primerApellido: "Lopez",
+    telefono: "9482-9056",
+    estado: "Trabajando",
+  },
+  {
+    id: 3,
+    primerNombre: "Jaime",
+    primerApellido: "Salasblancas",
+    telefono: "5389-9021",
+    estado: "Despedido",
+  },
+  {
+    id: 4,
+    primerNombre: "Arya",
+    primerApellido: "Campos",
+    telefono: "7432-9015",
+    estado: "Despedido",
+  },
+  {
+    id: 5,
+    primerNombre: "Daenerys",
+    primerApellido: "Romero",
+    telefono: "8314-9034",
+    estado: "Trabajando",
+  },
 ];
 
 type Props = {
-  // Cambio para que reciba un solo cliente, no un array
-  AgregarSeleccionado: (proveedores: FilaProveedores) => void;
-  onSelectSingle: (proveedores: FilaProveedores) => void;
+  AgregarSeleccionado: (rows: FilaTrabajadores[]) => void; // función para notificar al componente padre qué productos se van a agregar.
+  trabajadoresYaAgregados: FilaTrabajadores[]; // lista de productos que ya fueron agregados (para prevenir duplicados).
 };
 
 const FILAS_POR_PAGINA = 3;
 
-export default function TablaFiltroClientes({
+export default function TablaFiltroProductos({
   AgregarSeleccionado,
-  onSelectSingle,
+  trabajadoresYaAgregados,
 }: Props) {
-  const [rows] = useState<FilaProveedores[]>(initialRows); // Lista de clientes base
-  const [IDSeleccionado, setIDSeleccionado] = useState<number | null>(null); // IDs seleccionados
+  const [rows] = useState<FilaTrabajadores[]>(initialRows); // Lista de productos base
+  const [IDSeleccionado, setIDSeleccionado] = useState<number[]>([]); // IDs seleccionados
   const [textoFiltrado, setFilterText] = useState(""); // Texto de filtro
   const [isClicked, setIsClicked] = useState(false);
   const [isPrevClicked, setIsPrevClicked] = useState(false);
@@ -41,8 +72,8 @@ export default function TablaFiltroClientes({
     const lowerFilter = textoFiltrado.toLowerCase();
     return rows.filter(
       (row) =>
-        (row.nombreProveedor ?? "").toLowerCase().includes(lowerFilter) ||
-        row.telefono.toLowerCase().includes(lowerFilter)
+        (row.primerNombre ?? "").toLowerCase().includes(lowerFilter) ||
+        row.estado.toLowerCase().includes(lowerFilter)
     );
   }, [textoFiltrado, rows]);
 
@@ -57,25 +88,52 @@ export default function TablaFiltroClientes({
     }
   }, [totalPages, paginaActual]);
 
+  // Mostrar cierta telefono de filas por página
   const paginatedRows = useMemo(() => {
     const startIndex = (paginaActual - 1) * FILAS_POR_PAGINA;
     return FilasFiltradas.slice(startIndex, startIndex + FILAS_POR_PAGINA);
   }, [FilasFiltradas, paginaActual]);
 
-  // Cambié para manejar un solo ID seleccionado
+  // Alterna selección individual
+  const handleSelect = (id: number) => {
+    setIDSeleccionado((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  // Selecciona todas las visibles
+  const handleSelectAll = () => {
+    if (IDSeleccionado.length === paginatedRows.length) {
+      setIDSeleccionado([]);
+    } else {
+      setIDSeleccionado(paginatedRows.map((row) => row.id));
+    }
+  };
+
   const handleAddSelected = () => {
-    if (IDSeleccionado === null) return;
+    if (IDSeleccionado.length === 0) return;
+    // Obtiene productos seleccionados
+    const nuevosSeleccionados = rows
+      .filter((row) => IDSeleccionado.includes(row.id))
+      .map((row) => ({ ...row }));
 
-    const provedores = rows.find((r) => r.ruc === IDSeleccionado);
-    if (!provedores) return;
+    const yaAgregados = nuevosSeleccionados.filter((row) =>
+      trabajadoresYaAgregados.some((p) => p.id === row.id)
+    );
 
-    // Ya no es necesario verificar cliente duplicado porque solo hay uno
-    onSelectSingle(provedores);
-    AgregarSeleccionado(provedores);
+    // Mostrar error si hay duplicados
+    if (yaAgregados.length > 0) {
+      setMensajeError(
+        `Los siguientes trabajadores ya fueron agregados: ${yaAgregados.map((r) => r.primerNombre).join(", ")}`
+      );
+      return;
+    }
 
     setIsClicked(true);
     setTimeout(() => setIsClicked(false), 150);
-    setIDSeleccionado(null);
+    // Llama al padre para agregarlos
+    AgregarSeleccionado(nuevosSeleccionados);
+    setIDSeleccionado([]); // limpiar selección tras agregar
   };
 
   // Muestra un mensaje de error por 3 segundos si se intenta agregar un producto duplicado.
@@ -103,18 +161,15 @@ export default function TablaFiltroClientes({
     }
   };
 
-  // Cambié para manejar solo un ID seleccionado
-  const handleSelect = (id: number) => {
-    setIDSeleccionado(id);
-  };
-
   return (
     <div
       style={{
         padding: "1rem",
         background: "#121212",
         color: "#fff",
-        maxWidth: "600px",
+        maxWidth: "1000px",
+        //margin: "auto", // Centrar tabla
+        margin: "0", // Alinear tabla a la izquierda en lugar de centrarla
       }}
     >
       <div
@@ -129,7 +184,7 @@ export default function TablaFiltroClientes({
       >
         <input
           type="text"
-          placeholder="Filtrar por nombre del proveedor o número"
+          placeholder="Filtrar por nombre de trabajador o apellido"
           value={textoFiltrado}
           onChange={(e) => setFilterText(e.target.value)}
           style={{
@@ -140,23 +195,23 @@ export default function TablaFiltroClientes({
             backgroundColor: "#1f1f1f",
             color: "#fff",
           }}
-          aria-label="Filtrar por nombre del proveedor o número"
+          aria-label="Filtrar por nombre de trabajador o apellido"
         />
         <button
           onClick={handleAddSelected}
-          disabled={IDSeleccionado === null}
+          disabled={IDSeleccionado.length === 0}
           style={{
             padding: "0.5rem 1rem",
             borderRadius: "4px",
             border: "none",
-            backgroundColor: IDSeleccionado === null ? "#555" : "#007bff",
+            backgroundColor: IDSeleccionado.length === 0 ? "#555" : "#007bff",
             color: "#fff",
-            cursor: IDSeleccionado === null ? "not-allowed" : "pointer",
+            cursor: IDSeleccionado.length === 0 ? "not-allowed" : "pointer",
             userSelect: "none",
             transform: isClicked ? "scale(0.95)" : "scale(1)",
             transition: "transform 150ms ease",
           }}
-          aria-label="Añadir proveedor seleccionado"
+          aria-label="Añadir filas seleccionadas"
         >
           Agregar
         </button>
@@ -179,40 +234,63 @@ export default function TablaFiltroClientes({
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
-            <th style={thStyle}></th>
-            <th style={thStyle}>RUC</th>
-            <th style={thStyle}>Nombre Proveedor</th>
+            <th style={thStyle}>
+              <input
+                type="checkbox"
+                checked={
+                  paginatedRows.length > 0 &&
+                  IDSeleccionado.length === paginatedRows.length
+                }
+                ref={(input) => {
+                  if (input) {
+                    input.indeterminate =
+                      IDSeleccionado.length > 0 &&
+                      IDSeleccionado.length < paginatedRows.length;
+                  }
+                }}
+                onChange={handleSelectAll}
+                aria-label="Select all rows on current page"
+                style={{ cursor: "pointer" }}
+              />
+            </th>
+            <th style={thStyle}>ID</th>
+            <th style={thStyle}>Primer Nombre</th>
+            <th style={thStyle}>Primer Apellido</th>
             <th style={thStyle}>Telefono</th>
+            <th style={thStyle}>Estado</th>
           </tr>
         </thead>
         <tbody>
           {paginatedRows.length > 0 ? (
             paginatedRows.map((row) => (
               <tr
-                key={row.ruc}
+                key={row.id}
                 style={{
-                  backgroundColor:
-                    IDSeleccionado === row.ruc ? "#1f1f1f" : "inherit",
+                  backgroundColor: IDSeleccionado.includes(row.id)
+                    ? "#1f1f1f"
+                    : "inherit",
                 }}
               >
                 <td style={tdStyle}>
                   <input
-                    type="radio"
-                    checked={IDSeleccionado === row.ruc}
-                    onChange={() => handleSelect(row.ruc)}
-                    aria-label={`Select row with ID ${row.ruc}`}
+                    type="checkbox"
+                    checked={IDSeleccionado.includes(row.id)}
+                    onChange={() => handleSelect(row.id)}
+                    aria-label={`Select row with ID ${row.id}`}
                     style={{ cursor: "pointer" }}
                   />
                 </td>
-                <td style={tdStyle}>{row.ruc}</td>
-                <td style={tdStyle}>{row.nombreProveedor}</td>
+                <td style={tdStyle}>{row.id}</td>
+                <td style={tdStyle}>{row.primerNombre}</td>
+                <td style={tdStyle}>{row.primerApellido}</td>
                 <td style={tdStyle}>{row.telefono}</td>
+                <td style={tdStyle}>{row.estado}</td>
               </tr>
             ))
           ) : (
             <tr>
               {/* No se encontraron resultados similares */}
-              <td style={tdStyle} colSpan={4} align="center">
+              <td style={tdStyle} colSpan={6} align="center">
                 Sin resultados encontrados
               </td>
             </tr>

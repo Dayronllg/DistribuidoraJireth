@@ -11,11 +11,11 @@ type FilaProductos = {
 
 // Lista temporal solo para probar
 const initialRows: FilaProductos[] = [
-  { id: 1, nombre: "Jon", precio: 35, cantidad: 3, estado: "Snow" },
-  { id: 2, nombre: "Cersei", precio: 42, cantidad: 5, estado: "Lannister" },
-  { id: 3, nombre: "Jaime", precio: 45, cantidad: 7, estado: "Lannister" },
-  { id: 4, nombre: "Arya", precio: 16, cantidad: 2, estado: "Stark" },
-  { id: 5, nombre: "Daenerys", precio: 29, cantidad: 6, estado: "Targaryen" },
+  { id: 1, nombre: "Pan", precio: 35, cantidad: 3, estado: "Activo" },
+  { id: 2, nombre: "Mondongo", precio: 42, cantidad: 5, estado: "Inactivo" },
+  { id: 3, nombre: "Jabon", precio: 45, cantidad: 7, estado: "Activo" },
+  { id: 4, nombre: "Arroz", precio: 16, cantidad: 2, estado: "Activo" },
+  { id: 5, nombre: "Aceite", precio: 29, cantidad: 6, estado: "Activo" },
 ];
 
 type Props = {

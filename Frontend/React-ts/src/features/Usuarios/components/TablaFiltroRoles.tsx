@@ -1,34 +1,34 @@
 import React, { useState, useMemo, useEffect } from "react";
 
 // Definir el tipo de valor de cada fila (producto)
-type FilaProveedores = {
-  ruc: number;
-  nombreProveedor: string;
-  telefono: string;
+type FilaRoles = {
+  id: number;
+  rol: string;
+  estado: string;
 };
 
 // Lista temporal solo para probar
-const initialRows: FilaProveedores[] = [
-  { ruc: 1, nombreProveedor: "Jon", telefono: "9063-9012" },
-  { ruc: 2, nombreProveedor: "Cersei", telefono: "8439-1045" },
-  { ruc: 3, nombreProveedor: "Jaime", telefono: "4298-5134" },
-  { ruc: 4, nombreProveedor: "Arya", telefono: "3589-4126" },
-  { ruc: 5, nombreProveedor: "Daenerys", telefono: "9318-6312" },
+const initialRows: FilaRoles[] = [
+  { id: 1, rol: "Administrador", estado: "Activo" },
+  { id: 2, rol: "Usuario", estado: "Activo" },
+  { id: 3, rol: "Jefe de Bodega", estado: "Activo" },
+  { id: 4, rol: "Gerente", estado: "Activo" },
+  { id: 5, rol: "Cajero", estado: "Desactivo" },
 ];
 
 type Props = {
-  // Cambio para que reciba un solo cliente, no un array
-  AgregarSeleccionado: (proveedores: FilaProveedores) => void;
-  onSelectSingle: (proveedores: FilaProveedores) => void;
+  // Cambio para que reciba un solo roles, no un array
+  AgregarSeleccionado: (rol: FilaRoles) => void;
+  onSelectSingle: (rol: FilaRoles) => void;
 };
 
 const FILAS_POR_PAGINA = 3;
 
-export default function TablaFiltroClientes({
+export default function TablaFiltroRoles({
   AgregarSeleccionado,
   onSelectSingle,
 }: Props) {
-  const [rows] = useState<FilaProveedores[]>(initialRows); // Lista de clientes base
+  const [rows] = useState<FilaRoles[]>(initialRows); // Lista de roless base
   const [IDSeleccionado, setIDSeleccionado] = useState<number | null>(null); // IDs seleccionados
   const [textoFiltrado, setFilterText] = useState(""); // Texto de filtro
   const [isClicked, setIsClicked] = useState(false);
@@ -41,8 +41,8 @@ export default function TablaFiltroClientes({
     const lowerFilter = textoFiltrado.toLowerCase();
     return rows.filter(
       (row) =>
-        (row.nombreProveedor ?? "").toLowerCase().includes(lowerFilter) ||
-        row.telefono.toLowerCase().includes(lowerFilter)
+        (row.rol ?? "").toLowerCase().includes(lowerFilter) ||
+        row.estado.toLowerCase().includes(lowerFilter)
     );
   }, [textoFiltrado, rows]);
 
@@ -66,12 +66,12 @@ export default function TablaFiltroClientes({
   const handleAddSelected = () => {
     if (IDSeleccionado === null) return;
 
-    const provedores = rows.find((r) => r.ruc === IDSeleccionado);
-    if (!provedores) return;
+    const rol = rows.find((r) => r.id === IDSeleccionado);
+    if (!rol) return;
 
-    // Ya no es necesario verificar cliente duplicado porque solo hay uno
-    onSelectSingle(provedores);
-    AgregarSeleccionado(provedores);
+    // Ya no es necesario verificar roles duplicado porque solo hay uno
+    onSelectSingle(rol);
+    AgregarSeleccionado(rol);
 
     setIsClicked(true);
     setTimeout(() => setIsClicked(false), 150);
@@ -129,7 +129,7 @@ export default function TablaFiltroClientes({
       >
         <input
           type="text"
-          placeholder="Filtrar por nombre del proveedor o número"
+          placeholder="Filtrar por nombre de rol o estado"
           value={textoFiltrado}
           onChange={(e) => setFilterText(e.target.value)}
           style={{
@@ -140,7 +140,7 @@ export default function TablaFiltroClientes({
             backgroundColor: "#1f1f1f",
             color: "#fff",
           }}
-          aria-label="Filtrar por nombre del proveedor o número"
+          aria-label="Filtrar por nombre de rol o estado"
         />
         <button
           onClick={handleAddSelected}
@@ -156,7 +156,7 @@ export default function TablaFiltroClientes({
             transform: isClicked ? "scale(0.95)" : "scale(1)",
             transition: "transform 150ms ease",
           }}
-          aria-label="Añadir proveedor seleccionado"
+          aria-label="Añadir rol seleccionado"
         >
           Agregar
         </button>
@@ -180,33 +180,33 @@ export default function TablaFiltroClientes({
         <thead>
           <tr>
             <th style={thStyle}></th>
-            <th style={thStyle}>RUC</th>
-            <th style={thStyle}>Nombre Proveedor</th>
-            <th style={thStyle}>Telefono</th>
+            <th style={thStyle}>ID</th>
+            <th style={thStyle}>Rol</th>
+            <th style={thStyle}>Estado</th>
           </tr>
         </thead>
         <tbody>
           {paginatedRows.length > 0 ? (
             paginatedRows.map((row) => (
               <tr
-                key={row.ruc}
+                key={row.id}
                 style={{
                   backgroundColor:
-                    IDSeleccionado === row.ruc ? "#1f1f1f" : "inherit",
+                    IDSeleccionado === row.id ? "#1f1f1f" : "inherit",
                 }}
               >
                 <td style={tdStyle}>
                   <input
                     type="radio"
-                    checked={IDSeleccionado === row.ruc}
-                    onChange={() => handleSelect(row.ruc)}
-                    aria-label={`Select row with ID ${row.ruc}`}
+                    checked={IDSeleccionado === row.id}
+                    onChange={() => handleSelect(row.id)}
+                    aria-label={`Select row with ID ${row.id}`}
                     style={{ cursor: "pointer" }}
                   />
                 </td>
-                <td style={tdStyle}>{row.ruc}</td>
-                <td style={tdStyle}>{row.nombreProveedor}</td>
-                <td style={tdStyle}>{row.telefono}</td>
+                <td style={tdStyle}>{row.id}</td>
+                <td style={tdStyle}>{row.rol}</td>
+                <td style={tdStyle}>{row.estado}</td>
               </tr>
             ))
           ) : (

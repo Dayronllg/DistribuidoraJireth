@@ -1,6 +1,6 @@
 type FilaClientes = {
   id: number;
-  nombre: string;
+  nombreCliente: string;
   telefono: string;
 };
 
@@ -12,7 +12,7 @@ export default function ClienteInput({ cliente }: Props) {
   return (
     <div style={{ padding: "1rem", background: "#121212", color: "#fff" }}>
       <h3 style={{ color: "#fff", marginBottom: "1rem" }}>
-        Información del cliente
+        Información del Cliente
       </h3>
 
       {/* ID */}
@@ -61,7 +61,7 @@ export default function ClienteInput({ cliente }: Props) {
             marginBottom: "0.5rem",
           }}
         >
-          Nombre
+          Nombre Cliente
         </label>
         <div
           style={{
@@ -80,7 +80,7 @@ export default function ClienteInput({ cliente }: Props) {
               color: "#fff",
               outline: "none",
             }}
-            value={cliente.nombre}
+            value={cliente.nombreCliente}
             readOnly
           />
         </div>

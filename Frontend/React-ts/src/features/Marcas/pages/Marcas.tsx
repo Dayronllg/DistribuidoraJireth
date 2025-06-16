@@ -1,4 +1,4 @@
-import React from "react";
+import TablaMarcas from "../components/TablaMarcas";
 
 function Marcas() {
   return (
@@ -11,7 +11,7 @@ function Marcas() {
       }}
     >
       <h2 style={{ marginBottom: "1.5rem", textAlign: "center" }}>Marcas</h2>
-      {/* <TablaPedidos /> */}
+      <TablaMarcas />
     </div>
   );
 }
