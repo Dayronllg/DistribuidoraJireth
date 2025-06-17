@@ -53,7 +53,9 @@ public partial class DistribuidoraContext : DbContext
 
     public virtual DbSet<Venta> Ventas { get; set; }
 
-    
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){}
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Cliente>(entity =>
@@ -67,7 +69,8 @@ public partial class DistribuidoraContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.Estado)
                 .HasMaxLength(15)
-                .IsUnicode(false);
+                .IsUnicode(false)
+                .HasDefaultValue("Activo");
             entity.Property(e => e.Telefono)
                 .HasMaxLength(8)
                 .IsUnicode(false)

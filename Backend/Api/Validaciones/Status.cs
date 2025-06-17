@@ -5,5 +5,6 @@ public enum Status
     None,
     NotFound,
     WithoutChanges,
+    Conflict,
     Ok
 }
