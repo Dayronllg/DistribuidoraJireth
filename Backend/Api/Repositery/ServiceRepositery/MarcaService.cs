@@ -57,7 +57,7 @@ public class MarcaService : Service<Marca>, IMarcaService
 
     public async Task<Result<CrearMarcaDto>> CrearMarca(CrearMarcaDto CrearMarca)
     {
-         var MapMarca = _mapper.Map<Marca>(CrearMarca);
+        var MapMarca = _mapper.Map<Marca>(CrearMarca);
         var result = await base.create(MapMarca);
 
         return Result<CrearMarcaDto>.Ok(CrearMarca);

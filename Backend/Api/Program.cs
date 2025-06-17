@@ -38,6 +38,9 @@ builder.Services.AddScoped<IProductService, Product_service>();
 builder.Services.AddScoped<ITrabajador, TrabajadorService>();
 builder.Services.AddScoped<IRolService, RolService>();
 builder.Services.AddScoped<IMarcaService, MarcaService>();
+builder.Services.AddScoped<IProvedorService, ProveedorService>();
+builder.Services.AddScoped<IClienteNatural, ClienteNaturalService>();
+builder.Services.AddScoped<IClienteJuridicoService, ClienteJuridicoService>();
 builder.Services.AddAutoMapper(typeof(Api.MapConfig));
 builder.Services.AddAuthentication(config =>
 {
@@ -63,6 +66,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name:"Mypolicy", policy=>
     {
         policy.WithOrigins("http://localhost:5173").AllowAnyMethod().AllowAnyHeader();
+        policy.WithOrigins("http://localhost:5174").AllowAnyMethod().AllowAnyHeader();
     });
 });
 
