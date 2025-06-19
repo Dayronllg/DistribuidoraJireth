@@ -53,12 +53,12 @@ public class TrabajadorService : Service<Trabajadore>, ITrabajador
         return ResultNoValue.Ok();
     }
 
-    public async Task<Result<CrearTrabajadorDto>> CrearTrabajador(CrearTrabajadorDto CrearTrabajador)
+    public async Task<Result<TrabajadorDto>> CrearTrabajador(CrearTrabajadorDto CrearTrabajador)
     {
         var MapTrabajador = _mapper.Map<Trabajadore>(CrearTrabajador);
         var result = await base.create(MapTrabajador);
 
-        return Result<CrearTrabajadorDto>.Ok(CrearTrabajador);
+        return Result<TrabajadorDto>.Ok(_mapper.Map<TrabajadorDto>(result.Value));
 
     }
 
