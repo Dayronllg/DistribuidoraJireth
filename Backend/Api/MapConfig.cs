@@ -24,6 +24,7 @@ public class MapConfig:Profile
         //Mapeo trabajador
         CreateMap<Trabajadore, CrearTrabajadorDto>().ReverseMap();
         CreateMap<PaginarTrabajadorDto, Trabajadore>().ReverseMap();
+        CreateMap<Trabajadore, TrabajadorDto>().ReverseMap();
         CreateMap<ActualizarTrabajadorDto, Trabajadore>().ReverseMap();
         //MapeoRol
         CreateMap<Role, RolDto>().ReverseMap();
