@@ -3,15 +3,21 @@ using System.Collections.Generic;
 
 namespace Api.Models;
 
-public partial class Producto
+public partial class Presentacione
 {
-    public int IdProducto { get; set; }
+    public int IdPresentacion { get; set; }
 
     public string Nombre { get; set; } = null!;
 
+    public decimal Precio { get; set; }
+
+    public int Inventario { get; set; }
+
+    public string UnidadDeMedida { get; set; } = null!;
+
     public string Estado { get; set; } = null!;
 
-    public int IdMarca { get; set; }
+    public int IdProductos { get; set; }
 
     public virtual ICollection<DetalleCompra> DetalleCompras { get; set; } = new List<DetalleCompra>();
 
@@ -23,7 +29,5 @@ public partial class Producto
 
     public virtual ICollection<DetalleVenta> DetalleVenta { get; set; } = new List<DetalleVenta>();
 
-    public virtual Marca IdMarcaNavigation { get; set; } = null!;
-
-    public virtual ICollection<Presentacione> Presentaciones { get; set; } = new List<Presentacione>();
+    public virtual Producto IdProductosNavigation { get; set; } = null!;
 }

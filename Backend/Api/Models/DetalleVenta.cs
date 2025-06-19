@@ -17,6 +17,10 @@ public partial class DetalleVenta
 
     public int IdProducto { get; set; }
 
+    public int IdPresentacion { get; set; }
+
+    public virtual Presentacione IdPresentacionNavigation { get; set; } = null!;
+
     public virtual Producto IdProductoNavigation { get; set; } = null!;
 
     public virtual Venta IdVentaNavigation { get; set; } = null!;

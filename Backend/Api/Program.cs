@@ -41,6 +41,7 @@ builder.Services.AddScoped<IMarcaService, MarcaService>();
 builder.Services.AddScoped<IProvedorService, ProveedorService>();
 builder.Services.AddScoped<IClienteNatural, ClienteNaturalService>();
 builder.Services.AddScoped<IClienteJuridicoService, ClienteJuridicoService>();
+builder.Services.AddScoped<IPresentacionService,PresentacionService>();
 builder.Services.AddAutoMapper(typeof(Api.MapConfig));
 builder.Services.AddAuthentication(config =>
 {

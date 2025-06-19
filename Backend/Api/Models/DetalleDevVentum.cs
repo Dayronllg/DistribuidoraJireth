@@ -13,7 +13,11 @@ public partial class DetalleDevVentum
 
     public int IdProducto { get; set; }
 
+    public int IdPresentacion { get; set; }
+
     public virtual DevolucionVentum IdDevVentaNavigation { get; set; } = null!;
+
+    public virtual Presentacione IdPresentacionNavigation { get; set; } = null!;
 
     public virtual Producto IdProductoNavigation { get; set; } = null!;
 }

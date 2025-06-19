@@ -41,6 +41,8 @@ public partial class DistribuidoraContext : DbContext
 
     public virtual DbSet<Pedido> Pedidos { get; set; }
 
+    public virtual DbSet<Presentacione> Presentaciones { get; set; }
+
     public virtual DbSet<Producto> Productos { get; set; }
 
     public virtual DbSet<Proveedore> Proveedores { get; set; }
@@ -54,7 +56,6 @@ public partial class DistribuidoraContext : DbContext
     public virtual DbSet<Venta> Ventas { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){}
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -159,6 +160,11 @@ public partial class DistribuidoraContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DetalleCompra_Compras");
 
+            entity.HasOne(d => d.IdPresentacionNavigation).WithMany(p => p.DetalleCompras)
+                .HasForeignKey(d => d.IdPresentacion)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("Fk_Presentaciones_DetalleCompra");
+
             entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.DetalleCompras)
                 .HasForeignKey(d => d.IdProducto)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -178,6 +184,11 @@ public partial class DistribuidoraContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DetalleDevVenta_DevolucionVenta");
 
+            entity.HasOne(d => d.IdPresentacionNavigation).WithMany(p => p.DetalleDevVenta)
+                .HasForeignKey(d => d.IdPresentacion)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("Fk_Presentaciones_DetalleDevVenta");
+
             entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.DetalleDevVenta)
                 .HasForeignKey(d => d.IdProducto)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -194,6 +205,11 @@ public partial class DistribuidoraContext : DbContext
                 .HasForeignKey(d => d.IdDevCompra)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DetalleDevoCompra_DevolucionCompra");
+
+            entity.HasOne(d => d.IdPresentacionNavigation).WithMany(p => p.DetalleDevoCompras)
+                .HasForeignKey(d => d.IdPresentacion)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("Fk_Presentaciones_DetalleDevoCompra");
 
             entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.DetalleDevoCompras)
                 .HasForeignKey(d => d.IdProducto)
@@ -216,6 +232,11 @@ public partial class DistribuidoraContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DetallePedido_Pedidos");
 
+            entity.HasOne(d => d.IdPresentacionNavigation).WithMany(p => p.DetallePedidos)
+                .HasForeignKey(d => d.IdPresentacion)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("Fk_Presentaciones_DetallePedido");
+
             entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.DetallePedidos)
                 .HasForeignKey(d => d.IdProducto)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -230,6 +251,11 @@ public partial class DistribuidoraContext : DbContext
             entity.Property(e => e.Subtotal)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("subtotal");
+
+            entity.HasOne(d => d.IdPresentacionNavigation).WithMany(p => p.DetalleVenta)
+                .HasForeignKey(d => d.IdPresentacion)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("Fk_Presentaciones_DetalleVentas");
 
             entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.DetalleVenta)
                 .HasForeignKey(d => d.IdProducto)
@@ -302,6 +328,26 @@ public partial class DistribuidoraContext : DbContext
                 .HasConstraintName("FK_Pedidos_Proveedores");
         });
 
+        modelBuilder.Entity<Presentacione>(entity =>
+        {
+            entity.HasKey(e => e.IdPresentacion).HasName("PK__Presenta__6175A1CDA1F339CC");
+
+            entity.Property(e => e.Estado)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasDefaultValue("Activo");
+            entity.Property(e => e.Nombre).HasMaxLength(50);
+            entity.Property(e => e.Precio).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.UnidadDeMedida)
+                .HasMaxLength(15)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.IdProductosNavigation).WithMany(p => p.Presentaciones)
+                .HasForeignKey(d => d.IdProductos)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Presentac__IdPro__14270015");
+        });
+
         modelBuilder.Entity<Producto>(entity =>
         {
             entity.HasKey(e => e.IdProducto);
@@ -313,7 +359,6 @@ public partial class DistribuidoraContext : DbContext
             entity.Property(e => e.Nombre)
                 .HasMaxLength(30)
                 .IsUnicode(false);
-            entity.Property(e => e.Precio).HasColumnType("decimal(10, 2)");
 
             entity.HasOne(d => d.IdMarcaNavigation).WithMany(p => p.Productos)
                 .HasForeignKey(d => d.IdMarca)

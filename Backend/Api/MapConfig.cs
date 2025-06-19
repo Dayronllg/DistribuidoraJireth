@@ -1,10 +1,9 @@
 using System;
 using Api.Dto;
 using Api.Dto.ClientesDto;
-using Api.Dto.ClientesDto;
 using Api.Dto.MarcasDto;
+using Api.Dto.PresentacionesDto;
 using Api.Dto.ProductosDto;
-using Api.Dto.ProveedoresDto;
 using Api.Dto.ProveedoresDto;
 using Api.Dto.RolesDto;
 using Api.Dto.TrabajadorDtos;
@@ -47,7 +46,7 @@ public class MapConfig:Profile
         CreateMap<CrearClienteJuridicoDto, Cliente>().ForMember(dest => dest.ClienteJuridico, opt => opt.MapFrom(src => src.ClienteJuridico)).ReverseMap();
         CreateMap<ClienteJuridicoDto, ClienteJuridico>()
        .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
-         //mapeo marcas
+        //mapeo marcas
         CreateMap<MarcaDto, Marca>().ReverseMap();
         CreateMap<Marca, MarcaDto>().ReverseMap();
         //Mapeo Proveedores     
@@ -64,10 +63,9 @@ public class MapConfig:Profile
         CreateMap<CrearClienteJuridicoDto, Cliente>().ForMember(dest => dest.ClienteJuridico, opt => opt.MapFrom(src => src.ClienteJuridico)).ReverseMap();
         CreateMap<ClienteJuridicoDto, ClienteJuridico>()
        .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
-
-       
-
-
-        
+        //Mapeo Presentaciones
+        CreateMap<Presentacione, PresentacionDto>().ReverseMap();
+        CreateMap<Presentacione, CrearPresentacionDto>().ReverseMap();
+        CreateMap<Presentacione, ActualizarPresentacionDto>().ReverseMap();     
     }
 }
