@@ -47,7 +47,7 @@ export interface Trabajador {
   primerApellido: string;
   segundoApellido: string;
   telefono: string;
-  estado: "Contratado" | "Despedido";
+  estado: "Activo" | "Inactivo";
 }
 
 export function mapRowToTrabajador(row: GridRowModel): Trabajador {
@@ -331,7 +331,7 @@ let updatedRow: { id: number; isNew: boolean } = { id: newRow.id, isNew: false }
       headerAlign: "center",
       align: "center",
       type: "singleSelect",
-      valueOptions: ["Acitvo", "Inactivo"],
+      valueOptions: ["Activo", "Inactivo"],
       flex: 0.7,
       minWidth: 150,
       editable: true,
