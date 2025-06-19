@@ -55,12 +55,17 @@ public class MarcaService : Service<Marca>, IMarcaService
         return ResultNoValue.Ok();
     }
 
-    public async Task<Result<CrearMarcaDto>> CrearMarca(CrearMarcaDto CrearMarca)
+    public async Task<Result<MarcaDto>> CrearMarca(CrearMarcaDto CrearMarca)
     {
         var MapMarca = _mapper.Map<Marca>(CrearMarca);
         var result = await base.create(MapMarca);
 
-        return Result<CrearMarcaDto>.Ok(CrearMarca);
+        if (result.Failed)
+        {
+            return Result<MarcaDto>.Fail(result.Error, Status.Conflict);
+        }
+
+        return Result<MarcaDto>.Ok(_mapper.Map<MarcaDto>(result.Value));
     }
 
     public async Task<PaginacionResultado<MarcaDto>> PaginarMarca(int pagina, int tamanioPagina)

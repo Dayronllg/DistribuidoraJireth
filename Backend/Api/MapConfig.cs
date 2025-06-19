@@ -47,11 +47,10 @@ public class MapConfig:Profile
         CreateMap<CrearClienteJuridicoDto, Cliente>().ForMember(dest => dest.ClienteJuridico, opt => opt.MapFrom(src => src.ClienteJuridico)).ReverseMap();
         CreateMap<ClienteJuridicoDto, ClienteJuridico>()
        .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
-
-       
-
+         //mapeo marcas
         CreateMap<MarcaDto, Marca>().ReverseMap();
-        //Mapeo Proveedores
+        CreateMap<Marca, MarcaDto>().ReverseMap();
+        //Mapeo Proveedores     
         CreateMap<Proveedore, CrearProveedorDto>().ReverseMap();
         CreateMap<Proveedore, ProveedorDto>().ReverseMap();
         //Mapeo ClienteNatural

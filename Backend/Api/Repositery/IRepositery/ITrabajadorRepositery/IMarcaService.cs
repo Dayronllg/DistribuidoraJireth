@@ -9,7 +9,7 @@ namespace Api.Repositery.IRepositery.ITrabajadorRepositery;
 public interface IMarcaService : IService<Marca>
 {
     
-    Task<Result<CrearMarcaDto>> CrearMarca(CrearMarcaDto CrearMarca);
+    Task<Result<MarcaDto>> CrearMarca(CrearMarcaDto CrearMarca);
     Task<PaginacionResultado<MarcaDto>> PaginarMarca(int pagina, int tamanioPagina);
     Task<ResultNoValue> BajaMarca(int id);
     Task<Result<MarcaDto>> ActualizarMarca(MarcaDto ActualizarMarca);
