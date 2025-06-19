@@ -16,5 +16,5 @@ public class PaginarTrabajadorDto
 
     public string Telefono { get; set; } = null!;
 
-
+    public string Estado { get; set; } = null!;
 }
