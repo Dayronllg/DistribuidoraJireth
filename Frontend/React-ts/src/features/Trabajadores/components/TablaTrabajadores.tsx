@@ -23,57 +23,81 @@ import type {
   GridRowId,
   GridRowModel,
   GridSlotProps,
+  GridValidRowModel,
 } from "@mui/x-data-grid";
 
 import {
-  randomCreatedDate,
-  randomTraderName,
-  randomId,
-  randomArrayItem,
+  randomId
+ 
 } from "@mui/x-data-grid-generator";
+import axios from "axios";
 
-const roles = ["Market", "Finance", "Development"];
-const randomRole = () => {
-  return randomArrayItem(roles);
+export interface PaginacionResultado<T> {
+  datos: T[];
+  paginaActual: number;
+  totalPaginas: number;
+  totalRegistros: number;
+  tamanioPagina: number;
+}
+
+export interface Trabajador {
+  idTrabajador: number;
+  primerNombre: string;
+  segundoNombre: string;
+  primerApellido: string;
+  segundoApellido: string;
+  telefono: string;
+  estado: "Contratado" | "Despedido";
+}
+
+export function mapRowToTrabajador(row: GridRowModel): Trabajador {
+  return {
+    idTrabajador: row.idTrabajador,
+    primerNombre: row.primerNombre,
+    segundoNombre: row.segundoNombre,
+    primerApellido: row.primerApellido,
+    segundoApellido: row.segundoApellido,
+    telefono: row.telefono,
+    estado: row.estado, // si tienes este campo
+  };
+}
+
+const API_BASE='http://localhost:5187/api'
+
+export const crearTrabajador = async (nuevo: Trabajador) => {
+  try {
+    const response = await axios.post(`${API_BASE}/Trabajadores/CrearTrabajador`, nuevo);
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear trabajador", error);
+    throw error;
+  }
 };
 
-const initialRows: GridRowsProp = [
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 25,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 36,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 19,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 28,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 23,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-];
+
+export async function actualizarTrabajador(trabajador: Trabajador): Promise<Trabajador> {
+  try {
+    const response = await axios.put<Trabajador>(
+      `${API_BASE}/Trabajadores/ActualizarTrabajador`,
+      trabajador
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar trabajador:", error);
+    throw error; // Puedes lanzar un error más específico si querés
+  }
+}
+
+const eliminarTrabajador = async (id: number) => {
+  try {
+    const response = await axios.put(`${API_BASE}/Trabajadores/BajaTrabajadores`,null,{params:{id:id}} 
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al eliminar (inhabilitar) el trabajador:', error);
+    throw error;
+  }
+};
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -128,11 +152,37 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
   );
 }
 
+
 export default function TablaRegistroVentas() {
-  const [rows, setRows] = React.useState(initialRows);
+  const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+
+  React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<Trabajador>>(
+        "http://localhost:5187/api/Trabajadores/ObtenerTrabajadores",
+        {
+          params: {
+            pagina: 1,
+            tamanioPagina: 100,
+          },
+        }
+      )
+      .then((response) => {
+        setRows(
+          response.data.datos.map((t) => ({
+            ...t,
+            id: t.idTrabajador,
+          }))
+        );
+      })
+      .catch((error) => {
+        console.error("Error al obtener trabajadores:", error);
+      });
+  }, []);
+
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -151,7 +201,9 @@ export default function TablaRegistroVentas() {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-  const MantenerClickBorrar = (id: GridRowId) => () => {
+  const MantenerClickBorrar = (id: GridRowId) => async () => {
+    console.log(id);
+    await eliminarTrabajador(Number(id));
     setRows(rows.filter((row) => row.id !== id));
   };
 
@@ -167,11 +219,42 @@ export default function TablaRegistroVentas() {
     }
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    return updatedRow;
-  };
+ const processRowUpdate = async (newRow: GridRowModel) => {
+  //let updatedRow = { ...newRow, isNew: false };
+let updatedRow: { id: number; isNew: boolean } = { id: newRow.id, isNew: false };
+
+  if (newRow.isNew) {
+    const trabajadorCreado = await crearTrabajador(mapRowToTrabajador(newRow));
+
+    updatedRow = {
+      ...newRow,
+      ...trabajadorCreado,
+      id: trabajadorCreado.idTrabajador, 
+      isNew: false,
+    };
+  } else {
+    const trabajadorActualizado = await actualizarTrabajador(mapRowToTrabajador(newRow));
+    updatedRow = {
+      ...trabajadorActualizado,
+      id: trabajadorActualizado.idTrabajador, 
+      isNew: false
+    };
+  }
+
+  // Actualizás las filas del grid
+  setRows((prevRows) =>
+    prevRows.map((row) =>
+      row.id === newRow.id ? updatedRow : row
+    )
+  );
+  setRowModesModel((prevModel) => ({
+    ...prevModel,
+    [newRow.id]: { mode: GridRowModes.View }, // usar el id final
+  }));
+
+  return updatedRow;
+};
+
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
@@ -248,7 +331,7 @@ export default function TablaRegistroVentas() {
       headerAlign: "center",
       align: "center",
       type: "singleSelect",
-      valueOptions: ["Contratado", "Despedido"],
+      valueOptions: ["Acitvo", "Inactivo"],
       flex: 0.7,
       minWidth: 150,
       editable: true,
