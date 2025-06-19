@@ -7,6 +7,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import Button from "@mui/material/Button";
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
 
 import {
   GridRowModes,
@@ -26,54 +27,60 @@ import type {
 } from "@mui/x-data-grid";
 
 import {
-  randomCreatedDate,
-  randomTraderName,
   randomId,
-  randomArrayItem,
 } from "@mui/x-data-grid-generator";
+import axios from "axios";
 
-const roles = ["Market", "Finance", "Development"];
-const randomRole = () => {
-  return randomArrayItem(roles);
+export interface Marca{
+  idMarca:number,
+  nombre:string,
+  estado: "Activo" | "Inactivo"
+}
+
+export function mapRowToMarca(row: GridRowModel): Marca {
+  return {
+    idMarca: row.idMarca,
+    nombre: row.nombre,
+    estado:row.estado // si tienes este campo
+  };
+}
+
+const API_BASE='http://localhost:5187/api'
+
+export const crearMarca = async (nuevo: Marca) => {
+  try {
+    const response = await axios.post(`${API_BASE}/Marcas/CrearMarca`, nuevo);
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear Marca", error);
+    throw error;
+  }
 };
 
-const initialRows: GridRowsProp = [
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 25,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 36,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 19,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 28,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 23,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-];
+
+export async function actualizarMarca(Marca: Marca): Promise<Marca> {
+  try {
+    const response = await axios.put<Marca>(
+      `${API_BASE}/Marcas/ActualizarMarca`,
+      Marca
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar Marca:", error);
+    throw error; // Puedes lanzar un error más específico si querés
+  }
+}
+
+const eliminarMarca = async (id: number) => {
+  try {
+    const response = await axios.put(`${API_BASE}/Marcas/BajaMarca`,null,{params:{id:id}} 
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al eliminar (inhabilitar) el Marca:', error);
+    throw error;
+  }
+};
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -129,11 +136,35 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
 }
 
 export default function TablaRegistroVentas() {
-  const [rows, setRows] = React.useState(initialRows);
+  const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
 
+     React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<Marca>>(
+        "http://localhost:5187/api/Marcas/ObtenerMarcas",
+        {
+          params: {
+            pagina: 1,
+            tamanioPagina: 100,
+          },
+        }
+      )
+      .then((response) => {
+        setRows(
+          response.data.datos.map((t) => ({
+            ...t,
+            id: t.idMarca,
+          }))
+        );
+      })
+      .catch((error) => {
+        console.error("Error al obtener Marcas:", error);
+      });
+  }, []);
+  
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
     event
@@ -151,9 +182,11 @@ export default function TablaRegistroVentas() {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-  const MantenerClickBorrar = (id: GridRowId) => () => {
-    setRows(rows.filter((row) => row.id !== id));
-  };
+ const MantenerClickBorrar = (id: GridRowId) => async () => {
+     
+     await eliminarMarca(Number(id));
+     setRows(rows.filter((row) => row.id !== id));
+   };
 
   const MantenerClickCancelar = (id: GridRowId) => () => {
     setRowModesModel({
@@ -167,11 +200,42 @@ export default function TablaRegistroVentas() {
     }
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+  const processRowUpdate = async (newRow: GridRowModel) => {
+    //let updatedRow = { ...newRow, isNew: false };
+  let updatedRow: { id: number; isNew: boolean } = { id: newRow.id, isNew: false };
+  
+    if (newRow.isNew) {
+      const MarcaCreado = await crearMarca(mapRowToMarca(newRow));
+  
+      updatedRow = {
+        ...newRow,
+        ...MarcaCreado,
+        id: MarcaCreado.idMarca, 
+        isNew: false,
+      };
+    } else {
+      const MarcaActualizado = await actualizarMarca(mapRowToMarca(newRow));
+      updatedRow = {
+        ...MarcaActualizado,
+        id: MarcaActualizado.idMarca, 
+        isNew: false
+      };
+    }
+  
+    // Actualizás las filas del grid
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === newRow.id ? updatedRow : row
+      )
+    );
+    setRowModesModel((prevModel) => ({
+      ...prevModel,
+      [newRow.id]: { mode: GridRowModes.View }, // usar el id final
+    }));
+  
     return updatedRow;
   };
+  
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
@@ -208,7 +272,7 @@ export default function TablaRegistroVentas() {
       headerAlign: "center",
       align: "center",
       type: "singleSelect",
-      valueOptions: ["Realizado", "Cancelado"],
+      valueOptions: ["Activo", "Inactivo"],
       flex: 0.7,
       minWidth: 150,
       editable: true,

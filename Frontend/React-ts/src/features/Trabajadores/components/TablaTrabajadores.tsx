@@ -202,7 +202,7 @@ export default function TablaRegistroVentas() {
   };
 
   const MantenerClickBorrar = (id: GridRowId) => async () => {
-    console.log(id);
+    
     await eliminarTrabajador(Number(id));
     setRows(rows.filter((row) => row.id !== id));
   };
