@@ -8,7 +8,9 @@ import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import {
   AssignmentAdd,
   AttachMoney,
+  ContactPhone,
   Cookie,
+  DomainAddRounded,
   Engineering,
   Equalizer,
   Groups,
@@ -17,7 +19,9 @@ import {
   LunchDining,
   Payment,
   PermMedia,
+  PersonAdd,
   PointOfSale,
+  ReduceCapacity,
   Store,
 } from "@mui/icons-material";
 
@@ -98,6 +102,27 @@ const NAVIGATION: Navigation = [
         segment: rol + "/presentaciones",
         title: "Presentaciones",
         icon: <PermMedia />,
+      },
+      {
+        segment: rol + "/proveedores",
+        title: "Proveedores",
+        icon: <DomainAddRounded />,
+      },
+    ],
+  },
+  {
+    title: "Clientes",
+    icon: <PersonAdd />,
+    children: [
+      {
+        segment: rol + "/clientesNaturales",
+        title: "Clientes Naturales",
+        icon: <ReduceCapacity />,
+      },
+      {
+        segment: rol + "/clientesJuridicos",
+        title: "Clientes Juridicos",
+        icon: <ContactPhone />,
       },
     ],
   },

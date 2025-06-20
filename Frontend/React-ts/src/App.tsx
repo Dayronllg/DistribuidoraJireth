@@ -14,6 +14,9 @@ import Presentaciones from "./features/Presentaciones/pages/Presentaciones";
 import Usuarios from "./features/Usuarios/pages/Usuarios";
 import Trabajadores from "./features/Trabajadores/pages/Trabajadores";
 import Reportes from "./features/Reportes/pages/Reportes";
+import ClientesNaturales from "./features/ClientesNaturales/pages/ClientesNaturales";
+import ClientesJuridicos from "./features/ClientesJuridicos/pages/ClientesJuridicos";
+import Proveedores from "./features/Proveedores/pages/Proveedores";
 //import ProtectedRoute from "./features/Login/ProtectedRoute";
 
 // {<ProtectedRoute allowedRoles={["admin"]}>
@@ -40,6 +43,9 @@ export default function App() {
         <Route path="usuarios" element={<Usuarios />} />
         <Route path="trabajadores" element={<Trabajadores />} />
         <Route path="reportes" element={<Reportes />} />
+        <Route path="clientesNaturales" element={<ClientesNaturales />} />
+        <Route path="clientesJuridicos" element={<ClientesJuridicos />} />
+        <Route path="proveedores" element={<Proveedores />} />
         <Route path="*" element={<NoFoundPage />} />
       </Route>
 
@@ -58,6 +64,9 @@ export default function App() {
         <Route path="usuarios" element={<Usuarios />} />
         <Route path="trabajadores" element={<Trabajadores />} />
         <Route path="reportes" element={<Reportes />} />
+        <Route path="clientesNaturales" element={<ClientesNaturales />} />
+        <Route path="clientesJuridicos" element={<ClientesJuridicos />} />
+        <Route path="proveedores" element={<Proveedores />} />
         <Route path="*" element={<NoFoundPage />} />
       </Route>
 

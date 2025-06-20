@@ -128,7 +128,7 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
   );
 }
 
-export default function TablaRegistroVentas() {
+export default function TablaClientesJuridicos() {
   const [rows, setRows] = React.useState(initialRows);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
@@ -183,53 +183,33 @@ export default function TablaRegistroVentas() {
   // Primero declarar las columnas comunes:
   const baseColumns: GridColDef[] = [
     {
-      field: "idPresentaciones",
-      headerName: "ID",
+      field: "idCliente",
+      headerName: "ID Cliente",
       headerAlign: "center",
       align: "center",
       type: "number",
-      flex: 0.5,
+      flex: 0.7,
       minWidth: 50,
       editable: true,
     },
     {
-      field: "nombre",
-      headerName: "Nombre",
+      field: "direccion",
+      headerName: "Direccion",
       headerAlign: "center",
       align: "center",
       type: "string",
-      flex: 1.1,
+      flex: 1,
       minWidth: 150,
       editable: true,
     },
     {
-      field: "precio",
-      headerName: "Precio",
-      headerAlign: "center",
-      align: "center",
-      type: "number",
-      flex: 0.7,
-      minWidth: 100,
-      editable: true,
-    },
-    {
-      field: "inventario",
-      headerName: "Inventario",
-      headerAlign: "center",
-      align: "center",
-      type: "number",
-      flex: 0.7,
-      minWidth: 100,
-      editable: true,
-    },
-    {
-      field: "unidadMedida",
-      headerName: "Unidad de Medida",
+      field: "telefono",
+      headerName: "Telefono",
       headerAlign: "center",
       align: "center",
       type: "string",
-      flex: 0.8,
-      minWidth: 150,
+      flex: 0.7,
+      minWidth: 100,
       editable: true,
     },
     {
@@ -239,18 +219,28 @@ export default function TablaRegistroVentas() {
       align: "center",
       type: "singleSelect",
       valueOptions: ["Activo", "Inactivo"],
-      flex: 0.8,
-      minWidth: 150,
+      flex: 0.7,
+      minWidth: 100,
       editable: true,
     },
     {
-      field: "idProductos",
-      headerName: "ID Producto",
+      field: "ruc",
+      headerName: "RUC",
       headerAlign: "center",
       align: "center",
       type: "number",
       flex: 0.7,
-      minWidth: 150,
+      minWidth: 50,
+      editable: true,
+    },
+    {
+      field: "nombre",
+      headerName: "Nombre",
+      headerAlign: "center",
+      align: "center",
+      type: "string",
+      flex: 1,
+      minWidth: 100,
       editable: true,
     },
   ];
