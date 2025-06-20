@@ -5,8 +5,6 @@ namespace Api.Models;
 
 public partial class DetalleVenta
 {
-    public int IdDetalle { get; set; }
-
     public int Cantidad { get; set; }
 
     public decimal Precio { get; set; }

@@ -2,6 +2,8 @@ using System;
 using Api.Dto;
 using Api.Dto.ClientesDto;
 using Api.Dto.MarcasDto;
+using Api.Dto.PedidosDto;
+using Api.Dto.PedidosDto.DetalleDePedidoDto;
 using Api.Dto.PresentacionesDto;
 using Api.Dto.ProductosDto;
 using Api.Dto.ProveedoresDto;
@@ -22,6 +24,8 @@ public class MapConfig:Profile
         CreateMap<Usuario, UsuarioDto>().ReverseMap();
         //Mapeo Producto
         CreateMap<Producto, ProductoDto>().ReverseMap();
+        CreateMap<Producto, CrearProductoDto>().ReverseMap();
+        CreateMap<Producto, ActualizarProductoDto>().ReverseMap();
         //Mapeo trabajador
         CreateMap<Trabajadore, CrearTrabajadorDto>().ReverseMap();
         CreateMap<PaginarTrabajadorDto, Trabajadore>().ReverseMap();
@@ -67,6 +71,11 @@ public class MapConfig:Profile
         //Mapeo Presentaciones
         CreateMap<Presentacione, PresentacionDto>().ReverseMap();
         CreateMap<Presentacione, CrearPresentacionDto>().ReverseMap();
-        CreateMap<Presentacione, ActualizarPresentacionDto>().ReverseMap();     
+        CreateMap<Presentacione, ActualizarPresentacionDto>().ReverseMap();
+        //MapeoPedidos
+        CreateMap<CrearDetallePedidoDto, DetallePedido>().ReverseMap();
+        CreateMap<DetallePedidoDto, DetallePedido>().ReverseMap();
+        CreateMap<CrearPedidoDto, Pedido>().ForMember(dest => dest.DetallePedidos, opt => opt.MapFrom(src => src.DetallePedidos)).ReverseMap();
+        CreateMap<Pedido, PedidoDto>().ReverseMap();
     }
 }

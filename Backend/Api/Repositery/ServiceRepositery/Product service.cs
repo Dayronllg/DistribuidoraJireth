@@ -1,4 +1,5 @@
 using System;
+using Api.Dto;
 using Api.Dto.ProductosDto;
 using Api.Models;
 using Api.Repositery.IRepositery;
@@ -23,26 +24,63 @@ public class Product_service : Service<Producto>, IProductService
         _mapper = mapper;
     }
 
-    public Task<Result<ProductoDto>> Actualizar()
+    public async Task<Result<ProductoDto>> ActualizarProducto(ProductoDto ActualizarProducto)
     {
-        throw new NotImplementedException();
+        var ProductoRespuesta = await base.Exists(x => x.IdProducto == ActualizarProducto.IdProducto
+                                        && x.Estado == "Activo");
+
+        if (ProductoRespuesta.Failed)
+            return Result<ProductoDto>.Fail(ProductoRespuesta.Error, ProductoRespuesta.status);
+
+        _mapper.Map(ActualizarProducto,ProductoRespuesta.Value);
+
+        var SuccessUpdated = await base.UpdateEntity( _mapper.Map(ActualizarProducto,ProductoRespuesta.Value));
+
+        if (SuccessUpdated.Failed)
+            return Result<ProductoDto>.Fail(SuccessUpdated.Error, SuccessUpdated.status);
+
+        return Result<ProductoDto>.Ok(_mapper.Map<ProductoDto>(SuccessUpdated.Value));
     }
 
-    public async Task<Result<ProductoDto>> CrearProducto(ProductoDto producto)
+    public async Task<ResultNoValue> BajaProducto(int id)
+    {
+         var entity = await base.Exists(x => x.IdProducto == id && x.Estado == "Activo");
+        if (entity.Failed)
+            return ResultNoValue.Fail(entity.Error,Status.NotFound);
+            
+        entity.Value.Estado = "Inactivo";
+        
+       var SuccessUpdated= await base.UpdateEntity(entity.Value);
+
+        if (SuccessUpdated.Failed)
+            return ResultNoValue.Fail(SuccessUpdated.Error, Status.WithoutChanges);
+
+        return ResultNoValue.Ok();
+    }
+
+    public async Task<Result<ProductoDto>> CrearProducto(CrearProductoDto producto)
     {
         var Producto = _mapper.Map<Producto>(producto);
         var ValidationResult = await _validation.ProductoExiste(producto);
 
         if (ValidationResult.Failed)
         {
-            return ValidationResult;
+            return Result<ProductoDto>.Fail(ValidationResult.Error,ValidationResult.status);
         }
 
-        await base.create(Producto);
+        var productoCreado = await base.create(Producto);
 
-        return ValidationResult;
+        return Result<ProductoDto>.Ok(_mapper.Map<ProductoDto>(productoCreado.Value));
          
     }
 
+    
+    public async Task<PaginacionResultado<ProductoDto>> PaginarProducto(int pagina, int tamanioPagina)
+    {
+        var query =  _context.Productos.AsQueryable();
+        var PagTrabajador = await base.PaginarAsync(query, pagina, tamanioPagina, x=>x.Estado=="Activo");
+
+        return MapearPaginador.MapearPaginacion<Producto, ProductoDto>(PagTrabajador,_mapper);
+    }
 }
 

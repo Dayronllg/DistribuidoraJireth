@@ -55,7 +55,9 @@ public partial class DistribuidoraContext : DbContext
 
     public virtual DbSet<Venta> Ventas { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){}
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=LAPTOP-GJAFQBRR; Database=Distribuidora; Trusted_Connection=True;TrustServerCertificate=true");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -147,7 +149,7 @@ public partial class DistribuidoraContext : DbContext
 
         modelBuilder.Entity<DetalleCompra>(entity =>
         {
-            entity.HasKey(e => new { e.IdCompra, e.IdProducto }).HasName("PK__DetalleC__1AC4527D88F02D31");
+            entity.HasKey(e => new { e.IdCompra, e.IdProducto, e.IdPresentacion }).HasName("PK__DetalleC__D6A527DC86CCE9B0");
 
             entity.ToTable("DetalleCompra");
 
@@ -173,7 +175,7 @@ public partial class DistribuidoraContext : DbContext
 
         modelBuilder.Entity<DetalleDevVentum>(entity =>
         {
-            entity.HasKey(e => new { e.IdDevVenta, e.IdProducto }).HasName("PK__DetalleD__C55019E971C2A141");
+            entity.HasKey(e => new { e.IdDevVenta, e.IdProducto, e.IdPresentacion }).HasName("PK__DetalleD__09316C48F8EA44F0");
 
             entity.Property(e => e.Cantidad)
                 .HasMaxLength(50)
@@ -197,7 +199,7 @@ public partial class DistribuidoraContext : DbContext
 
         modelBuilder.Entity<DetalleDevoCompra>(entity =>
         {
-            entity.HasKey(e => new { e.IdDevCompra, e.IdProducto }).HasName("PK__DetalleD__600F0F8EE45B32F7");
+            entity.HasKey(e => new { e.IdDevCompra, e.IdProducto, e.IdPresentacion }).HasName("PK__DetalleD__AC6E7A2FFD516675");
 
             entity.ToTable("DetalleDevoCompra");
 
@@ -219,7 +221,7 @@ public partial class DistribuidoraContext : DbContext
 
         modelBuilder.Entity<DetallePedido>(entity =>
         {
-            entity.HasKey(e => new { e.IdPedido, e.IdProducto }).HasName("PK__DetalleP__8DABD4E2556FCA2F");
+            entity.HasKey(e => new { e.IdPedido, e.IdProducto, e.IdPresentacion }).HasName("PK__DetalleP__41CAA143AA433F5B");
 
             entity.ToTable("DetallePedido");
 
@@ -245,7 +247,7 @@ public partial class DistribuidoraContext : DbContext
 
         modelBuilder.Entity<DetalleVenta>(entity =>
         {
-            entity.HasKey(e => new { e.IdVenta, e.IdProducto }).HasName("PK__DetalleV__AC8AC99C457E6033");
+            entity.HasKey(e => new { e.IdVenta, e.IdProducto, e.IdPresentacion }).HasName("PK__DetalleV__60EBBC3D29913161");
 
             entity.Property(e => e.Precio).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.Subtotal)

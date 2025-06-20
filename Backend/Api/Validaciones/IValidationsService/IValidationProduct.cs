@@ -7,6 +7,6 @@ namespace Api.Validaciones.IValidationsService;
 
 public interface IValidationProduct
 {
-    Task<Result<ProductoDto>> ProductoExiste(ProductoDto producto);
+    Task<Result<CrearProductoDto>> ProductoExiste(CrearProductoDto producto);
 
 }

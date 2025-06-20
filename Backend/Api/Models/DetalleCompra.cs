@@ -5,8 +5,6 @@ namespace Api.Models;
 
 public partial class DetalleCompra
 {
-    public int IdDetalleCmpra { get; set; }
-
     public string Cantidad { get; set; } = null!;
 
     public int IdCompra { get; set; }

@@ -15,13 +15,13 @@ public class ValidationProduct : IValidationProduct
         _context = context;
     }
 
-    public async Task<Result<ProductoDto>> ProductoExiste(ProductoDto producto)
+    public async Task<Result<CrearProductoDto>> ProductoExiste(CrearProductoDto producto)
     {
-        if (await _context.Productos.AnyAsync(x => x.Nombre.ToLower() == producto.Nombre.ToLower()))
+        if (await _context.Productos.AnyAsync(x => x.Nombre.ToLower() == producto.Nombre.ToLower() && x.IdMarca==producto.IdMarca))
         {
-            return Result<ProductoDto>.Fail("El Producto Ya existe");
+            return Result<CrearProductoDto>.Fail("El Producto para esa marca ya existe");
         }
 
-        return Result<ProductoDto>.Ok(producto);
+        return Result<CrearProductoDto>.Ok(producto);
     }
 }

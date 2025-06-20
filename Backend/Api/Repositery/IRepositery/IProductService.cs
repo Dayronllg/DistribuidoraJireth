@@ -1,4 +1,5 @@
 using System;
+using Api.Dto;
 using Api.Dto.ProductosDto;
 using Api.Models;
 using Api.Validaciones;
@@ -8,7 +9,11 @@ namespace Api.Repositery.IRepositery;
 
 public interface IProductService : IService<Producto>
 {
-    Task<Result<ProductoDto>> Actualizar();
-    Task<Result<ProductoDto>> CrearProducto(ProductoDto producto);
+
+    Task<Result<ProductoDto>> CrearProducto(CrearProductoDto producto);
+
+    Task<PaginacionResultado<ProductoDto>> PaginarProducto(int pagina, int tamanioPagina);
+    Task<ResultNoValue> BajaProducto(int id);
+    Task<Result<ProductoDto>> ActualizarProducto(ProductoDto ActualizarProducto);
 
 }

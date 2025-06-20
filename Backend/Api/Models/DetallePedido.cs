@@ -5,8 +5,6 @@ namespace Api.Models;
 
 public partial class DetallePedido
 {
-    public int IdDetalle { get; set; }
-
     public int CantidadProducto { get; set; }
 
     public string Estado { get; set; } = null!;
