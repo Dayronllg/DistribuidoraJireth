@@ -1,34 +1,88 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
+import Tooltip from "@mui/material/Tooltip";
+import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
-import Tooltip from "@mui/material/Tooltip";
-import AddIcon from "@mui/icons-material/Add";
 import Button from "@mui/material/Button";
+
 import {
-  DataGrid,
-  GridActionsCellItem,
-  GridRowEditStopReasons,
   GridRowModes,
   Toolbar,
+  GridRowEditStopReasons,
+  GridActionsCellItem,
+  DataGrid,
 } from "@mui/x-data-grid";
 import type {
+  GridRowsProp,
+  GridRowModesModel,
   GridColDef,
   GridEventListener,
   GridRowId,
-  GridRowModesModel,
   GridRowModel,
-  GridRowsProp,
   GridSlotProps,
 } from "@mui/x-data-grid";
-import { randomId } from "@mui/x-data-grid-generator";
 
-import type { FilaCompra } from "../pages/Compras";
-type Props = {
-  nuevaFila: FilaCompra | null;
+import {
+  randomCreatedDate,
+  randomTraderName,
+  randomId,
+  randomArrayItem,
+} from "@mui/x-data-grid-generator";
+
+const roles = ["Market", "Finance", "Development"];
+const randomRole = () => {
+  return randomArrayItem(roles);
 };
+
+const initialRows: GridRowsProp = [
+  {
+    id: randomId(),
+    name: randomTraderName(),
+    age: 25,
+    joinDate: randomCreatedDate(),
+    role: randomRole(),
+  },
+  {
+    id: randomId(),
+    name: randomTraderName(),
+    age: 36,
+    joinDate: randomCreatedDate(),
+    role: randomRole(),
+  },
+  {
+    id: randomId(),
+    name: randomTraderName(),
+    age: 19,
+    joinDate: randomCreatedDate(),
+    role: randomRole(),
+  },
+  {
+    id: randomId(),
+    name: randomTraderName(),
+    age: 28,
+    joinDate: randomCreatedDate(),
+    role: randomRole(),
+  },
+  {
+    id: randomId(),
+    name: randomTraderName(),
+    age: 23,
+    joinDate: randomCreatedDate(),
+    role: randomRole(),
+  },
+];
+
+declare module "@mui/x-data-grid" {
+  interface ToolbarPropsOverrides {
+    setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
+    setRowModesModel: (
+      newModel: (oldModel: GridRowModesModel) => GridRowModesModel
+    ) => void;
+  }
+}
 
 // Toolbar de Agregar
 function EditToolbar(props: GridSlotProps["toolbar"]) {
@@ -67,35 +121,18 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
             "&:hover": { backgroundColor: "#0056b3" },
           }}
         >
-          Finalizar Registro de Compra
+          Agregar
         </Button>
       </Tooltip>
     </Toolbar>
   );
 }
 
-export default function TablaCompras({ nuevaFila }: Props) {
-  const [rows, setRows] = React.useState<GridRowsProp>([]);
+export default function TablaClientesJuridicos() {
+  const [rows, setRows] = React.useState(initialRows);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
-
-  // Agrega nueva fila cuando lleguen desde props
-  React.useEffect(() => {
-    if (nuevaFila) {
-      const filaConId = {
-        // Este random ID se genera random para la tabla ya que si no ponia eso al darle click al boton Agregar daba conflicto con el DOM porque la tabla esperaba un ID
-        // ya cuando vos lo conectes a la API con el ID autonumerico me imagino que no dara conflicto y no se necesitará ese randomID
-        id: randomId(),
-        cantidad: nuevaFila.cantidad,
-        idProducto: nuevaFila.idProducto,
-        idPresentacion: nuevaFila.idPresentacion,
-        nombreProducto: "", // Texto Vacio
-        nombrePresentacion: "", // Texto Vacio
-      };
-      setRows((prev) => [...prev, filaConId]);
-    }
-  }, [nuevaFila]);
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -106,90 +143,109 @@ export default function TablaCompras({ nuevaFila }: Props) {
     }
   };
 
-  const handleEditClick = (id: GridRowId) => () => {
+  const MantenerClickEditar = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
-  const handleSaveClick = (id: GridRowId) => () => {
+  const MantenerClickGuardar = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-  const handleDeleteClick = (id: GridRowId) => () => {
-    setRows((prev) => prev.filter((row) => row.id !== id));
+  const MantenerClickBorrar = (id: GridRowId) => () => {
+    setRows(rows.filter((row) => row.id !== id));
   };
 
-  const handleCancelClick = (id: GridRowId) => () => {
+  const MantenerClickCancelar = (id: GridRowId) => () => {
     setRowModesModel({
       ...rowModesModel,
       [id]: { mode: GridRowModes.View, ignoreModifications: true },
     });
 
     const editedRow = rows.find((row) => row.id === id);
-    if (editedRow?.isNew) {
-      setRows((prev) => prev.filter((row) => row.id !== id));
+    if (editedRow!.isNew) {
+      setRows(rows.filter((row) => row.id !== id));
     }
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {
     const updatedRow = { ...newRow, isNew: false };
-    setRows((prev) =>
-      prev.map((row) => (row.id === newRow.id ? updatedRow : row))
-    );
+    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
     return updatedRow;
   };
 
-  const handleRowModesModelChange = (newModel: GridRowModesModel) => {
-    setRowModesModel(newModel);
+  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
+    setRowModesModel(newRowModesModel);
   };
 
+  // Leer rol
   const rol = localStorage.getItem("rol");
 
+  // Primero declarar las columnas comunes:
   const baseColumns: GridColDef[] = [
     {
-      field: "cantidad",
-      headerName: "Cantidad",
+      field: "idCliente",
+      headerName: "ID Cliente",
       headerAlign: "center",
       align: "center",
       type: "number",
-      flex: 0.5,
+      flex: 0.7,
+      minWidth: 50,
       editable: true,
     },
     {
-      field: "idProducto",
-      headerName: "ID Producto",
+      field: "direccion",
+      headerName: "Direccion",
       headerAlign: "center",
       align: "center",
-      type: "number",
-      flex: 0.8,
-      editable: true,
-    },
-    {
-      field: "nombreProducto",
-      headerName: "Nombre Producto",
-      headerAlign: "center",
-      align: "center",
+      type: "string",
       flex: 1,
+      minWidth: 150,
       editable: true,
     },
     {
-      field: "idPresentacion",
-      headerName: "ID Presentación",
+      field: "telefono",
+      headerName: "Telefono",
+      headerAlign: "center",
+      align: "center",
+      type: "string",
+      flex: 0.7,
+      minWidth: 100,
+      editable: true,
+    },
+    {
+      field: "estado",
+      headerName: "Estado",
+      headerAlign: "center",
+      align: "center",
+      type: "singleSelect",
+      valueOptions: ["Activo", "Inactivo"],
+      flex: 0.7,
+      minWidth: 100,
+      editable: true,
+    },
+    {
+      field: "ruc",
+      headerName: "RUC",
       headerAlign: "center",
       align: "center",
       type: "number",
-      flex: 0.8,
+      flex: 0.7,
+      minWidth: 50,
       editable: true,
     },
     {
-      field: "nombrePresentacion",
-      headerName: "Nombre Presentación",
+      field: "nombre",
+      headerName: "Nombre",
       headerAlign: "center",
       align: "center",
+      type: "string",
       flex: 1,
+      minWidth: 100,
       editable: true,
     },
   ];
 
+  // Después de forma condicional se renderiza o no la columna de actions:
   const columns: GridColDef[] =
     rol === "Administrador"
       ? [
@@ -197,36 +253,40 @@ export default function TablaCompras({ nuevaFila }: Props) {
           {
             field: "actions",
             headerName: "Acciones",
+            headerAlign: "center",
+            align: "center",
             type: "actions",
-            flex: 0.8,
+            flex: 1,
+            minWidth: 150,
+            cellClassName: "actions",
             getActions: ({ id }) => {
-              const isEditing = rowModesModel[id]?.mode === GridRowModes.Edit;
+              const isInEditMode =
+                rowModesModel[id]?.mode === GridRowModes.Edit;
 
-              if (isEditing) {
+              if (isInEditMode) {
                 return [
                   <GridActionsCellItem
                     icon={<SaveIcon />}
-                    label="Guardar"
-                    onClick={handleSaveClick(id)}
+                    label="Save"
+                    onClick={MantenerClickGuardar(id)}
                   />,
                   <GridActionsCellItem
                     icon={<CancelIcon />}
-                    label="Cancelar"
-                    onClick={handleCancelClick(id)}
+                    label="Cancel"
+                    onClick={MantenerClickCancelar(id)}
                   />,
                 ];
               }
-
               return [
                 <GridActionsCellItem
                   icon={<EditIcon />}
-                  label="Editar"
-                  onClick={handleEditClick(id)}
+                  label="Edit"
+                  onClick={MantenerClickEditar(id)}
                 />,
                 <GridActionsCellItem
                   icon={<DeleteIcon />}
-                  label="Eliminar"
-                  onClick={handleDeleteClick(id)}
+                  label="Delete"
+                  onClick={MantenerClickBorrar(id)}
                 />,
               ];
             },
@@ -237,14 +297,15 @@ export default function TablaCompras({ nuevaFila }: Props) {
   return (
     <Box
       sx={{
-        height: 600,
+        height: 700,
         width: "100%",
-        mt: 3,
-        "& .MuiDataGrid-columnHeaders": {
-          backgroundColor: "#007bff",
-          color: "#fff",
-          fontWeight: "bold",
+        "& .actions": {
+          color: "text.secondary",
         },
+        "& .textPrimary": {
+          color: "text.primary",
+        },
+        // ml: -22,
       }}
     >
       <DataGrid

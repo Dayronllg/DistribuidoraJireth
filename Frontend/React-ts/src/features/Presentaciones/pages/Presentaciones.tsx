@@ -1,6 +1,19 @@
 import TablaPresentaciones from "../components/TablaPresentaciones";
+import TablaFiltroProductos from "../components/TablaFiltroProductos";
+import ProductoInput from "../components/ProductoInput";
+import { useState } from "react";
+
+type FilaProductos = {
+  id: number;
+  nombre: string;
+  precio: number;
+  cantidad: number;
+  estado: string;
+};
 
 function Presentaciones() {
+  const [productoUnicoSeleccionado, setProductoUnicoSeleccionado] =
+    useState<FilaProductos | null>(null);
   return (
     <div
       style={{
@@ -13,7 +26,36 @@ function Presentaciones() {
       <h2 style={{ marginBottom: "1.5rem", textAlign: "center" }}>
         Presentaciones
       </h2>
-      <TablaPresentaciones />
+      <div
+        style={{
+          display: "flex",
+          gap: "2rem",
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ flex: 1, minWidth: "1000px" }}>
+          <TablaFiltroProductos
+            AgregarSeleccionado={(producto) =>
+              setProductoUnicoSeleccionado(producto)
+            }
+            onSelectSingle={(producto) =>
+              setProductoUnicoSeleccionado(producto)
+            }
+          />
+        </div>
+      </div>
+      {/* Render para mostrar el producto seleccionado */}
+      <div style={{ marginTop: "30px", marginBottom: "30px" }}>
+        {productoUnicoSeleccionado && (
+          <ProductoInput producto={productoUnicoSeleccionado} />
+        )}
+      </div>
+      <div>
+        <h2 style={{ marginBottom: "1.5rem", textAlign: "center" }}>
+          Agregar Presentacion
+        </h2>
+        <TablaPresentaciones />
+      </div>
     </div>
   );
 }
