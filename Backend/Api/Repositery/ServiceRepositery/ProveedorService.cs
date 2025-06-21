@@ -30,7 +30,7 @@ public class ProveedorService : Service<Proveedore>, IProvedorService
         if(ProveedorExiste.Failed)
            return Result<ProveedorDto>.Fail(ProveedorExiste.Error,Status.Conflict);
 
-           var ProveedorAct= await base.UpdateEntity(_mapper.Map<Proveedore>(ActProveedor));
+           var ProveedorAct= await base.UpdateEntity(_mapper.Map(ActProveedor,ProveedorExiste.Value));
 
         if (ProveedorAct.Failed)
             return Result<ProveedorDto>.Fail(ProveedorAct.Error);
