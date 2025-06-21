@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Login from "./features/Login/pages/Login";
 import GestionarVentas from "./features/GestionarVentas/pages/GestionarVentas";
 import NoFoundPage from "./features/NoFoundPage";
-import Sidebar from "./features/Inicio/components/Sidebar";
+import Inicio from "./features/Inicio/pages/Inicio";
 import Pedidos from "./features/Pedidos/pages/Pedidos";
 import Compras from "./features/Compras/pages/Compras";
 import RegistroVentas from "./features/RegistroVentas/pages/RegistroVentas";
@@ -14,6 +14,9 @@ import Presentaciones from "./features/Presentaciones/pages/Presentaciones";
 import Usuarios from "./features/Usuarios/pages/Usuarios";
 import Trabajadores from "./features/Trabajadores/pages/Trabajadores";
 import Reportes from "./features/Reportes/pages/Reportes";
+import ClientesNaturales from "./features/ClientesNaturales/pages/ClientesNaturales";
+import ClientesJuridicos from "./features/ClientesJuridicos/pages/ClientesJuridicos";
+import Proveedores from "./features/Proveedores/pages/Proveedores";
 //import ProtectedRoute from "./features/Login/ProtectedRoute";
 
 // {<ProtectedRoute allowedRoles={["admin"]}>
@@ -26,7 +29,7 @@ export default function App() {
       <Route path="/" element={<Login />}></Route>
 
       {/* Ruta para admin */}
-      <Route path="/Administrador" element={<Sidebar />}>
+      <Route path="/Administrador" element={<Inicio />}>
         {/* <Route index element={<AdminVentas />} /> Página por defecto */}
         <Route path="gestionarVentas" element={<GestionarVentas />} />
         <Route path="registroVentas" element={<RegistroVentas />} />
@@ -40,11 +43,14 @@ export default function App() {
         <Route path="usuarios" element={<Usuarios />} />
         <Route path="trabajadores" element={<Trabajadores />} />
         <Route path="reportes" element={<Reportes />} />
+        <Route path="clientesNaturales" element={<ClientesNaturales />} />
+        <Route path="clientesJuridicos" element={<ClientesJuridicos />} />
+        <Route path="proveedores" element={<Proveedores />} />
         <Route path="*" element={<NoFoundPage />} />
       </Route>
 
       {/* Ruta para usuario */}
-      <Route path="/Usuario" element={<Sidebar />}>
+      <Route path="/Usuario" element={<Inicio />}>
         {/* <Route index element={<AdminVentas />} /> Página por defecto */}
         <Route path="gestionarVentas" element={<GestionarVentas />} />
         <Route path="registroVentas" element={<RegistroVentas />} />
@@ -58,6 +64,9 @@ export default function App() {
         <Route path="usuarios" element={<Usuarios />} />
         <Route path="trabajadores" element={<Trabajadores />} />
         <Route path="reportes" element={<Reportes />} />
+        <Route path="clientesNaturales" element={<ClientesNaturales />} />
+        <Route path="clientesJuridicos" element={<ClientesJuridicos />} />
+        <Route path="proveedores" element={<Proveedores />} />
         <Route path="*" element={<NoFoundPage />} />
       </Route>
 

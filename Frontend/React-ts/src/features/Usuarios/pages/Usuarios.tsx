@@ -15,7 +15,7 @@ type FilaTrabajadores = {
 
 type FilaRoles = {
   id: number;
-  nombre: string;
+  rol: string;
   estado: string;
 };
 

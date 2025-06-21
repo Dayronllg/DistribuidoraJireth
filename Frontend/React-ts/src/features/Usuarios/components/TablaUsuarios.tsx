@@ -6,6 +6,8 @@ type Row = {
   primerApellido: string;
   telefono: string;
   estado: string;
+  nombreUsuario?: string;
+  contraseña?: string;
 };
 
 type Props = {
@@ -37,7 +39,7 @@ export default function TablaVentas({ data, Eliminar, Editar }: Props) {
     const { name, value } = e.target;
     setEditForm((prev) => ({
       ...prev,
-      [name]: name === "precio" || name === "cantidad" ? Number(value) : value, // Convierte a número si el campo es precio o cantidad.
+      [name]: value,
     }));
   };
 
@@ -45,10 +47,12 @@ export default function TablaVentas({ data, Eliminar, Editar }: Props) {
   const guardarEditar = () => {
     if (
       editarID !== null &&
-      editForm.primerNombre !== undefined &&
-      editForm.primerApellido !== undefined &&
-      editForm.telefono !== undefined &&
-      editForm.estado !== undefined
+      editForm.primerNombre &&
+      editForm.primerApellido &&
+      editForm.telefono &&
+      editForm.estado &&
+      editForm.nombreUsuario &&
+      editForm.contraseña
     ) {
       Editar(editForm as Row);
       setEditarID(null);
@@ -74,6 +78,8 @@ export default function TablaVentas({ data, Eliminar, Editar }: Props) {
             <th style={thStyle}>Primer Apellido</th>
             <th style={thStyle}>Telefono</th>
             <th style={thStyle}>Estado</th>
+            <th style={thStyle}>Nombre Usuario</th>
+            <th style={thStyle}>Contraseña</th>
             <th style={thStyle}>Acciones</th>
           </tr>
         </thead>
@@ -103,7 +109,7 @@ export default function TablaVentas({ data, Eliminar, Editar }: Props) {
                   </td>
                   <td style={tdStyle}>
                     <input
-                      type="string"
+                      type="text"
                       name="telefono"
                       value={editForm.telefono ?? ""}
                       onChange={manejarCambio}
@@ -115,6 +121,24 @@ export default function TablaVentas({ data, Eliminar, Editar }: Props) {
                       type="text"
                       name="estado"
                       value={editForm.estado ?? ""}
+                      onChange={manejarCambio}
+                      style={inputStyle}
+                    />
+                  </td>
+                  <td style={tdStyle}>
+                    <input
+                      type="text"
+                      name="nombreUsuario"
+                      value={editForm.nombreUsuario ?? ""}
+                      onChange={manejarCambio}
+                      style={inputStyle}
+                    />
+                  </td>
+                  <td style={tdStyle}>
+                    <input
+                      type="text"
+                      name="contraseña"
+                      value={editForm.contraseña ?? ""}
                       onChange={manejarCambio}
                       style={inputStyle}
                     />
@@ -140,6 +164,13 @@ export default function TablaVentas({ data, Eliminar, Editar }: Props) {
                   <td style={tdStyle}>{row.primerApellido}</td>
                   <td style={tdStyle}>{row.telefono}</td>
                   <td style={tdStyle}>{row.estado}</td>
+
+                  {/* Si row.nombreUsuario no es null ni undefined, se muestra su valor.
+                      Si es null o undefined, se muestra "-" como texto por defecto */}
+                  <td style={tdStyle}>{row.nombreUsuario ?? "-"}</td>
+
+                  {/* Si row.contraseña tiene algún valor (no vacío, ni undefined, ni null), se muestra •••••• */}
+                  <td style={tdStyle}>{row.contraseña ? "••••••" : "-"}</td>
                   <td style={tdStyle}>
                     <button
                       onClick={() => empezarEditar(row)}

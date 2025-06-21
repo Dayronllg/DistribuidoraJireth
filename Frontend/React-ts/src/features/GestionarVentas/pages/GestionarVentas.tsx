@@ -16,7 +16,7 @@ type FilaProductos = {
 
 type FilaClientes = {
   id: number;
-  nombre: string;
+  nombreCliente: string;
   telefono: string;
 };
 

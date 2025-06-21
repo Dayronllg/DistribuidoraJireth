@@ -1,11 +1,16 @@
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 
-export default function BotonAgregar() {
+type Props = {
+  onClick: () => void;
+};
+
+export default function BotonAgregar({ onClick }: Props) {
   return (
     <Button
       variant="contained"
       startIcon={<AddIcon />}
+      onClick={onClick}
       sx={{
         marginTop: "15px",
         color: "white",
