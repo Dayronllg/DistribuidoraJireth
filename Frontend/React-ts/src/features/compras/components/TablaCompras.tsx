@@ -4,11 +4,15 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
+import Tooltip from "@mui/material/Tooltip";
+import AddIcon from "@mui/icons-material/Add";
+import Button from "@mui/material/Button";
 import {
   DataGrid,
   GridActionsCellItem,
   GridRowEditStopReasons,
   GridRowModes,
+  Toolbar,
 } from "@mui/x-data-grid";
 import type {
   GridColDef,
@@ -17,29 +21,81 @@ import type {
   GridRowModesModel,
   GridRowModel,
   GridRowsProp,
+  GridSlotProps,
 } from "@mui/x-data-grid";
 import { randomId } from "@mui/x-data-grid-generator";
 
+import type { FilaCompra } from "../pages/Compras";
 type Props = {
-  nuevasFilas: any[]; // Puedes reemplazar 'any' por un tipo más específico si lo deseas
+  nuevaFila: FilaCompra | null;
 };
 
-export default function TablaCompras({ nuevasFilas }: Props) {
+// Toolbar de Agregar
+function EditToolbar(props: GridSlotProps["toolbar"]) {
+  const { setRows, setRowModesModel } = props;
+
+  // Obtener rol de localStorage
+  const rol = localStorage.getItem("rol");
+
+  if (rol !== "Administrador") {
+    return null; // Así no se renderiza nada de la Toolbar
+  }
+
+  const handleClick = () => {
+    const id = randomId();
+    setRows((oldRows) => [
+      ...oldRows,
+      { id, name: "", age: "", role: "", isNew: true },
+    ]);
+    setRowModesModel((oldModel) => ({
+      ...oldModel,
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
+    }));
+  };
+
+  return (
+    <Toolbar>
+      <Tooltip title="Agregar">
+        <Button
+          onClick={handleClick}
+          startIcon={<AddIcon />}
+          variant="contained"
+          sx={{
+            borderRadius: "10px",
+            color: "white",
+            backgroundColor: "#007bff",
+            "&:hover": { backgroundColor: "#0056b3" },
+          }}
+        >
+          Finalizar Registro de Compra
+        </Button>
+      </Tooltip>
+    </Toolbar>
+  );
+}
+
+export default function TablaCompras({ nuevaFila }: Props) {
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
 
-  // Agrega nuevas filas cuando lleguen desde props
+  // Agrega nueva fila cuando lleguen desde props
   React.useEffect(() => {
-    if (nuevasFilas.length > 0) {
-      const nuevasConId = nuevasFilas.map((fila) => ({
+    if (nuevaFila) {
+      const filaConId = {
+        // Este random ID se genera random para la tabla ya que si no ponia eso al darle click al boton Agregar daba conflicto con el DOM porque la tabla esperaba un ID
+        // ya cuando vos lo conectes a la API con el ID autonumerico me imagino que no dara conflicto y no se necesitará ese randomID
         id: randomId(),
-        ...fila,
-      }));
-      setRows((prev) => [...prev, ...nuevasConId]);
+        cantidad: nuevaFila.cantidad,
+        idProducto: nuevaFila.idProducto,
+        idPresentacion: nuevaFila.idPresentacion,
+        nombreProducto: "", // Texto Vacio
+        nombrePresentacion: "", // Texto Vacio
+      };
+      setRows((prev) => [...prev, filaConId]);
     }
-  }, [nuevasFilas]);
+  }, [nuevaFila]);
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -199,6 +255,20 @@ export default function TablaCompras({ nuevasFilas }: Props) {
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
+        slots={{ toolbar: EditToolbar }}
+        slotProps={{ toolbar: { setRows, setRowModesModel } }}
+        showToolbar
+        sx={{
+          "& .MuiDataGrid-columnHeaders": {
+            backgroundColor: "#007bff",
+            color: "#ffffff",
+            fontWeight: "bold",
+            fontSize: "1rem",
+          },
+          "& .MuiDataGrid-columnHeaders .MuiDataGrid-columnTitle": {
+            padding: "0.5rem",
+          },
+        }}
       />
     </Box>
   );

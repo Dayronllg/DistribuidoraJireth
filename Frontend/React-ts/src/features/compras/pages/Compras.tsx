@@ -24,24 +24,24 @@ export type FilaDetallePedido = {
 };
 
 export type FilaCompra = {
-  id: number;
   cantidad: number;
   idProducto: number;
   idPresentacion: number;
 };
 
 function Compras() {
+  // Seleccionar el Pedido
   const [pedidoSeleccionado, setPedidoSeleccionado] =
     useState<FilaPedidos | null>(null);
-  const [detalleSeleccionado, setDetalleSeleccionado] =
-    useState<FilaDetallePedido | null>(null);
-  const [cantidad, setCantidad] = useState<number>(0);
-  const [compras, setCompras] = useState<FilaCompra[]>([]);
 
   const seleccionarPedido = (pedido: FilaPedidos) => {
     setPedidoSeleccionado(pedido);
     setDetalleSeleccionado(null);
   };
+
+  // Seleccionar el detallePedido
+  const [detalleSeleccionado, setDetalleSeleccionado] =
+    useState<FilaDetallePedido | null>(null);
 
   const seleccionarDetalle = (rows: FilaDetallePedido[]) => {
     if (rows.length > 0) {
@@ -51,17 +51,22 @@ function Compras() {
     }
   };
 
+  // Pasar datos (IdProducto, IdPresentacion y cantidad) de los input a la tablaCompras
+  const [nuevaFila, setNuevaFila] = useState<FilaCompra | null>(null);
+  const [cantidad, setCantidad] = useState<number>(0);
+
   const handleAgregar = () => {
     if (!detalleSeleccionado || cantidad <= 0) return;
 
-    const nuevaFila: FilaCompra = {
-      id: Date.now(),
+    // Los datos no se pasan si la cantidad está en 0
+    const fila = {
       cantidad,
       idProducto: detalleSeleccionado.idProducto,
       idPresentacion: detalleSeleccionado.idPresentacion,
     };
 
-    setCompras((prev) => [...prev, nuevaFila]);
+    setNuevaFila(fila); // Se enviará a la tabla
+    setCantidad(0); // Limpia cantidad después de agregar
   };
 
   return (
@@ -140,6 +145,7 @@ function Compras() {
           onCantidadChange={setCantidad}
         />
       </div>
+      <TablaCompras nuevaFila={nuevaFila} />
     </div>
   );
 }
