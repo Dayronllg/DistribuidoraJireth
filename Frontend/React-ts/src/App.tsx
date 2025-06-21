@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Login from "./features/Login/pages/Login";
 import GestionarVentas from "./features/GestionarVentas/pages/GestionarVentas";
 import NoFoundPage from "./features/NoFoundPage";
-import Sidebar from "./features/Inicio/components/Sidebar";
+import Inicio from "./features/Inicio/pages/Inicio";
 import Pedidos from "./features/Pedidos/pages/Pedidos";
 import Compras from "./features/Compras/pages/Compras";
 import RegistroVentas from "./features/RegistroVentas/pages/RegistroVentas";
@@ -29,7 +29,7 @@ export default function App() {
       <Route path="/" element={<Login />}></Route>
 
       {/* Ruta para admin */}
-      <Route path="/Administrador" element={<Sidebar />}>
+      <Route path="/Administrador" element={<Inicio />}>
         {/* <Route index element={<AdminVentas />} /> Página por defecto */}
         <Route path="gestionarVentas" element={<GestionarVentas />} />
         <Route path="registroVentas" element={<RegistroVentas />} />
@@ -50,7 +50,7 @@ export default function App() {
       </Route>
 
       {/* Ruta para usuario */}
-      <Route path="/Usuario" element={<Sidebar />}>
+      <Route path="/Usuario" element={<Inicio />}>
         {/* <Route index element={<AdminVentas />} /> Página por defecto */}
         <Route path="gestionarVentas" element={<GestionarVentas />} />
         <Route path="registroVentas" element={<RegistroVentas />} />
