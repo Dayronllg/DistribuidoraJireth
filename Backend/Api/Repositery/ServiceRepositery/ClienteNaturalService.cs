@@ -65,7 +65,7 @@ public class ClienteNaturalService : Service<Cliente>, IClienteNatural
 
     public async Task<PaginacionResultado<ClienteNaturalDto>> ObtenerClientesNaturales(int pagina, int tamanio)
     {
-         var query = _context.Clientes.Include(x=>x.ClienteNatural).AsQueryable();
+         var query = _context.Clientes.Include(x=>x.ClienteNatural).Where(x=>x.ClienteNatural!=null).AsQueryable();
 
         var PagClientes = await base.PaginarAsync(query, pagina, tamanio, x => x.Estado == "Activo");
 
