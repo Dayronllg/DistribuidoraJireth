@@ -7,6 +7,8 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import Button from "@mui/material/Button";
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
+
 
 import {
   GridRowModes,
@@ -15,6 +17,7 @@ import {
   GridActionsCellItem,
   DataGrid,
 } from "@mui/x-data-grid";
+
 import type {
   GridRowsProp,
   GridRowModesModel,
@@ -26,54 +29,79 @@ import type {
 } from "@mui/x-data-grid";
 
 import {
-  randomCreatedDate,
-  randomTraderName,
-  randomId,
-  randomArrayItem,
+  randomId
 } from "@mui/x-data-grid-generator";
+import axios from "axios";
 
-const roles = ["Market", "Finance", "Development"];
-const randomRole = () => {
-  return randomArrayItem(roles);
+
+export interface Cliente{
+  idCliente: number,
+  direccion: string,
+  telefono: string,
+  estado: "Activo" | "Inativo",
+  clienteNatural:ClienteNatural
+}
+
+export interface ClienteNatural{
+    primerNombre:string,
+    segundoNombre: string,
+    primerApellido: string,
+    segundoApellido: string
+}
+
+
+function mapRowToClienteNatural(row: any): Cliente {
+  return {
+    idCliente: row.idCliente,
+    direccion: row.direccion,
+    telefono: row.telefono,
+    estado: row.estado as "Activo" | "Inativo",
+    clienteNatural: {
+      primerNombre: row.primerNombre,
+      segundoNombre: row.segundoNombre,
+      primerApellido: row.primerApellido,
+      segundoApellido: row.segundoApellido
+    }
+  };
+}
+
+
+const API_BASE='http://localhost:5187/api'
+
+export const crearClienteNatural = async (nuevo: Cliente) => {
+  try {
+    const response = await axios.post(`${API_BASE}/ClienteNatural/CrearClienteNatural`, nuevo);
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear ClienteNatural", error);
+    throw error;
+  }
 };
 
-const initialRows: GridRowsProp = [
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 25,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 36,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 19,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 28,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 23,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-];
+export async function actualizarClienteNatural(ClienteNatural: Cliente): Promise<Cliente> {
+  try {
+    const response = await axios.put<Cliente>(
+      `${API_BASE}/ClienteNatural/ActualizarClienteNatural`,
+      ClienteNatural
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar Cliente Natural:", error);
+    throw error; // Puedes lanzar un error más específico si querés
+  }
+}
+
+const eliminarClienteNatural = async (id: number) => {
+  try {
+    const response = await axios.put(`${API_BASE}/ClienteNatural/BajaClienteNatural`,null,{params:{id:id}} 
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al eliminar (inhabilitar) el ClienteNatural:', error);
+    throw error;
+  }
+};
+
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -129,10 +157,39 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
 }
 
 export default function TablaClientesNaturales() {
-  const [rows, setRows] = React.useState(initialRows);
+  const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+  
+ React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<Cliente>>(
+        "http://localhost:5187/api/ClienteNatural/ObtenerClienteNaturales",
+        {
+          params: {
+            pagina: 1,
+            tamanioPagina: 100,
+          },
+        }
+      )
+      .then((response) => {
+        setRows(
+          response.data.datos.map((t) => ({
+            ...t,
+            id: t.idCliente,
+            primerNombre:t.clienteNatural.primerNombre,
+            segundoNombre:t.clienteNatural.segundoNombre,
+            primerApellido:t.clienteNatural.primerApellido,
+            segundoApellido:t.clienteNatural.segundoApellido
+          }))
+        );
+      })
+      .catch((error) => {
+        console.error("Error al obtener ClienteNatural:", error);
+      });
+  }, []);
+
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -151,9 +208,12 @@ export default function TablaClientesNaturales() {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-  const MantenerClickBorrar = (id: GridRowId) => () => {
-    setRows(rows.filter((row) => row.id !== id));
-  };
+    const MantenerClickBorrar = (id: GridRowId) => async () => {
+       
+       await eliminarClienteNatural(Number(id));
+       setRows(rows.filter((row) => row.id !== id));
+     };
+   
 
   const MantenerClickCancelar = (id: GridRowId) => () => {
     setRowModesModel({
@@ -167,11 +227,52 @@ export default function TablaClientesNaturales() {
     }
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    return updatedRow;
+ const processRowUpdate = async (newRow: GridRowModel) => {
+   //let updatedRow = { ...newRow, isNew: false };
+ let updatedRow: { id: number; isNew: boolean, primerNombre:string ,segundoNombre:string,primerApellido:string,segundoApellido:string} =
+  { id: newRow.id, isNew: false ,primerNombre:newRow.primerNombre,segundoNombre:newRow.segundoNombre,primerApellido:newRow.primerApellido,
+    segundoApellido:newRow.segundoApellido
   };
+ 
+   if (newRow.isNew) {
+     const clienteNaturalCreado = await crearClienteNatural(mapRowToClienteNatural(newRow));
+ 
+     updatedRow = {
+       ...newRow,
+       ...clienteNaturalCreado,
+       id: clienteNaturalCreado.idCliente, 
+       primerNombre:clienteNaturalCreado.primerNombre,
+       segundoNombre:clienteNaturalCreado.segundoNombre,
+       primerApellido:clienteNaturalCreado.primerApellido,
+       segundoApellido:clienteNaturalCreado.segundoApellido,
+       isNew: false,
+     };
+   } else {
+     const clienteNaturalActualizado = await actualizarClienteNatural(mapRowToClienteNatural(newRow));
+     updatedRow = {
+       ...clienteNaturalActualizado,
+       id: clienteNaturalActualizado.idCliente,
+       primerNombre:clienteNaturalActualizado.clienteNatural.primerNombre,
+       segundoNombre:clienteNaturalActualizado.clienteNatural.segundoNombre,
+       primerApellido:clienteNaturalActualizado.clienteNatural.primerApellido,
+       segundoApellido:clienteNaturalActualizado.clienteNatural.segundoApellido, 
+       isNew: false
+     };
+   }
+ 
+   // Actualizás las filas del grid
+   setRows((prevRows) =>
+     prevRows.map((row) =>
+       row.id === newRow.id ? updatedRow : row
+     )
+   );
+   setRowModesModel((prevModel) => ({
+     ...prevModel,
+     [newRow.id]: { mode: GridRowModes.View }, // usar el id final
+   }));
+ 
+   return updatedRow;
+ };
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
@@ -223,7 +324,7 @@ export default function TablaClientesNaturales() {
       minWidth: 100,
       editable: true,
     },
-    {
+    /* {
       field: "idClienteNatural",
       headerName: "ID Cliente Natural",
       headerAlign: "center",
@@ -232,7 +333,7 @@ export default function TablaClientesNaturales() {
       flex: 0.7,
       minWidth: 50,
       editable: true,
-    },
+    },*/
     {
       field: "primerNombre",
       headerName: "Primer Nombre",
@@ -346,6 +447,7 @@ export default function TablaClientesNaturales() {
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
+        onProcessRowUpdateError={()=> "errror"}
         slots={{ toolbar: EditToolbar }}
         slotProps={{ toolbar: { setRows, setRowModesModel } }}
         showToolbar

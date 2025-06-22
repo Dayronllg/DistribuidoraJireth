@@ -28,10 +28,11 @@ function Login() {
         formData
       );
 
-      const { token, rol } = response.data;
+      const { token, rol,IdUsuario } = response.data;
       console.log("Token recibido: ", token, " Rol: ", rol);
-
+       
       // Guarda el token y el rol en localStorage
+      localStorage.setItem("IdUsuario",IdUsuario);
       localStorage.setItem("token", token);
       localStorage.setItem("rol", rol);
 

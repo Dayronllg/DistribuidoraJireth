@@ -15,7 +15,7 @@ type FilaProductos = {
 
 type FilaProveedores = {
   ruc: number;
-  nombre: string;
+  nombreProveedor: string;
   telefono: string;
 };
 

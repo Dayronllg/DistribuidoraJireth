@@ -26,54 +26,79 @@ import type {
 } from "@mui/x-data-grid";
 
 import {
-  randomCreatedDate,
-  randomTraderName,
   randomId,
-  randomArrayItem,
 } from "@mui/x-data-grid-generator";
+import axios from "axios";
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
 
-const roles = ["Market", "Finance", "Development"];
-const randomRole = () => {
-  return randomArrayItem(roles);
+
+export interface ClienteJ{
+  idCliente: number,
+  direccion: string,
+  telefono: string,
+  estado: "Activo" | "Inactivo",
+  clienteJuridico:ClienteJuridico,
+  
 };
 
-const initialRows: GridRowsProp = [
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 25,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 36,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 19,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 28,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 23,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-];
+export interface ClienteJuridico{
+    ruc:string,
+    nombre:string
+};
+
+
+ export function mapRowToClienteJuridico(row: GridRowModel): ClienteJ {
+  return {
+    idCliente: row.idCliente,
+    direccion: row.direccion,
+    telefono: row.telefono,
+    estado: row.estado ,
+    clienteJuridico: {
+    ruc:row.ruc,
+    nombre:row.nombre
+    }
+  };
+ }
+  
+
+
+
+const API_BASE='http://localhost:5187/api'
+
+export const crearClienteJuridico = async (nuevo: ClienteJ) => {
+  try {
+    const response = await axios.post(`${API_BASE}/ClienteJuridico/CrearClienteJuridico`, nuevo);
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear ClienteJuridico", error);
+    throw error;
+  }
+};
+
+export async function actualizarClienteJuridico(ClienteJuridico: ClienteJ): Promise<ClienteJ> {
+  try {
+    const response = await axios.put<ClienteJ>(
+      `${API_BASE}/ClienteJuridico/ActualizarClienteJuridico`,
+      ClienteJuridico
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar Cliente Natural:", error);
+    throw error; 
+  }
+};
+
+const eliminarClienteJuridico = async (id: string) => {
+  try {
+    const response = await axios.put(`${API_BASE}/ClienteJuridico/BajaClienteJuridico`,null,{params:{id:id}} 
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al eliminar (inhabilitar) el ClienteJuridico:', error);
+    throw error;
+  }
+};
+
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -129,10 +154,36 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
 }
 
 export default function TablaClientesJuridicos() {
-  const [rows, setRows] = React.useState(initialRows);
+  const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+
+ React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<ClienteJ>>(
+        "http://localhost:5187/api/ClienteJuridico/ObtenerClienteJuridicoes",
+        {
+          params: {
+            pagina: 1,
+            tamanioPagina: 100,
+          },
+        }
+      )
+      .then((response) => {
+        setRows(
+          response.data.datos.map((t) => ({
+            ...t,
+            id: t.idCliente,
+            ruc:t.clienteJuridico.ruc,
+            nombre:t.clienteJuridico.nombre
+          }))
+        );
+      })
+      .catch((error) => {
+        console.error("Error al obtener ClienteJuridico:", error);
+      });
+  }, []);
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -151,9 +202,14 @@ export default function TablaClientesJuridicos() {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-  const MantenerClickBorrar = (id: GridRowId) => () => {
-    setRows(rows.filter((row) => row.id !== id));
-  };
+  const MantenerClickBorrar = (id: GridRowId) => async () => {
+      //let f = rows.filter((row)=>row.id === id);
+       let f = rows.find((row)=> row.id===id);
+       let Ruc = f?.ruc;
+      await eliminarClienteJuridico(String(Ruc));
+      setRows(rows.filter((row) => row.id !== id));
+    };
+  
 
   const MantenerClickCancelar = (id: GridRowId) => () => {
     setRowModesModel({
@@ -167,11 +223,44 @@ export default function TablaClientesJuridicos() {
     }
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    return updatedRow;
-  };
+ const processRowUpdate = async (newRow: GridRowModel) => {
+  //let updatedRow = { ...newRow, isNew: false };
+let updatedRow: { id: number; isNew: boolean, ruc:string, nombre:string } = { id: newRow.id, isNew: false,ruc:newRow.ruc,nombre:newRow.nombre };
+
+  if (newRow.isNew) {
+    const ClienteJuridicoCreado = await crearClienteJuridico(mapRowToClienteJuridico(newRow));
+
+    updatedRow = {
+      ...newRow,
+      ...ClienteJuridicoCreado,
+      id: ClienteJuridicoCreado.idCliente,
+      
+      isNew: false,
+    };
+  } else {
+    const ClienteJuridicoActualizado = await actualizarClienteJuridico(mapRowToClienteJuridico(newRow));
+    updatedRow = {
+      ...ClienteJuridicoActualizado,
+      id: ClienteJuridicoActualizado.idCliente, 
+      isNew: false,
+      ruc:ClienteJuridicoActualizado.clienteJuridico.ruc,
+      nombre:ClienteJuridicoActualizado.clienteJuridico.nombre
+    };
+  }
+
+  // Actualizás las filas del grid
+  setRows((prevRows) =>
+    prevRows.map((row) =>
+      row.id === newRow.id ? updatedRow : row
+    )
+  );
+  setRowModesModel((prevModel) => ({
+    ...prevModel,
+    [newRow.id]: { mode: GridRowModes.View }, // usar el id final
+  }));
+
+  return updatedRow;
+};
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
@@ -228,7 +317,7 @@ export default function TablaClientesJuridicos() {
       headerName: "RUC",
       headerAlign: "center",
       align: "center",
-      type: "number",
+      type: "string",
       flex: 0.7,
       minWidth: 50,
       editable: true,

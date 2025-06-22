@@ -7,6 +7,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import Button from "@mui/material/Button";
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
 
 import {
   GridRowModes,
@@ -26,54 +27,65 @@ import type {
 } from "@mui/x-data-grid";
 
 import {
-  randomCreatedDate,
-  randomTraderName,
-  randomId,
-  randomArrayItem,
+  randomId
 } from "@mui/x-data-grid-generator";
+import axios from "axios";
 
-const roles = ["Market", "Finance", "Development"];
-const randomRole = () => {
-  return randomArrayItem(roles);
+export interface Proveedor {
+  ruc: string,
+  nombre: string,
+  telefono: string,
+  direccion: string,
+  estado: "Activo" | "Inactivo"
+}
+
+export function mapRowToProveedor(row: GridRowModel): Proveedor {
+  return {
+    ruc: row.ruc,
+  nombre: row.nombre,
+  telefono: row.telefono,
+  direccion: row.direccion,
+  estado: row.estado // si tienes este campo
+  };
+}
+
+const API_BASE='http://localhost:5187/api'
+
+export const crearProveedor = async (nuevo: Proveedor) => {
+  try {
+    const response = await axios.post(`${API_BASE}/Proveedor/CrearProveedor`, nuevo);
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear Proveedor", error);
+    throw error;
+  }
 };
 
-const initialRows: GridRowsProp = [
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 25,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 36,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 19,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 28,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 23,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-];
+
+export async function actualizarProveedor(Proveedor: Proveedor): Promise<Proveedor> {
+  try {
+    const response = await axios.put<Proveedor>(
+      `${API_BASE}/Proveedor/ActualizarProveedor`,
+      Proveedor
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar Proveedor:", error);
+    throw error; // Puedes lanzar un error más específico si querés
+  }
+}
+
+const eliminarProveedor = async (id: string) => {
+  try {
+    const response = await axios.put(`${API_BASE}/Proveedor/BajaProveedor`,null,{params:{ruc:id}} 
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al eliminar (inhabilitar) el Proveedor:', error);
+    throw error;
+  }
+};
+
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -129,10 +141,36 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
 }
 
 export default function TablaProveedores() {
-  const [rows, setRows] = React.useState(initialRows);
+  const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+
+
+  React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<Proveedor>>(
+        "http://localhost:5187/api/Proveedor/ObtenerProveedores",
+        {
+          params: {
+            pagina: 1,
+            tamanioPagina: 100,
+          },
+        }
+      )
+      .then((response) => {
+        setRows(
+          response.data.datos.map((t) => ({
+            ...t,
+            id: t.ruc,
+          }))
+        );
+      })
+      .catch((error) => {
+        console.error("Error al obtener Proveedores:", error);
+      });
+  }, []);
+
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -151,9 +189,11 @@ export default function TablaProveedores() {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-  const MantenerClickBorrar = (id: GridRowId) => () => {
-    setRows(rows.filter((row) => row.id !== id));
-  };
+ const MantenerClickBorrar = (id: GridRowId) => async () => {
+     
+     await eliminarProveedor(String(id));
+     setRows(rows.filter((row) => row.id !== id));
+   };
 
   const MantenerClickCancelar = (id: GridRowId) => () => {
     setRowModesModel({
@@ -167,11 +207,42 @@ export default function TablaProveedores() {
     }
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+  const processRowUpdate = async (newRow: GridRowModel) => {
+    //let updatedRow = { ...newRow, isNew: false };
+  let updatedRow: { id: string; isNew: boolean } = { id: newRow.id, isNew: false };
+  
+    if (newRow.isNew) {
+      const ProveedorCreado = await crearProveedor(mapRowToProveedor(newRow));
+  
+      updatedRow = {
+        ...newRow,
+        ...ProveedorCreado,
+        id: ProveedorCreado.ruc, 
+        isNew: false,
+      };
+    } else {
+      const ProveedorActualizado = await actualizarProveedor(mapRowToProveedor(newRow));
+      updatedRow = {
+        ...ProveedorActualizado,
+        id: ProveedorActualizado.ruc, 
+        isNew: false
+      };
+    }
+  
+    // Actualizás las filas del grid
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === newRow.id ? updatedRow : row
+      )
+    );
+    setRowModesModel((prevModel) => ({
+      ...prevModel,
+      [newRow.id]: { mode: GridRowModes.View }, // usar el id final
+    }));
+  
     return updatedRow;
   };
+  
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
@@ -187,7 +258,7 @@ export default function TablaProveedores() {
       headerName: "RUC",
       headerAlign: "center",
       align: "center",
-      type: "number",
+      type: "string",
       flex: 1,
       minWidth: 150,
       editable: true,
