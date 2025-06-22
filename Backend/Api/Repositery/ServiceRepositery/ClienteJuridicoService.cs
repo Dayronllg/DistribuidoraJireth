@@ -73,7 +73,7 @@ public class ClienteJuridicoService : Service<Cliente>, IClienteJuridicoService
     public async Task<PaginacionResultado<ClienteJuridicoDto>> ObtenerClientesJuridicos(int pagina, int tamanio)
     {
 
-        var query = _context.Clientes.Include(x => x.ClienteJuridico).AsQueryable();
+        var query = _context.Clientes.Include(x => x.ClienteJuridico).Where(x=> x.ClienteJuridico!=null).AsQueryable();
 
         var PagClientes = await base.PaginarAsync(query, pagina, tamanio, x => x.Estado == "Activo");
 
