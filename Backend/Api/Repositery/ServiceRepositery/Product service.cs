@@ -7,6 +7,7 @@ using Api.Validaciones;
 using Api.Validaciones.IValidationsService;
 using AutoMapper;
 using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 namespace Api.Repositery.ServiceRepositery;
@@ -75,12 +76,12 @@ public class Product_service : Service<Producto>, IProductService
     }
 
     
-    public async Task<PaginacionResultado<ProductoDto>> PaginarProducto(int pagina, int tamanioPagina)
+    public async Task<PaginacionResultado<PaginarProductoDto>> PaginarProducto(int pagina, int tamanioPagina)
     {
-        var query =  _context.Productos.AsQueryable();
+        var query = _context.Productos.Include(x => x.IdMarcaNavigation).Include(x=> x.Presentaciones   );
         var PagTrabajador = await base.PaginarAsync(query, pagina, tamanioPagina, x=>x.Estado=="Activo");
 
-        return MapearPaginador.MapearPaginacion<Producto, ProductoDto>(PagTrabajador,_mapper);
+        return MapearPaginador.MapearPaginacion<Producto,PaginarProductoDto >(PagTrabajador,_mapper);
     }
 }
 

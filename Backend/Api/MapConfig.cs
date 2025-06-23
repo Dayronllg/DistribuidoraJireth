@@ -23,7 +23,8 @@ public class MapConfig:Profile
         CreateMap<Usuario, UsuarioCreateDto>().ReverseMap();
         CreateMap<Usuario, UsuarioDto>().ReverseMap();
         //Mapeo Producto
-        CreateMap<Producto, ProductoDto>().ReverseMap();
+        CreateMap<PaginarProductoDto, Producto>().ForMember(dest => dest.IdMarcaNavigation, opt => opt.MapFrom(src => src.IdMarcaNavigation)).
+        ForMember(dest => dest.Presentaciones, opt => opt.MapFrom(src => src.Presentaciones)).ReverseMap();
         CreateMap<Producto, CrearProductoDto>().ReverseMap();
         CreateMap<Producto, ActualizarProductoDto>().ReverseMap();
         //Mapeo trabajador

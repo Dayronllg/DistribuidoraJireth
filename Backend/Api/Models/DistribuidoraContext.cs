@@ -57,6 +57,7 @@ public partial class DistribuidoraContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){}
 
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Cliente>(entity =>
@@ -338,9 +339,6 @@ public partial class DistribuidoraContext : DbContext
                 .HasDefaultValue("Activo");
             entity.Property(e => e.Nombre).HasMaxLength(50);
             entity.Property(e => e.Precio).HasColumnType("decimal(10, 2)");
-            entity.Property(e => e.UnidadDeMedida)
-                .HasMaxLength(15)
-                .IsUnicode(false);
 
             entity.HasOne(d => d.IdProductosNavigation).WithMany(p => p.Presentaciones)
                 .HasForeignKey(d => d.IdProductos)
