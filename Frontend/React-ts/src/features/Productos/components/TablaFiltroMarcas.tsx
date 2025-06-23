@@ -1,22 +1,19 @@
-import React, { useState, useMemo, useEffect } from "react";
+import axios from "axios";
+import React, { useState, useMemo, useEffect, } from "react";
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
+
 
 // Definir el tipo de valor de cada fila (producto)
 type FilaMarca = {
-  id: number;
-  nombreMarca: string;
+  idMarca: number;
+  nombre: string;
   estado: string;
 };
 
-// Lista temporal solo para probar
-const initialRows: FilaMarca[] = [
-  { id: 1, nombreMarca: "Coca-Cola", estado: "Activo" },
-  { id: 2, nombreMarca: "Pepsi", estado: "Activo" },
-  { id: 3, nombreMarca: "KFC", estado: "Inactivo" },
-  { id: 4, nombreMarca: "Eskimo", estado: "Activo" },
-  { id: 5, nombreMarca: "Dos Pinos", estado: "Activo" },
-];
+  
 
-type Props = {
+
+export type Props = {
   // Cambio para que reciba una sola marca, no un array
   AgregarSeleccionado: (marca: FilaMarca) => void;
   onSelectSingle: (marca: FilaMarca) => void;
@@ -28,7 +25,7 @@ export default function TablaFiltromarcas({
   AgregarSeleccionado,
   onSelectSingle,
 }: Props) {
-  const [rows] = useState<FilaMarca[]>(initialRows); // Lista de marcas base
+  const [rows,setRows] = useState<FilaMarca[]>([]); // Lista de marcas base
   const [IDSeleccionado, setIDSeleccionado] = useState<number | null>(null); // IDs seleccionados
   const [textoFiltrado, setFilterText] = useState(""); // Texto de filtro
   const [isClicked, setIsClicked] = useState(false);
@@ -37,11 +34,37 @@ export default function TablaFiltromarcas({
   const [paginaActual, setpaginaActual] = useState(1); // Página actual
   const [mensajeError, setMensajeError] = useState<string | null>(null); // Mensaje de error
 
+  React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<FilaMarca>>(
+        "http://localhost:5187/api/Marcas/ObtenerMarcas",
+        {
+          params: {
+            pagina: 1,
+            tamanioPagina: 100,
+          },
+        }
+      )
+      .then((response) => {
+        setRows(
+          response.data.datos.map((t) => ({
+            ...t,
+            id: t.idMarca,
+            estado:t.estado,
+            nombre:t.nombre
+          }))
+        );
+      })
+      .catch((error) => {
+        console.error("Error al obtener Marcas:", error);
+      });
+  }, []);
+  
   const FilasFiltradas = useMemo(() => {
     const lowerFilter = textoFiltrado.toLowerCase();
     return rows.filter(
       (row) =>
-        (row.nombreMarca ?? "").toLowerCase().includes(lowerFilter) ||
+        (row.nombre ?? "").toLowerCase().includes(lowerFilter) ||
         row.estado.toLowerCase().includes(lowerFilter)
     );
   }, [textoFiltrado, rows]);
@@ -66,7 +89,7 @@ export default function TablaFiltromarcas({
   const handleAddSelected = () => {
     if (IDSeleccionado === null) return;
 
-    const marcas = rows.find((r) => r.id === IDSeleccionado);
+    const marcas = rows.find((r) => r.idMarca === IDSeleccionado);
     if (!marcas) return;
 
     // Ya no es necesario verificar marcas duplicado porque solo hay uno
@@ -189,23 +212,23 @@ export default function TablaFiltromarcas({
           {paginatedRows.length > 0 ? (
             paginatedRows.map((row) => (
               <tr
-                key={row.id}
+                key={row.idMarca}
                 style={{
                   backgroundColor:
-                    IDSeleccionado === row.id ? "#1f1f1f" : "inherit",
+                    IDSeleccionado === row.idMarca ? "#1f1f1f" : "inherit",
                 }}
               >
                 <td style={tdStyle}>
                   <input
                     type="radio"
-                    checked={IDSeleccionado === row.id}
-                    onChange={() => handleSelect(row.id)}
-                    aria-label={`Select row with ID ${row.id}`}
+                    checked={IDSeleccionado === row.idMarca}
+                    onChange={() => handleSelect(row.idMarca)}
+                    aria-label={`Select row with ID ${row.idMarca}`}
                     style={{ cursor: "pointer" }}
                   />
                 </td>
-                <td style={tdStyle}>{row.id}</td>
-                <td style={tdStyle}>{row.nombreMarca}</td>
+                <td style={tdStyle}>{row.idMarca}</td>
+                <td style={tdStyle}>{row.nombre}</td>
                 <td style={tdStyle}>{row.estado}</td>
               </tr>
             ))

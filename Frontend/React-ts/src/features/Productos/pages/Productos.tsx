@@ -4,8 +4,8 @@ import MarcaInput from "../components/MarcaInput";
 import TablaProductos from "../components/TablaProductos";
 
 type FilaMarca = {
-  id: number;
-  nombreMarca: string;
+  idMarca: number;
+  nombre: string;
   estado: string;
 };
 
@@ -47,7 +47,7 @@ function Productos() {
         <h2 style={{ marginBottom: "1.5rem", textAlign: "center" }}>
           Agregar Producto
         </h2>
-        <TablaProductos />
+        <TablaProductos marca={marcaUnicoSeleccionado}  />
       </div>
     </div>
   );

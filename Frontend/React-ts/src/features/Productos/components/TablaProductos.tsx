@@ -7,6 +7,8 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import Button from "@mui/material/Button";
+//import type {Props} from "../../Productos/components/ProductoInput"
+//import type FilaProductos from "../../Productos/components/ProductoInput"
 
 import {
   GridRowModes,
@@ -26,54 +28,107 @@ import type {
 } from "@mui/x-data-grid";
 
 import {
-  randomCreatedDate,
-  randomTraderName,
-  randomId,
-  randomArrayItem,
+  randomId
 } from "@mui/x-data-grid-generator";
+import axios from "axios";
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
 
-const roles = ["Market", "Finance", "Development"];
-const randomRole = () => {
-  return randomArrayItem(roles);
+
+
+type FilaProducto = {
+  idProducto: number;
+  nombre: string;
+  estado: string;
 };
 
-const initialRows: GridRowsProp = [
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 25,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 36,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 19,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 28,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 23,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-];
+type Props = {
+  Producto: FilaProducto | null;
+};
+
+interface Presentacion{
+  idPresentacion:number
+  nombre:string,
+  precio:number,
+  inventario:number,
+  estado:"Activo"|"Inactivo"
+  
+} 
+
+interface marca {
+    idMarca: number,
+    nombre: string,
+    estado: string
+}
+
+interface Producto{
+
+  idProducto: number,
+  nombre: string,
+  estado: string,
+  marca:marca,
+  presentaciones:Presentacion[]
+
+}
+
+export function mapRowToProducto(row: GridRowModel): Producto {
+  return {
+    idProducto: row.idProducto,
+    nombre: row.nombre,
+    estado:row.estado,
+      marca:{
+      idMarca:row.idMarca,
+      nombre:row.nombre,
+      estado:row.estado
+    },
+    presentaciones: (row.presentaciones || []).map((p: any) => ({
+      idPresentacion: p.idPresentacion,
+      nombre: p.nombre,
+      precio: p.precio,
+      inventario: p.inventario,
+      Estado:"activo",
+      idProductos: p.idProductos
+    }))
+  };
+}
+
+const API_BASE='http://localhost:5187/api'
+
+export const crearProducto = async (nuevo: Producto) => {
+  try {
+    const response = await axios.post(`${API_BASE}/Productos/CrearProducto`, nuevo);
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear Producto", error);
+    throw error;
+  }
+};
+
+
+export async function actualizarProducto(Producto: Producto): Promise<Producto> {
+  try {
+    const response = await axios.put<Producto>(
+      `${API_BASE}/Productos/ActualizarProducto`,
+      Producto
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar Producto:", error);
+    throw error; // Puedes lanzar un error más específico si querés
+  }
+}
+
+const eliminarProducto = async (id: number) => {
+  try {
+    const response = await axios.put(`${API_BASE}/Productos/BajaProducto`,null,{params:{id:id}} 
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al eliminar (inhabilitar) el Producto:', error);
+    throw error;
+  }
+};
+
+  
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -84,7 +139,50 @@ declare module "@mui/x-data-grid" {
   }
 }
 
-// Toolbar de Agregar
+
+export default function TablaRegistroProductos(marca:Props) {
+  const [rows, setRows] = React.useState<GridRowsProp>([]);
+  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
+    {}
+  );
+
+ React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<Producto>>(
+        "http://localhost:5187/api/Marcas/ObtenerMarcas",
+        {
+          params: {
+            pagina: 1,
+            tamanioPagina: 100,
+          },
+        }
+      )
+     .then((response) => {
+      const filas = response.data.datos.flatMap((producto) =>
+        producto.presentaciones.map((p) => ({
+          id: p.idPresentacion, // este es el ID que necesita el DataGrid
+          idProducto: producto.idProducto,
+          nombre: producto.nombre,
+          estado: producto.estado,
+          idMarca: producto.marca.idMarca,
+          nombreMarca: producto.marca.nombre,
+          // Datos de la presentación
+          idPresentacion: p.idPresentacion,
+          nombreP: p.nombre,
+          precio: p.precio,
+          inventario: p.inventario,
+          
+        }))
+      );
+
+      setRows(filas);
+    })
+    .catch((error) => {
+      console.error("Error al obtener productos:", error);
+    });
+}, []);
+
+//Toolbar de Agregar
 function EditToolbar(props: GridSlotProps["toolbar"]) {
   const { setRows, setRowModesModel } = props;
 
@@ -120,6 +218,7 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
             backgroundColor: "#007bff",
             "&:hover": { backgroundColor: "#0056b3" },
           }}
+          
         >
           Agregar
         </Button>
@@ -128,11 +227,13 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
   );
 }
 
-export default function TablaRegistroVentas() {
-  const [rows, setRows] = React.useState(initialRows);
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
-    {}
-  );
+
+  // Este useEffect se dispara cada vez que seleccionás una nueva Producto
+
+
+
+   
+   
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -167,12 +268,42 @@ export default function TablaRegistroVentas() {
     }
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    return updatedRow;
-  };
-
+  const processRowUpdate = async (newRow: GridRowModel) => {
+      //let updatedRow = { ...newRow, isNew: false };
+    let updatedRow: { id: number; isNew: boolean } = { id: newRow.id, isNew: false };
+    
+      if (newRow.isNew) {
+        const ProductoCreado = await crearProducto(mapRowToProducto(newRow));
+    
+        updatedRow = {
+          ...newRow,
+          ...ProductoCreado,
+          id: ProductoCreado.idProducto, 
+          isNew: false,
+        };
+      } else {
+        const ProductoActualizado = await actualizarProducto(mapRowToProducto(newRow));
+        updatedRow = {
+          ...ProductoActualizado,
+          id: ProductoActualizado.idProducto, 
+          isNew: false
+        };
+      }
+    
+      // Actualizás las filas del grid
+      setRows((prevRows) =>
+        prevRows.map((row) =>
+          row.id === newRow.id ? updatedRow : row
+        )
+      );
+      setRowModesModel((prevModel) => ({
+        ...prevModel,
+        [newRow.id]: { mode: GridRowModes.View }, // usar el id final
+      }));
+    
+      return updatedRow;
+    };
+    
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
   };
@@ -190,7 +321,7 @@ export default function TablaRegistroVentas() {
       type: "number",
       flex: 0.5,
       minWidth: 150,
-      editable: true,
+      editable: false,
     },
     {
       field: "nombre",
@@ -203,26 +334,48 @@ export default function TablaRegistroVentas() {
       editable: true,
     },
     {
+      field: "idPresentacion",
+      headerName: "ID",
+      headerAlign: "center",
+      align: "center",
+      type: "number",
+      flex: 0.5,
+      minWidth: 150,
+      editable: true,
+    },
+    {
+      field: "nombreP",
+      headerName: "Nombre",
+      headerAlign: "center",
+      align: "center",
+      type: "string",
+      flex: 0.5,
+      minWidth: 150,
+      editable: true,
+    },
+    {
       field: "precio",
-      headerName: "Precio",
+      headerName: "precio",
       headerAlign: "center",
       align: "center",
       type: "number",
       flex: 0.5,
       minWidth: 150,
-      editable: true,
+      editable: true
+      
     },
     {
-      field: "cantidad",
-      headerName: "Cantidad",
+      field: "idProducto",
+      headerName: "ID Producto",
       headerAlign: "center",
       align: "center",
       type: "number",
       flex: 0.5,
       minWidth: 150,
-      editable: true,
+      editable: true
+      
     },
-    {
+     {
       field: "estado",
       headerName: "Estado",
       headerAlign: "center",
@@ -230,17 +383,6 @@ export default function TablaRegistroVentas() {
       type: "singleSelect",
       valueOptions: ["Realizado", "Cancelado"],
       flex: 0.7,
-      minWidth: 150,
-      editable: true,
-    },
-
-    {
-      field: "idMarca",
-      headerName: "ID Marca",
-      headerAlign: "center",
-      align: "center",
-      type: "number",
-      flex: 0.5,
       minWidth: 150,
       editable: true,
     },

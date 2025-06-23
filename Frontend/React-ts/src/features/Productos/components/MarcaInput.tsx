@@ -1,10 +1,10 @@
-type FilaMarcas = {
-  id: number;
-  nombreMarca: string;
+export type FilaMarcas = {
+  idMarca: number;
+  nombre: string;
   estado: string;
 };
 
-type Props = {
+export type Props = {
   marca: FilaMarcas;
 };
 
@@ -45,7 +45,7 @@ export default function MarcaInput({ marca }: Props) {
               color: "#fff",
               outline: "none",
             }}
-            value={marca.id}
+            value={marca.idMarca}
             readOnly
           />
         </div>
@@ -80,7 +80,7 @@ export default function MarcaInput({ marca }: Props) {
               color: "#fff",
               outline: "none",
             }}
-            value={marca.nombreMarca}
+            value={marca.nombre}
             readOnly
           />
         </div>

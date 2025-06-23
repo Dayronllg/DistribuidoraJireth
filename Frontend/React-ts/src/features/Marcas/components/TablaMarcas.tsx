@@ -135,13 +135,15 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
   );
 }
 
+
 export default function TablaRegistroVentas() {
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
 
-     React.useEffect(() => {
+
+    React.useEffect(() => {
     axios
       .get<PaginacionResultado<Marca>>(
         "http://localhost:5187/api/Marcas/ObtenerMarcas",
@@ -164,6 +166,8 @@ export default function TablaRegistroVentas() {
         console.error("Error al obtener Marcas:", error);
       });
   }, []);
+
+
   
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
