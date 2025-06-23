@@ -1,4 +1,5 @@
 using System;
+using Api.Dto.MarcasDto;
 
 namespace Api.Dto.ProductosDto;
 
@@ -12,5 +13,5 @@ public class ProductoDto
 
     public int IdMarca { get; set; }
 
-
+    public  MarcaDto IdMarcaNavigation { get; set; } = null!;
 }

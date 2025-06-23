@@ -12,7 +12,7 @@ public interface IProductService : IService<Producto>
 
     Task<Result<ProductoDto>> CrearProducto(CrearProductoDto producto);
 
-    Task<PaginacionResultado<ProductoDto>> PaginarProducto(int pagina, int tamanioPagina);
+    Task<PaginacionResultado<PaginarProductoDto>> PaginarProducto(int pagina, int tamanioPagina);
     Task<ResultNoValue> BajaProducto(int id);
     Task<Result<ProductoDto>> ActualizarProducto(ProductoDto ActualizarProducto);
 
