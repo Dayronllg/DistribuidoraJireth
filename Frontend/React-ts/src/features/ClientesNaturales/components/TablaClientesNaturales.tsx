@@ -241,11 +241,11 @@ export default function TablaClientesNaturales() {
        ...newRow,
        ...clienteNaturalCreado,
        id: clienteNaturalCreado.idCliente, 
-       primerNombre:clienteNaturalCreado.primerNombre,
+       /*primerNombre:clienteNaturalCreado.primerNombre,
        segundoNombre:clienteNaturalCreado.segundoNombre,
        primerApellido:clienteNaturalCreado.primerApellido,
-       segundoApellido:clienteNaturalCreado.segundoApellido,
-       isNew: false,
+       segundoApellido:clienteNaturalCreado.segundoApellido,*/
+       isNew: false
      };
    } else {
      const clienteNaturalActualizado = await actualizarClienteNatural(mapRowToClienteNatural(newRow));
