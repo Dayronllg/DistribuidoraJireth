@@ -1,0 +1,48 @@
+/* Fondo oscuro detrás del modal */
+.react-confirm-alert-overlay {
+    background: rgba(0, 0, 0, 0.6);
+    /* podés poner rgba(0,0,0,0) si querés 100% transparente */
+    z-index: 9999;
+}
+
+/* Cuadro del modal */
+.react-confirm-alert {
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    max-width: 400px;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Título del modal */
+.react-confirm-alert h1 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Mensaje del modal */
+.react-confirm-alert p {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Botones */
+.react-confirm-alert-button-group button {
+    background-color: #000;
+    /* negro puro */
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    margin: 0 0.5rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background-color 0.3s ease;
+}
+
+.react-confirm-alert-button-group button:hover {
+    background-color: #333;
+    /* gris oscuro al pasar el mouse */
+    border-color: #666;
+}

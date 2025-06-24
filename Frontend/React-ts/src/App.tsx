@@ -18,12 +18,11 @@ import ClientesNaturales from "./features/ClientesNaturales/pages/ClientesNatura
 import ClientesJuridicos from "./features/ClientesJuridicos/pages/ClientesJuridicos";
 import Proveedores from "./features/Proveedores/pages/Proveedores";
 import "react-confirm-alert/src/react-confirm-alert.css";
+import "./App.css";
 //import ProtectedRoute from "./features/Login/ProtectedRoute";
 
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
-
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // {<ProtectedRoute allowedRoles={["admin"]}>
 // <DashboardLayout/>
@@ -31,90 +30,85 @@ import 'react-toastify/dist/ReactToastify.css';
 export default function App() {
   return (
     <>
-    <ToastContainer
-     position="top-right"
-     autoClose={3000}
-     hideProgressBar={false}
-     closeOnClick={false}
-     pauseOnFocusLoss
-     draggable
-     pauseOnHover
-    theme="dark" // También puedes usar "light" o "colored"
-     toastStyle={{
-    background: "#1f1f1f",
-    color: "#fff",
-    fontSize: "18px",
-    borderRadius: "8px",
-    boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-    border: "1px solid #444",
-    padding: "1rem",
-  }}
-    />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        closeOnClick={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark" // También puedes usar "light" o "colored"
+        toastStyle={{
+          background: "#1f1f1f",
+          color: "#fff",
+          fontSize: "18px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+          border: "1px solid #444",
+          padding: "1rem",
+        }}
+      />
 
-    <Routes>
-      
-      {/* Ruta principal de Login */}
-      <Route path="/" element={<Login />}></Route>
+      <Routes>
+        {/* Ruta principal de Login */}
+        <Route path="/" element={<Login />}></Route>
 
-      {/* Ruta para admin */}
-      <Route path="/Administrador" element={<Inicio />}>
-        {/* <Route index element={<AdminVentas />} /> Página por defecto */}
-        <Route path="gestionarVentas" element={<GestionarVentas />} />
-        <Route path="registroVentas" element={<RegistroVentas />} />
-        <Route path="pedidos" element={<Pedidos />} />
-        <Route path="compras" element={<Compras />} />
-        <Route path="devolucionesVentas" element={<DevolucionesVentas />} />
-        <Route path="devolucionesCompras" element={<DevolucionesCompras />} />
-        <Route path="productos" element={<Productos />} />
-        <Route path="marcas" element={<Marcas />} />
-        <Route path="presentaciones" element={<Presentaciones />} />
-        <Route path="usuarios" element={<Usuarios />} />
-        <Route path="trabajadores" element={<Trabajadores />} />
-        <Route path="reportes" element={<Reportes />} />
-        <Route path="clientesNaturales" element={<ClientesNaturales />} />
-        <Route path="clientesJuridicos" element={<ClientesJuridicos />} />
-        <Route path="proveedores" element={<Proveedores />} />
-        <Route path="*" element={<NoFoundPage />} />
-        
-      </Route>
+        {/* Ruta para admin */}
+        <Route path="/Administrador" element={<Inicio />}>
+          {/* <Route index element={<AdminVentas />} /> Página por defecto */}
+          <Route path="gestionarVentas" element={<GestionarVentas />} />
+          <Route path="registroVentas" element={<RegistroVentas />} />
+          <Route path="pedidos" element={<Pedidos />} />
+          <Route path="compras" element={<Compras />} />
+          <Route path="devolucionesVentas" element={<DevolucionesVentas />} />
+          <Route path="devolucionesCompras" element={<DevolucionesCompras />} />
+          <Route path="productos" element={<Productos />} />
+          <Route path="marcas" element={<Marcas />} />
+          <Route path="presentaciones" element={<Presentaciones />} />
+          <Route path="usuarios" element={<Usuarios />} />
+          <Route path="trabajadores" element={<Trabajadores />} />
+          <Route path="reportes" element={<Reportes />} />
+          <Route path="clientesNaturales" element={<ClientesNaturales />} />
+          <Route path="clientesJuridicos" element={<ClientesJuridicos />} />
+          <Route path="proveedores" element={<Proveedores />} />
+          <Route path="*" element={<NoFoundPage />} />
+        </Route>
 
-      {/* Ruta para usuario */}
-      <Route path="/Usuario" element={<Inicio />}>
-        {/* <Route index element={<AdminVentas />} /> Página por defecto */}
-        <Route path="gestionarVentas" element={<GestionarVentas />} />
-        <Route path="registroVentas" element={<RegistroVentas />} />
-        <Route path="pedidos" element={<Pedidos />} />
-        <Route path="compras" element={<Compras />} />
-        <Route path="devolucionesVentas" element={<DevolucionesVentas />} />
-        <Route path="devolucionesCompras" element={<DevolucionesCompras />} />
-        <Route path="productos" element={<Productos />} />
-        <Route path="marcas" element={<Marcas />} />
-        <Route path="presentaciones" element={<Presentaciones />} />
-        <Route path="usuarios" element={<Usuarios />} />
-        <Route path="trabajadores" element={<Trabajadores />} />
-        <Route path="reportes" element={<Reportes />} />
-        <Route path="clientesNaturales" element={<ClientesNaturales />} />
-        <Route path="clientesJuridicos" element={<ClientesJuridicos />} />
-        <Route path="proveedores" element={<Proveedores />} />
-        <Route path="*" element={<NoFoundPage />} />
-         
-      </Route>
-    
-     
-      
-      {/*Rutas para Admin*/}
-      {/* <Route path="/admin" element={<DashboardLayout />}>
+        {/* Ruta para usuario */}
+        <Route path="/Usuario" element={<Inicio />}>
+          {/* <Route index element={<AdminVentas />} /> Página por defecto */}
+          <Route path="gestionarVentas" element={<GestionarVentas />} />
+          <Route path="registroVentas" element={<RegistroVentas />} />
+          <Route path="pedidos" element={<Pedidos />} />
+          <Route path="compras" element={<Compras />} />
+          <Route path="devolucionesVentas" element={<DevolucionesVentas />} />
+          <Route path="devolucionesCompras" element={<DevolucionesCompras />} />
+          <Route path="productos" element={<Productos />} />
+          <Route path="marcas" element={<Marcas />} />
+          <Route path="presentaciones" element={<Presentaciones />} />
+          <Route path="usuarios" element={<Usuarios />} />
+          <Route path="trabajadores" element={<Trabajadores />} />
+          <Route path="reportes" element={<Reportes />} />
+          <Route path="clientesNaturales" element={<ClientesNaturales />} />
+          <Route path="clientesJuridicos" element={<ClientesJuridicos />} />
+          <Route path="proveedores" element={<Proveedores />} />
+          <Route path="*" element={<NoFoundPage />} />
+        </Route>
+
+        {/*Rutas para Admin*/}
+        {/* <Route path="/admin" element={<DashboardLayout />}>
         <Route path="inicio" element={<Inicio />}></Route>
         <Route path="ventas" element={<AdminVentas />} />
         {/* <Route path="pedidos" element={<AdminPedidos />} />}
       </Route> */}
 
-      {/* Rutas para Cliente */}
-      {/* <Route path="/cliente" element={<DashboardLayout />}>
+        {/* Rutas para Cliente */}
+        {/* <Route path="/cliente" element={<DashboardLayout />}>
         <Route index element={<ClienteInicio />} />
         <Route path="compras" element={<Compras />} />
       </Route>*/}
-    </Routes>
+      </Routes>
     </>
   );
 }
