@@ -10,7 +10,7 @@ public class CrearDetalleVentaDto
 
     public decimal Subtotal { get; set; }
 
-    public int IdVenta { get; set; }
+  
 
     public int IdProducto { get; set; }
 

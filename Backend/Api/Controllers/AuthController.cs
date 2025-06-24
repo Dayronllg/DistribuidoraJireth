@@ -45,7 +45,7 @@ namespace Api.Controllers
                 return Unauthorized(usuario.Error);
             }
 
-            UsuarioAuthorized authorized = new(_utilidad.GenerarToken(usuario.Value),usuario.Value.Rol);
+            UsuarioAuthorized authorized = new(_utilidad.GenerarToken(usuario.Value),usuario.Value.Rol,usuario.Value.IdUsuario);
             
             
                 

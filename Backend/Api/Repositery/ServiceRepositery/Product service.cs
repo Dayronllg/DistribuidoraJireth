@@ -83,5 +83,14 @@ public class Product_service : Service<Producto>, IProductService
 
         return MapearPaginador.MapearPaginacion<Producto,PaginarProductoDto >(PagTrabajador,_mapper);
     }
+
+
+   public async Task<PaginacionResultado<ProductoDto>> PaginarSoloProducto(int pagina, int tamanioPagina)
+    {
+        var query = _context.Productos.Include(x=>x.IdMarcaNavigation).AsQueryable();
+        var PagTrabajador = await base.PaginarAsync(query, pagina, tamanioPagina, x=>x.Estado=="Activo");
+
+        return MapearPaginador.MapearPaginacion<Producto,ProductoDto >(PagTrabajador,_mapper);
+    }
 }
 
