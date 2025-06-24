@@ -10,7 +10,6 @@ public class CrearPresentacionDto
 
     public int Inventario { get; set; }
 
-    public string UnidadDeMedida { get; set; } = null!;
 
     public string Estado { get; set; } = null!;
 
