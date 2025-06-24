@@ -34,6 +34,17 @@ import axios from "axios";
 import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
 
 
+export type FilaMarcas = {
+  idMarca: number;
+  nombre: string;
+  estado: string;
+};
+
+export type Props = {
+  marca: FilaMarcas|null;
+};
+
+
 
 type FilaProducto = {
   idProducto: number;
@@ -41,9 +52,6 @@ type FilaProducto = {
   estado: string;
 };
 
-type Props = {
-  Producto: FilaProducto | null;
-};
 
 interface Presentacion{
   idPresentacion:number

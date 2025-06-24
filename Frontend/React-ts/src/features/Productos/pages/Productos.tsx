@@ -3,7 +3,7 @@ import TablaFiltroMarcas from "../components/TablaFiltroMarcas";
 import MarcaInput from "../components/MarcaInput";
 import TablaProductos from "../components/TablaProductos";
 
-type FilaMarca = {
+type FilaMarcas = {
   idMarca: number;
   nombre: string;
   estado: string;
@@ -12,7 +12,7 @@ type FilaMarca = {
 function Productos() {
   //Pasar datos del componente TablaFiltroClientes al componente ClienteInput
   const [marcaUnicoSeleccionado, setMarcaUnicoSeleccionado] =
-    useState<FilaMarca | null>(null);
+    useState<FilaMarcas | null>(null);
   return (
     <div
       style={{

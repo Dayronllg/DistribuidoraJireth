@@ -8,6 +8,8 @@ export type Props = {
   marca: FilaMarcas;
 };
 
+ 
+
 export default function MarcaInput({ marca }: Props) {
   return (
     <div style={{ padding: "1rem", background: "#121212", color: "#fff" }}>
