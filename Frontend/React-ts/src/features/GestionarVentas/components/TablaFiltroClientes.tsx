@@ -1,20 +1,22 @@
+import axios from "axios";
 import React, { useState, useMemo, useEffect } from "react";
-
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
+import type { Cliente } from "../../ClientesNaturales/components/TablaClientesNaturales";
+import type { ClienteJ } from "../../ClientesJuridicos/components/TablaClientesJuridicos";
 // Definir el tipo de valor de cada fila (producto)
 type FilaClientes = {
   id: number;
   nombreCliente: string;
   telefono: string;
+  tipo: "Natural" | "Jurídico";
+  ruc?: string; 
 };
 
+
+
+
 // Lista temporal solo para probar
-const initialRows: FilaClientes[] = [
-  { id: 1, nombreCliente: "Jon", telefono: "9063-9012" },
-  { id: 2, nombreCliente: "Cersei", telefono: "8439-1045" },
-  { id: 3, nombreCliente: "Jaime", telefono: "4298-5134" },
-  { id: 4, nombreCliente: "Arya", telefono: "3589-4126" },
-  { id: 5, nombreCliente: "Daenerys", telefono: "9318-6312" },
-];
+
 
 type Props = {
   // Cambio para que reciba un solo cliente, no un array
@@ -28,7 +30,7 @@ export default function TablaFiltroClientes({
   AgregarSeleccionado,
   onSelectSingle,
 }: Props) {
-  const [rows] = useState<FilaClientes[]>(initialRows); // Lista de clientes base
+  const [rows,setRows] = useState<FilaClientes[]>([]); // Lista de clientes base
   const [IDSeleccionado, setIDSeleccionado] = useState<number | null>(null); // IDs seleccionados
   const [textoFiltrado, setFilterText] = useState(""); // Texto de filtro
   const [isClicked, setIsClicked] = useState(false);
@@ -36,15 +38,54 @@ export default function TablaFiltroClientes({
   const [isNextClicked, setIsNextClicked] = useState(false);
   const [paginaActual, setpaginaActual] = useState(1); // Página actual
   const [mensajeError, setMensajeError] = useState<string | null>(null); // Mensaje de error
+  const [tipoFiltro, setTipoFiltro] = useState<"Defecto" | "Natural" | "Jurídico">("Defecto");
+  const columnasVisibles = tipoFiltro === "Jurídico" ? 5 : 4;
+  useEffect(() => {
+  const fetchClientes = async () => {
+    try {
+      const [naturalesRes, juridicosRes] = await Promise.all([
+        axios.get<PaginacionResultado<Cliente>>("http://localhost:5187/api/ClienteNatural/ObtenerClienteNaturales"),
+        axios.get<PaginacionResultado<ClienteJ>>("http://localhost:5187/api/ClienteJuridico/ObtenerClienteJuridicoes"),
+      ]);
+
+      const naturales: FilaClientes[] = naturalesRes.data.datos.map((cliente) => ({
+        id: cliente.idCliente,
+        nombreCliente: cliente.clienteNatural.primerNombre,
+        telefono: cliente.telefono,
+        tipo: "Natural",
+      }));
+
+      const juridicos: FilaClientes[] = juridicosRes.data.datos.map((cliente) => ({
+        id: cliente.idCliente,
+        nombreCliente: cliente.clienteJuridico.nombre,
+        telefono: cliente.telefono,
+        tipo: "Jurídico",
+        ruc: cliente.clienteJuridico.ruc,
+      }));
+
+      setRows([...naturales, ...juridicos]);
+    } catch (error) {
+      console.error("Error al obtener clientes:", error);
+    }
+  };
+
+  fetchClientes();
+}, []);
 
   const FilasFiltradas = useMemo(() => {
-    const lowerFilter = textoFiltrado.toLowerCase();
-    return rows.filter(
-      (row) =>
-        (row.nombreCliente ?? "").toLowerCase().includes(lowerFilter) ||
-        row.telefono.toLowerCase().includes(lowerFilter)
-    );
-  }, [textoFiltrado, rows]);
+  const lowerFilter = textoFiltrado.toLowerCase();
+
+  return(rows?? []).filter((row) => {
+    const coincideTexto =
+      row.nombreCliente.toLowerCase().includes(lowerFilter) ||
+      row.telefono.toLowerCase().includes(lowerFilter);
+
+    const coincideTipo =
+      tipoFiltro === "Defecto" || row.tipo === tipoFiltro;
+
+    return coincideTexto && coincideTipo;
+  });
+}, [textoFiltrado, tipoFiltro, rows]);
 
   const totalPages = Math.max(
     1,
@@ -66,7 +107,7 @@ export default function TablaFiltroClientes({
   const handleAddSelected = () => {
     if (IDSeleccionado === null) return;
 
-    const cliente = rows.find((r) => r.id === IDSeleccionado);
+    const cliente = (rows?? []).find((r) => r.id === IDSeleccionado);
     if (!cliente) return;
 
     // Ya no es necesario verificar cliente duplicado porque solo hay uno
@@ -109,58 +150,79 @@ export default function TablaFiltroClientes({
   };
 
   return (
+   
+  <div
+    style={{
+      padding: "1rem",
+      background: "#121212",
+      color: "#fff",
+      maxWidth: "800px", // Ampliado
+      margin: "0 auto",   // Centrar el bloque completo
+    }}
+  >
+    {/* Fila de filtros e input */}
     <div
       style={{
-        padding: "1rem",
-        background: "#121212",
-        color: "#fff",
-        maxWidth: "600px",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: "1rem",
+        marginBottom: "1.5rem",
+        flexWrap: "wrap",
       }}
     >
-      <div
+      <input
+        type="text"
+        placeholder="Filtrar por nombre del cliente o número"
+        value={textoFiltrado}
+        onChange={(e) => setFilterText(e.target.value)}
         style={{
-          marginBottom: "1rem",
-          display: "flex",
-          gap: "0.5rem",
-          flexWrap: "wrap",
-          alignItems: "center",
-          maxWidth: "500px",
+          flexGrow: 1,
+          padding: "0.5rem",
+          borderRadius: "4px",
+          border: "1px solid #333",
+          backgroundColor: "#1f1f1f",
+          color: "#fff",
+          minWidth: "200px",
+        }}
+      />
+
+      <select
+        value={tipoFiltro}
+        onChange={(e) =>
+          setTipoFiltro(e.target.value as "Defecto" | "Natural" | "Jurídico")
+        }
+        style={{
+          padding: "0.5rem",
+          borderRadius: "4px",
+          border: "1px solid #333",
+          backgroundColor: "#1f1f1f",
+          color: "#fff",
         }}
       >
-        <input
-          type="text"
-          placeholder="Filtrar por nombre del cliente o número"
-          value={textoFiltrado}
-          onChange={(e) => setFilterText(e.target.value)}
-          style={{
-            flexGrow: 1,
-            padding: "0.5rem",
-            borderRadius: "4px",
-            border: "1px solid #333",
-            backgroundColor: "#1f1f1f",
-            color: "#fff",
-          }}
-          aria-label="Filtrar por nombre del cliente o número"
-        />
-        <button
-          onClick={handleAddSelected}
-          disabled={IDSeleccionado === null}
-          style={{
-            padding: "0.5rem 1rem",
-            borderRadius: "4px",
-            border: "none",
-            backgroundColor: IDSeleccionado === null ? "#555" : "#007bff",
-            color: "#fff",
-            cursor: IDSeleccionado === null ? "not-allowed" : "pointer",
-            userSelect: "none",
-            transform: isClicked ? "scale(0.95)" : "scale(1)",
-            transition: "transform 150ms ease",
-          }}
-          aria-label="Añadir cliente seleccionado"
-        >
-          Agregar
-        </button>
-      </div>
+        <option value="Defecto">Todos</option>
+        <option value="Natural">Natural</option>
+        <option value="Jurídico">Jurídico</option>
+      </select>
+
+      <button
+        onClick={handleAddSelected}
+        disabled={IDSeleccionado === null}
+        style={{
+          padding: "0.5rem 1rem",
+          borderRadius: "4px",
+          border: "none",
+          backgroundColor: IDSeleccionado === null ? "#555" : "#007bff",
+          color: "#fff",
+          cursor: IDSeleccionado === null ? "not-allowed" : "pointer",
+          transform: isClicked ? "scale(0.95)" : "scale(1)",
+          transition: "transform 150ms ease",
+        }}
+        aria-label="Añadir cliente seleccionado"
+      >
+        Agregar
+      </button>
+    </div>
 
       {mensajeError && (
         <div
@@ -181,6 +243,7 @@ export default function TablaFiltroClientes({
           <tr>
             <th style={thStyle}></th>
             <th style={thStyle}>ID</th>
+            {tipoFiltro === "Jurídico" && <td style={thStyle}>Ruc</td>}
             <th style={thStyle}>Nombre Cliente</th>
             <th style={thStyle}>Telefono</th>
           </tr>
@@ -205,6 +268,7 @@ export default function TablaFiltroClientes({
                   />
                 </td>
                 <td style={tdStyle}>{row.id}</td>
+                {tipoFiltro === "Jurídico" && <td style={tdStyle}>{row.ruc}</td>}
                 <td style={tdStyle}>{row.nombreCliente}</td>
                 <td style={tdStyle}>{row.telefono}</td>
               </tr>
@@ -212,7 +276,7 @@ export default function TablaFiltroClientes({
           ) : (
             <tr>
               {/* No se encontraron resultados similares */}
-              <td style={tdStyle} colSpan={4} align="center">
+              <td style={tdStyle} colSpan={columnasVisibles} align="center">
                 Sin resultados encontrados
               </td>
             </tr>

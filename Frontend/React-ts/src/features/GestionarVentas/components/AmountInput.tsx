@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import "./AmountInput.css";
 
-export default function AmountInput() {
+type Props={
+  Total:number;
+}
+
+export default function AmountInput({Total}:Props) {
   const [amount, setAmount] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,10 +38,10 @@ export default function AmountInput() {
       <div className="input-wrapper">
         <span>C$</span>
         <input
-          type="text"
+          type="text" 
           id="total"
           name="Total"
-          value={amount}
+          value={Total.toFixed(2)}
           onChange={handleChange}
           onBlur={handleBlur}
           placeholder="Precio total"

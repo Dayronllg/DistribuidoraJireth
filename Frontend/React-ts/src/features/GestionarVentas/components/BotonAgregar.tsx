@@ -1,9 +1,16 @@
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 
-export default function BotonAgregar() {
+
+
+type Props = {
+  AgregarVenta:()=> void
+}
+
+export default function BotonAgregar({AgregarVenta}:Props) {
   return (
     <Button
+     onClick={AgregarVenta}
       variant="contained"
       startIcon={<AddIcon />}
       sx={{
@@ -16,6 +23,7 @@ export default function BotonAgregar() {
         "&:hover": { backgroundColor: "#0056b3" },
       }}
     >
+     
       Agregar
     </Button>
   );

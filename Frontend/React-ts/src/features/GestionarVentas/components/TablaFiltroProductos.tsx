@@ -1,22 +1,43 @@
 import React, { useState, useMemo, useEffect } from "react";
-
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
+import type { Producto } from "../../Productos/components/TablaProductos";
+import axios from "axios";
 // Definir el tipo de valor de cada fila (producto)
-type FilaProductos = {
+/*type FilaProductos = {
   id: number;
   nombre: string;
   precio: number;
   cantidad: number;
   estado: string;
+};*/
+
+type FilaProductos = {
+    id: number;
+    nombre: string;
+    idPresentacion:number,
+    nombreP:string
+    precio:number;
+    cantidad:number;
+    estado:string;
 };
 
+/*interface Producto{
+
+  idProducto: number,
+  nombre: string,
+  estado: string,
+  marca:marca,
+  presentaciones:Presentacion[]
+
+}*/
 // Lista temporal solo para probar
-const initialRows: FilaProductos[] = [
+/*const initialRows: FilaProductos[] = [
   { id: 1, nombre: "Pan", precio: 35, cantidad: 3, estado: "Activo" },
   { id: 2, nombre: "Mondongo", precio: 42, cantidad: 5, estado: "Inactivo" },
   { id: 3, nombre: "Jabon", precio: 45, cantidad: 7, estado: "Activo" },
   { id: 4, nombre: "Arroz", precio: 16, cantidad: 2, estado: "Activo" },
   { id: 5, nombre: "Aceite", precio: 29, cantidad: 6, estado: "Activo" },
-];
+];*/
 
 type Props = {
   AgregarSeleccionado: (rows: FilaProductos[]) => void; // función para notificar al componente padre qué productos se van a agregar.
@@ -29,7 +50,7 @@ export default function TablaFiltroProductos({
   AgregarSeleccionado,
   productosYaAgregados,
 }: Props) {
-  const [rows] = useState<FilaProductos[]>(initialRows); // Lista de productos base
+  const [rows,setRows] = useState<FilaProductos[]>(); // Lista de productos base
   const [IDSeleccionado, setIDSeleccionado] = useState<number[]>([]); // IDs seleccionados
   const [textoFiltrado, setFilterText] = useState(""); // Texto de filtro
   const [isClicked, setIsClicked] = useState(false);
@@ -38,11 +59,44 @@ export default function TablaFiltroProductos({
   const [paginaActual, setpaginaActual] = useState(1); // Página actual
   const [mensajeError, setMensajeError] = useState<string | null>(null); // Mensaje de error
 
+  React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<Producto>>(
+        "http://localhost:5187/api/Productos/ObtenerProductos",
+        {
+          params: {
+            pagina: 1,
+            tamanioPagina: 100,
+          },
+        }
+      )
+     .then((response) => {
+    const filas = response.data.datos.flatMap((producto) =>
+       producto.presentaciones.map((p) => ({
+       
+        id:producto.idProducto,
+        nombre:producto.nombre,
+        idPresentacion:p.idPresentacion,
+        nombreP:p.nombre,
+        precio:p.precio,
+        cantidad:p.inventario,
+        estado:"Activo"
+      
+    }))
+  );
+
+      setRows(filas);
+    })
+    .catch((error) => {
+      console.error("Error al obtener productos:", error);
+    });
+}, []);
+
   const FilasFiltradas = useMemo(() => {
     const lowerFilter = textoFiltrado.toLowerCase();
-    return rows.filter(
+    return (rows ?? []).filter(
       (row) =>
-        (row.nombre ?? "").toLowerCase().includes(lowerFilter) ||
+        (row.nombreP ?? "").toLowerCase().includes(lowerFilter) ||
         row.estado.toLowerCase().includes(lowerFilter)
     );
   }, [textoFiltrado, rows]);
@@ -76,37 +130,38 @@ export default function TablaFiltroProductos({
     if (IDSeleccionado.length === paginatedRows.length) {
       setIDSeleccionado([]);
     } else {
-      setIDSeleccionado(paginatedRows.map((row) => row.id));
+      setIDSeleccionado(paginatedRows.map((row) => row.idPresentacion));
     }
   };
 
-  const handleAddSelected = () => {
-    if (IDSeleccionado.length === 0) return;
-    // Obtiene productos seleccionados
-    const nuevosSeleccionados = rows
-      .filter((row) => IDSeleccionado.includes(row.id))
-      // Aqui los productos al agregarse la cantidad por defecto siempre será 1
-      .map((row) => ({ ...row, cantidad: 1 }));
+const handleAddSelected = () => {
+  if (IDSeleccionado.length === 0) return;
 
-    const yaAgregados = nuevosSeleccionados.filter((row) =>
-      productosYaAgregados.some((p) => p.id === row.id)
+  // Obtiene productos seleccionados
+  const nuevosSeleccionados = rows!
+    .filter((row) => IDSeleccionado.includes(row.idPresentacion))
+    .map((row: FilaProductos) => ({ ...row, cantidad: 1 }));
+
+  const yaAgregados = nuevosSeleccionados.filter((row) =>
+    productosYaAgregados.some((p) => p.idPresentacion === row.idPresentacion)
+  );
+
+  // Mostrar error si hay duplicados
+  if (yaAgregados.length > 0) {
+    setMensajeError(
+      `Los siguientes productos ya fueron agregados: ${yaAgregados
+        .map((r) => r.nombreP)
+        .join(", ")}`
     );
+    return;
+  }
 
-    // Mostrar error si hay duplicados
-    if (yaAgregados.length > 0) {
-      setMensajeError(
-        `Los siguientes productos ya fueron agregados: ${yaAgregados.map((r) => r.nombre).join(", ")}`
-      );
-      return;
-    }
-
-    setIsClicked(true);
-    setTimeout(() => setIsClicked(false), 150);
-    // Llama al padre para agregarlos
-    AgregarSeleccionado(nuevosSeleccionados);
-    setIDSeleccionado([]); // limpiar selección tras agregar
-  };
-
+  setIsClicked(true);
+  setTimeout(() => setIsClicked(false), 150);
+  // Llama al padre para agregarlos
+  AgregarSeleccionado(nuevosSeleccionados);
+  setIDSeleccionado([]); // limpiar selección tras agregar
+};
   // Muestra un mensaje de error por 3 segundos si se intenta agregar un producto duplicado.
   useEffect(() => {
     if (mensajeError) {
@@ -226,6 +281,8 @@ export default function TablaFiltroProductos({
             </th>
             <th style={thStyle}>ID</th>
             <th style={thStyle}>Nombre</th>
+            <th style={thStyle}>IdPresentacion</th>
+            <th style={thStyle}>Nombre Presentacion</th>
             <th style={thStyle}>Precio (C$)</th>
             <th style={thStyle}>Cantidad</th>
             <th style={thStyle}>Estado</th>
@@ -235,9 +292,9 @@ export default function TablaFiltroProductos({
           {paginatedRows.length > 0 ? (
             paginatedRows.map((row) => (
               <tr
-                key={row.id}
+                key={row.idPresentacion}
                 style={{
-                  backgroundColor: IDSeleccionado.includes(row.id)
+                  backgroundColor: IDSeleccionado.includes(row.idPresentacion)
                     ? "#1f1f1f"
                     : "inherit",
                 }}
@@ -245,14 +302,16 @@ export default function TablaFiltroProductos({
                 <td style={tdStyle}>
                   <input
                     type="checkbox"
-                    checked={IDSeleccionado.includes(row.id)}
-                    onChange={() => handleSelect(row.id)}
-                    aria-label={`Select row with ID ${row.id}`}
+                    checked={IDSeleccionado.includes(row.idPresentacion)}
+                    onChange={() => handleSelect(row.idPresentacion)}
+                    aria-label={`Select row with ID ${row.idPresentacion}`}
                     style={{ cursor: "pointer" }}
                   />
                 </td>
                 <td style={tdStyle}>{row.id}</td>
                 <td style={tdStyle}>{row.nombre}</td>
+                <td style={tdStyle}>{row.idPresentacion}</td>
+                <td style={tdStyle}>{row.nombreP}</td>
                 <td style={tdStyle}>{row.precio}</td>
                 <td style={tdStyle}>{row.cantidad}</td>
                 <td style={tdStyle}>{row.estado}</td>

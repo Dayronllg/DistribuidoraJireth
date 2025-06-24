@@ -28,15 +28,15 @@ function Login() {
         formData
       );
 
-      const { token, rol,IdUsuario } = response.data;
+      const { token, rol,idUsuario } = response.data;
       console.log("Token recibido: ", token, " Rol: ", rol);
        
       // Guarda el token y el rol en localStorage
-      localStorage.setItem("IdUsuario",IdUsuario);
+      localStorage.setItem("idUsuario",idUsuario);
       localStorage.setItem("token", token);
       localStorage.setItem("rol", rol);
 
-      console.log("Token recibido:", response.data.token);
+      console.log("Token recibido:", response.data.token,response.data.idUsuario);
       setMessage("Login Exitoso. Redirigiendo....");
       // Aquí se puede guardar el token si querés: localStorage.setItem("token", response.data.token)
       // ✅ Redirección (simple o según rol)

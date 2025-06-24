@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 
 type Row = {
-  id: number;
-  nombre: string;
-  precio: number;
-  cantidad: number;
-  estado: string;
+ id: number;
+    nombre: string;
+    idPresentacion:number,
+    nombreP:string
+    precio:number;
+    cantidad:number;
+    estado:string;
 };
 
 type Props = {
@@ -20,7 +22,7 @@ export default function TablaVentas({ data, Eliminar, Editar }: Props) {
 
   // Editar una Fila
   const empezarEditar = (fila: Row) => {
-    setEditarID(fila.id);
+    setEditarID(fila.idPresentacion);
     setEditForm(fila);
   };
 
@@ -71,50 +73,28 @@ export default function TablaVentas({ data, Eliminar, Editar }: Props) {
           <tr>
             <th style={thStyle}>ID</th>
             <th style={thStyle}>Nombre</th>
+            <th style={thStyle}>IdPresentacion</th>
+            <th style={thStyle}>Presentacion</th>
             <th style={thStyle}>Precio</th>
             <th style={thStyle}>Cantidad</th>
-            <th style={thStyle}>Estado</th>
             <th style={thStyle}>Acciones</th>
           </tr>
         </thead>
         <tbody>
           {data.map((row) => (
-            <tr key={row.id}>
+            <tr key={row.idPresentacion}>
               <td style={tdStyle}>{row.id}</td>
-              {editarID === row.id ? (
-                <>
-                  <td style={tdStyle}>
-                    <input
-                      type="text"
-                      name="nombre"
-                      value={editForm.nombre ?? ""}
-                      onChange={manejarCambio}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={tdStyle}>
-                    <input
-                      type="number"
-                      name="precio"
-                      value={editForm.precio ?? ""}
-                      onChange={manejarCambio}
-                      style={inputStyle}
-                    />
-                  </td>
+              {editarID === row.idPresentacion ? (
+                <> 
+                  <td style={tdStyle}>{row.nombre}</td>
+                  <td style={tdStyle}>{row.idPresentacion}</td>
+                  <th style={tdStyle}>{row.nombreP}</th>
+                   <td style={tdStyle}>{row.precio}</td>
                   <td style={tdStyle}>
                     <input
                       type="number"
                       name="cantidad"
                       value={editForm.cantidad ?? ""}
-                      onChange={manejarCambio}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={tdStyle}>
-                    <input
-                      type="text"
-                      name="estado"
-                      value={editForm.estado ?? ""}
                       onChange={manejarCambio}
                       style={inputStyle}
                     />
@@ -137,9 +117,11 @@ export default function TablaVentas({ data, Eliminar, Editar }: Props) {
               ) : (
                 <>
                   <td style={tdStyle}>{row.nombre}</td>
+                  <td style={tdStyle}>{row.idPresentacion}</td>
+                  <th style={tdStyle}>{row.nombreP}</th>
                   <td style={tdStyle}>{row.precio}</td>
                   <td style={tdStyle}>{row.cantidad}</td>
-                  <td style={tdStyle}>{row.estado}</td>
+                 
                   <td style={tdStyle}>
                     <button
                       onClick={() => empezarEditar(row)}
@@ -148,7 +130,7 @@ export default function TablaVentas({ data, Eliminar, Editar }: Props) {
                       Modificar
                     </button>
                     <button
-                      onClick={() => Eliminar(row.id)}
+                      onClick={() => Eliminar(row.idPresentacion)}
                       style={{ ...actionButton, backgroundColor: "#dc3545" }}
                     >
                       Eliminar

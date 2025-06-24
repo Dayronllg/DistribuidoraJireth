@@ -5,13 +5,27 @@ import AmountInput from "../components/AmountInput";
 import TablaFiltroClientes from "../components/TablaFiltroClientes";
 import ClienteInput from "../components/ClienteInput";
 import BotonAgregar from "../components/BotonAgregar";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { confirmAlert } from "react-confirm-alert";
 
-type FilaProductos = {
+
+/*type FilaProductos = {
   id: number;
   nombre: string;
   precio: number;
   cantidad: number;
   estado: string;
+};*/
+
+type FilaProductos = {
+    id: number;
+    nombre: string;
+    idPresentacion:number,
+    nombreP:string
+    precio:number;
+    cantidad:number;
+    estado:string;
 };
 
 type FilaClientes = {
@@ -19,6 +33,22 @@ type FilaClientes = {
   nombreCliente: string;
   telefono: string;
 };
+
+type Venta={
+  totalVenta:number;
+  idCliente:number;
+  idUsuario:number;
+  detalleVenta:DetalleVenta[]
+}
+
+type DetalleVenta = {
+  
+      cantidad:number,
+      precio: number,
+      subtotal: number,
+      idProducto: number,
+      idPresentacion: number
+}
 
 export default function GestionarVentas() {
   // FilaProductos
@@ -32,21 +62,87 @@ export default function GestionarVentas() {
   // const TablaFiltroProductos.tsx
   const AñadirFilasSeleccionadas = (rows: FilaProductos[]) => {
     const nuevos = rows.filter(
-      (row) => !FilasSeleccionadas.some((r) => r.id === row.id)
+      (row) => !FilasSeleccionadas.some((r) => r.idPresentacion === row.idPresentacion)
     );
     setFilasSeleccionadas((prev) => [...prev, ...nuevos]);
   };
 
   // const para TablaProductosVender.tsx
   const EliminarFilasSeleccionadas = (id: number) => {
-    setFilasSeleccionadas((prev) => prev.filter((row) => row.id !== id));
+    setFilasSeleccionadas((prev) => prev.filter((row) => row.idPresentacion !== id));
   };
 
   const EditarFilaSeleccionada = (editarFila: FilaProductos) => {
     setFilasSeleccionadas((prev) =>
-      prev.map((row) => (row.id === editarFila.id ? editarFila : row))
+      prev.map((row) => (row.idPresentacion === editarFila.idPresentacion ? editarFila : row))
     );
   };
+  // para calcular el total mijo
+  const total = FilasSeleccionadas.reduce(
+  (sum, row) => sum + row.precio * row.cantidad,
+  0
+);
+
+  const enviarVenta = async (venta: Venta) => {
+  try {
+    const response = await axios.post("http://localhost:5187/api/Ventas/CrearVenta", venta);
+    return response.data;
+    
+  } catch (error) {
+    console.error("Error al guardar la venta:", error);
+    throw error;
+  }
+};
+
+
+
+const handleAgregarVenta = () => {
+  if (!clienteUnicoSeleccionado || FilasSeleccionadas.length === 0) {
+    toast.error("Debe seleccionar un cliente y al menos un producto");
+    return;
+  }
+
+  // Mostrar alerta de confirmación
+  confirmAlert({
+    title: "¿Confirmar venta?",
+    message: "¿Estás seguro que deseas registrar esta venta?",
+    buttons: [
+      {
+        label: "Sí, confirmar",
+        onClick: async () => {
+          const venta: Venta = {
+            totalVenta: total,
+            idCliente: clienteUnicoSeleccionado.id,
+            idUsuario: Number(localStorage.getItem("idUsuario")),
+            detalleVenta: FilasSeleccionadas.map((item) => ({
+              cantidad: item.cantidad,
+              precio: item.precio,
+              subtotal: item.precio * item.cantidad,
+              idProducto: item.id,
+              idPresentacion: item.idPresentacion,
+            })),
+          };
+
+          try {
+            const resultado = await enviarVenta(venta);
+            console.log("Venta registrada con éxito:", resultado);
+            toast.success("Venta exitosa");
+            setFilasSeleccionadas([]);
+            setClienteUnicoSeleccionado(null);
+          } catch (error) {
+            toast.error("Error al registrar la venta.");
+          }
+        },
+      },
+      {
+        label: "Cancelar",
+        onClick: () => {
+          toast.info("Registro cancelado");
+        },
+      },
+    ],
+  });
+};
 
   return (
     <div
@@ -97,9 +193,9 @@ export default function GestionarVentas() {
       />
       <div style={{ padding: "2rem" }}>
         {/* Input del Total a Pagar C$ */}
-        <AmountInput />
+        <AmountInput Total={total} />
         {/* Boton Agregar */}
-        <BotonAgregar />
+        <BotonAgregar AgregarVenta={handleAgregarVenta} />
       </div>
     </div>
   );

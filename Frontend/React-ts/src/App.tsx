@@ -17,14 +17,42 @@ import Reportes from "./features/Reportes/pages/Reportes";
 import ClientesNaturales from "./features/ClientesNaturales/pages/ClientesNaturales";
 import ClientesJuridicos from "./features/ClientesJuridicos/pages/ClientesJuridicos";
 import Proveedores from "./features/Proveedores/pages/Proveedores";
+import "react-confirm-alert/src/react-confirm-alert.css";
 //import ProtectedRoute from "./features/Login/ProtectedRoute";
+
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 
 // {<ProtectedRoute allowedRoles={["admin"]}>
 // <DashboardLayout/>
 // </ProtectedRoute>}
 export default function App() {
   return (
+    <>
+    <ToastContainer
+     position="top-right"
+     autoClose={3000}
+     hideProgressBar={false}
+     closeOnClick={false}
+     pauseOnFocusLoss
+     draggable
+     pauseOnHover
+    theme="dark" // También puedes usar "light" o "colored"
+     toastStyle={{
+    background: "#1f1f1f",
+    color: "#fff",
+    fontSize: "18px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+    border: "1px solid #444",
+    padding: "1rem",
+  }}
+    />
+
     <Routes>
+      
       {/* Ruta principal de Login */}
       <Route path="/" element={<Login />}></Route>
 
@@ -47,6 +75,7 @@ export default function App() {
         <Route path="clientesJuridicos" element={<ClientesJuridicos />} />
         <Route path="proveedores" element={<Proveedores />} />
         <Route path="*" element={<NoFoundPage />} />
+        
       </Route>
 
       {/* Ruta para usuario */}
@@ -68,8 +97,11 @@ export default function App() {
         <Route path="clientesJuridicos" element={<ClientesJuridicos />} />
         <Route path="proveedores" element={<Proveedores />} />
         <Route path="*" element={<NoFoundPage />} />
+         
       </Route>
-
+    
+     
+      
       {/*Rutas para Admin*/}
       {/* <Route path="/admin" element={<DashboardLayout />}>
         <Route path="inicio" element={<Inicio />}></Route>
@@ -83,5 +115,6 @@ export default function App() {
         <Route path="compras" element={<Compras />} />
       </Route>*/}
     </Routes>
+    </>
   );
 }

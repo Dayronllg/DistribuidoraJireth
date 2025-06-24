@@ -68,7 +68,7 @@ interface marca {
     estado: string
 }
 
-interface Producto{
+export interface Producto{
 
   idProducto: number,
   nombre: string,
