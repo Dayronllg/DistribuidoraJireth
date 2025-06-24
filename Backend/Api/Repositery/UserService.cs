@@ -53,7 +53,7 @@ public class UserService : Service<Usuario>, IUserService
     public async Task<Result<UsuarioDto>> Login(UsuarioLogDto usuarioLog)
     {
         var result = await _validation.ValidarLogin(usuarioLog);
-
+        
         return result;
     }
 }

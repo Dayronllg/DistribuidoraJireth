@@ -27,6 +27,15 @@ namespace Api.Controllers
             return Ok(RespuestaTrabajadores);
         }
 
+         [HttpGet("ObtenerSoloProductos")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ObtenerSoloProducto(int Pagina, int TamanioPagina)
+        {
+            var RespuestaProductos = await _productoService.PaginarSoloProducto(Pagina, TamanioPagina);
+
+            return Ok(RespuestaProductos);
+        }
 
         [HttpPost("CrearProducto")]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
