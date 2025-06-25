@@ -8,7 +8,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import Button from "@mui/material/Button";
 import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
-
+import { toast } from "react-toastify";
 
 import {
   GridRowModes,
@@ -28,27 +28,23 @@ import type {
   GridSlotProps,
 } from "@mui/x-data-grid";
 
-import {
-  randomId
-} from "@mui/x-data-grid-generator";
+import { randomId } from "@mui/x-data-grid-generator";
 import axios from "axios";
 
-
-export interface Cliente{
-  idCliente: number,
-  direccion: string,
-  telefono: string,
-  estado: "Activo" | "Inativo",
-  clienteNatural:ClienteNatural
+export interface Cliente {
+  idCliente: number;
+  direccion: string;
+  telefono: string;
+  estado: "Activo" | "Inativo";
+  clienteNatural: ClienteNatural;
 }
 
-export interface ClienteNatural{
-    primerNombre:string,
-    segundoNombre: string,
-    primerApellido: string,
-    segundoApellido: string
+export interface ClienteNatural {
+  primerNombre: string;
+  segundoNombre: string;
+  primerApellido: string;
+  segundoApellido: string;
 }
-
 
 function mapRowToClienteNatural(row: any): Cliente {
   return {
@@ -60,17 +56,19 @@ function mapRowToClienteNatural(row: any): Cliente {
       primerNombre: row.primerNombre,
       segundoNombre: row.segundoNombre,
       primerApellido: row.primerApellido,
-      segundoApellido: row.segundoApellido
-    }
+      segundoApellido: row.segundoApellido,
+    },
   };
 }
 
-
-const API_BASE='http://localhost:5187/api'
+const API_BASE = "http://localhost:5187/api";
 
 export const crearClienteNatural = async (nuevo: Cliente) => {
   try {
-    const response = await axios.post(`${API_BASE}/ClienteNatural/CrearClienteNatural`, nuevo);
+    const response = await axios.post(
+      `${API_BASE}/ClienteNatural/CrearClienteNatural`,
+      nuevo
+    );
     return response.data;
   } catch (error) {
     console.error("Error al crear ClienteNatural", error);
@@ -78,7 +76,9 @@ export const crearClienteNatural = async (nuevo: Cliente) => {
   }
 };
 
-export async function actualizarClienteNatural(ClienteNatural: Cliente): Promise<Cliente> {
+export async function actualizarClienteNatural(
+  ClienteNatural: Cliente
+): Promise<Cliente> {
   try {
     const response = await axios.put<Cliente>(
       `${API_BASE}/ClienteNatural/ActualizarClienteNatural`,
@@ -93,15 +93,17 @@ export async function actualizarClienteNatural(ClienteNatural: Cliente): Promise
 
 const eliminarClienteNatural = async (id: number) => {
   try {
-    const response = await axios.put(`${API_BASE}/ClienteNatural/BajaClienteNatural`,null,{params:{id:id}} 
+    const response = await axios.put(
+      `${API_BASE}/ClienteNatural/BajaClienteNatural`,
+      null,
+      { params: { id: id } }
     );
     return response.data;
   } catch (error) {
-    console.error('Error al eliminar (inhabilitar) el ClienteNatural:', error);
+    console.error("Error al eliminar (inhabilitar) el ClienteNatural:", error);
     throw error;
   }
 };
-
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -125,13 +127,10 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
 
   const handleClick = () => {
     const id = randomId();
-    setRows((oldRows) => [
-      ...oldRows,
-      { id, name: "", age: "", role: "", isNew: true },
-    ]);
+    setRows((oldRows) => [...oldRows, { id, estado: "Activo", isNew: true }]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: "direccion" },
     }));
   };
 
@@ -161,8 +160,8 @@ export default function TablaClientesNaturales() {
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
-  
- React.useEffect(() => {
+
+  React.useEffect(() => {
     axios
       .get<PaginacionResultado<Cliente>>(
         "http://localhost:5187/api/ClienteNatural/ObtenerClienteNaturales",
@@ -178,10 +177,10 @@ export default function TablaClientesNaturales() {
           response.data.datos.map((t) => ({
             ...t,
             id: t.idCliente,
-            primerNombre:t.clienteNatural.primerNombre,
-            segundoNombre:t.clienteNatural.segundoNombre,
-            primerApellido:t.clienteNatural.primerApellido,
-            segundoApellido:t.clienteNatural.segundoApellido
+            primerNombre: t.clienteNatural.primerNombre,
+            segundoNombre: t.clienteNatural.segundoNombre,
+            primerApellido: t.clienteNatural.primerApellido,
+            segundoApellido: t.clienteNatural.segundoApellido,
           }))
         );
       })
@@ -189,7 +188,6 @@ export default function TablaClientesNaturales() {
         console.error("Error al obtener ClienteNatural:", error);
       });
   }, []);
-
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -208,12 +206,10 @@ export default function TablaClientesNaturales() {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-    const MantenerClickBorrar = (id: GridRowId) => async () => {
-       
-       await eliminarClienteNatural(Number(id));
-       setRows(rows.filter((row) => row.id !== id));
-     };
-   
+  const MantenerClickBorrar = (id: GridRowId) => async () => {
+    await eliminarClienteNatural(Number(id));
+    setRows(rows.filter((row) => row.id !== id));
+  };
 
   const MantenerClickCancelar = (id: GridRowId) => () => {
     setRowModesModel({
@@ -227,52 +223,146 @@ export default function TablaClientesNaturales() {
     }
   };
 
- const processRowUpdate = async (newRow: GridRowModel) => {
-   //let updatedRow = { ...newRow, isNew: false };
- let updatedRow: { id: number; isNew: boolean, primerNombre:string ,segundoNombre:string,primerApellido:string,segundoApellido:string} =
-  { id: newRow.id, isNew: false ,primerNombre:newRow.primerNombre,segundoNombre:newRow.segundoNombre,primerApellido:newRow.primerApellido,
-    segundoApellido:newRow.segundoApellido
-  };
- 
-   if (newRow.isNew) {
-     const clienteNaturalCreado = await crearClienteNatural(mapRowToClienteNatural(newRow));
- 
-     updatedRow = {
-       ...newRow,
-       ...clienteNaturalCreado,
-       id: clienteNaturalCreado.idCliente, 
-       /*primerNombre:clienteNaturalCreado.primerNombre,
+  const processRowUpdate = async (newRow: GridRowModel) => {
+    //let updatedRow = { ...newRow, isNew: false };
+
+    // VALIDACIONES
+    const soloLetrasRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,30}$/;
+
+    const validarCampoTextoObligatorio = (
+      valor: string,
+      nombreCampo: string
+    ) => {
+      const texto = valor?.trim();
+
+      if (!texto) {
+        throw new Error(`${nombreCampo} no puede estar vacío.`);
+      }
+
+      if (!soloLetrasRegex.test(texto)) {
+        throw new Error(
+          `${nombreCampo} solo debe contener letras y espacios (máximo 30 caracteres).`
+        );
+      }
+    };
+
+    const validarDireccion = (valor: string) => {
+      const texto = valor?.trim();
+
+      if (!texto) {
+        throw new Error("El campo Dirección no puede estar vacío.");
+      }
+
+      if (texto.length > 100) {
+        throw new Error("La Dirección no puede exceder los 100 caracteres.");
+      }
+
+      const direccionRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s.,#-]+$/;
+
+      if (!direccionRegex.test(texto)) {
+        throw new Error(
+          "La Dirección solo debe contener letras, números y espacios."
+        );
+      }
+    };
+
+    const validarCampoTextoOpcional = (valor: string, nombreCampo: string) => {
+      const texto = valor?.trim();
+
+      if (texto && !soloLetrasRegex.test(texto)) {
+        throw new Error(
+          `${nombreCampo} solo debe contener letras y espacios (máximo 30 caracteres).`
+        );
+      }
+    };
+
+    // 🔒 Validación de nombres y apellidos
+    try {
+      validarCampoTextoObligatorio(newRow.primerNombre, "Primer Nombre");
+      validarCampoTextoOpcional(newRow.segundoNombre, "Segundo Nombre");
+      validarCampoTextoObligatorio(newRow.primerApellido, "Primer Apellido");
+      validarCampoTextoOpcional(newRow.segundoApellido, "Segundo Apellido");
+
+      // 🔒 Validación del teléfono
+      const telefono = newRow.telefono?.toString().trim();
+
+      if (!telefono) {
+        throw new Error("El campo Teléfono no puede estar vacío.");
+      }
+
+      if (!/^\d+$/.test(telefono)) {
+        throw new Error("El Teléfono solo debe contener números.");
+      }
+
+      if (telefono.length !== 8) {
+        throw new Error("El Teléfono debe tener exactamente 8 dígitos.");
+      }
+
+      // 🔒 Validar dirección
+      validarDireccion(newRow.direccion);
+    } catch (error: any) {
+      toast.error(error.message); // o toast.error(error.message)
+      throw error;
+    }
+
+    let updatedRow: {
+      id: number;
+      isNew: boolean;
+      primerNombre: string;
+      segundoNombre: string;
+      primerApellido: string;
+      segundoApellido: string;
+    } = {
+      id: newRow.id,
+      isNew: false,
+      primerNombre: newRow.primerNombre,
+      segundoNombre: newRow.segundoNombre,
+      primerApellido: newRow.primerApellido,
+      segundoApellido: newRow.segundoApellido,
+    };
+
+    if (newRow.isNew) {
+      const clienteNaturalCreado = await crearClienteNatural(
+        mapRowToClienteNatural(newRow)
+      );
+
+      updatedRow = {
+        ...newRow,
+        ...clienteNaturalCreado,
+        id: clienteNaturalCreado.idCliente,
+        /*primerNombre:clienteNaturalCreado.primerNombre,
        segundoNombre:clienteNaturalCreado.segundoNombre,
        primerApellido:clienteNaturalCreado.primerApellido,
        segundoApellido:clienteNaturalCreado.segundoApellido,*/
-       isNew: false
-     };
-   } else {
-     const clienteNaturalActualizado = await actualizarClienteNatural(mapRowToClienteNatural(newRow));
-     updatedRow = {
-       ...clienteNaturalActualizado,
-       id: clienteNaturalActualizado.idCliente,
-       primerNombre:clienteNaturalActualizado.clienteNatural.primerNombre,
-       segundoNombre:clienteNaturalActualizado.clienteNatural.segundoNombre,
-       primerApellido:clienteNaturalActualizado.clienteNatural.primerApellido,
-       segundoApellido:clienteNaturalActualizado.clienteNatural.segundoApellido, 
-       isNew: false
-     };
-   }
- 
-   // Actualizás las filas del grid
-   setRows((prevRows) =>
-     prevRows.map((row) =>
-       row.id === newRow.id ? updatedRow : row
-     )
-   );
-   setRowModesModel((prevModel) => ({
-     ...prevModel,
-     [newRow.id]: { mode: GridRowModes.View }, // usar el id final
-   }));
- 
-   return updatedRow;
- };
+        isNew: false,
+      };
+    } else {
+      const clienteNaturalActualizado = await actualizarClienteNatural(
+        mapRowToClienteNatural(newRow)
+      );
+      updatedRow = {
+        ...clienteNaturalActualizado,
+        id: clienteNaturalActualizado.idCliente,
+        primerNombre: clienteNaturalActualizado.clienteNatural.primerNombre,
+        segundoNombre: clienteNaturalActualizado.clienteNatural.segundoNombre,
+        primerApellido: clienteNaturalActualizado.clienteNatural.primerApellido,
+        segundoApellido:
+          clienteNaturalActualizado.clienteNatural.segundoApellido,
+        isNew: false,
+      };
+    }
+
+    // Actualizás las filas del grid
+    setRows((prevRows) =>
+      prevRows.map((row) => (row.id === newRow.id ? updatedRow : row))
+    );
+    setRowModesModel((prevModel) => ({
+      ...prevModel,
+      [newRow.id]: { mode: GridRowModes.View }, // usar el id final
+    }));
+
+    return updatedRow;
+  };
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
@@ -447,7 +537,7 @@ export default function TablaClientesNaturales() {
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
-        onProcessRowUpdateError={()=> "errror"}
+        onProcessRowUpdateError={() => "errror"}
         slots={{ toolbar: EditToolbar }}
         slotProps={{ toolbar: { setRows, setRowModesModel } }}
         showToolbar

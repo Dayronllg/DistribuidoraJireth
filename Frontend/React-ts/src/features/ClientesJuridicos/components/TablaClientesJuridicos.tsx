@@ -7,7 +7,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import Button from "@mui/material/Button";
-
+import { toast } from "react-toastify";
 
 import {
   GridRowModes,
@@ -26,49 +26,44 @@ import type {
   GridSlotProps,
 } from "@mui/x-data-grid";
 
-import {
-  randomId,
-} from "@mui/x-data-grid-generator";
+import { randomId } from "@mui/x-data-grid-generator";
 import axios from "axios";
 import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
 
+export interface ClienteJ {
+  idCliente: number;
+  direccion: string;
+  telefono: string;
+  estado: "Activo" | "Inactivo";
+  clienteJuridico: ClienteJuridico;
+}
 
-export interface ClienteJ{
-  idCliente: number,
-  direccion: string,
-  telefono: string,
-  estado: "Activo" | "Inactivo",
-  clienteJuridico:ClienteJuridico,
-  
-};
+export interface ClienteJuridico {
+  ruc: string;
+  nombre: string;
+}
 
-export interface ClienteJuridico{
-    ruc:string,
-    nombre:string
-};
-
-
- export function mapRowToClienteJuridico(row: GridRowModel): ClienteJ {
+export function mapRowToClienteJuridico(row: GridRowModel): ClienteJ {
   return {
     idCliente: row.idCliente,
     direccion: row.direccion,
     telefono: row.telefono,
-    estado: row.estado ,
+    estado: row.estado,
     clienteJuridico: {
-    ruc:row.ruc,
-    nombre:row.nombre
-    }
+      ruc: row.ruc,
+      nombre: row.nombre,
+    },
   };
- }
-  
+}
 
-
-
-const API_BASE='http://localhost:5187/api'
+const API_BASE = "http://localhost:5187/api";
 
 export const crearClienteJuridico = async (nuevo: ClienteJ) => {
   try {
-    const response = await axios.post(`${API_BASE}/ClienteJuridico/CrearClienteJuridico`, nuevo);
+    const response = await axios.post(
+      `${API_BASE}/ClienteJuridico/CrearClienteJuridico`,
+      nuevo
+    );
     return response.data;
   } catch (error) {
     console.error("Error al crear ClienteJuridico", error);
@@ -76,7 +71,9 @@ export const crearClienteJuridico = async (nuevo: ClienteJ) => {
   }
 };
 
-export async function actualizarClienteJuridico(ClienteJuridico: ClienteJ): Promise<ClienteJ> {
+export async function actualizarClienteJuridico(
+  ClienteJuridico: ClienteJ
+): Promise<ClienteJ> {
   try {
     const response = await axios.put<ClienteJ>(
       `${API_BASE}/ClienteJuridico/ActualizarClienteJuridico`,
@@ -85,21 +82,23 @@ export async function actualizarClienteJuridico(ClienteJuridico: ClienteJ): Prom
     return response.data;
   } catch (error) {
     console.error("Error al actualizar Cliente Natural:", error);
-    throw error; 
+    throw error;
   }
-};
+}
 
 const eliminarClienteJuridico = async (id: string) => {
   try {
-    const response = await axios.put(`${API_BASE}/ClienteJuridico/BajaClienteJuridico`,null,{params:{id:id}} 
+    const response = await axios.put(
+      `${API_BASE}/ClienteJuridico/BajaClienteJuridico`,
+      null,
+      { params: { id: id } }
     );
     return response.data;
   } catch (error) {
-    console.error('Error al eliminar (inhabilitar) el ClienteJuridico:', error);
+    console.error("Error al eliminar (inhabilitar) el ClienteJuridico:", error);
     throw error;
   }
 };
-
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -123,13 +122,10 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
 
   const handleClick = () => {
     const id = randomId();
-    setRows((oldRows) => [
-      ...oldRows,
-      { id, name: "", age: "", role: "", isNew: true },
-    ]);
+    setRows((oldRows) => [...oldRows, { id, estado: "Activo", isNew: true }]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: "direccion" },
     }));
   };
 
@@ -160,7 +156,7 @@ export default function TablaClientesJuridicos() {
     {}
   );
 
- React.useEffect(() => {
+  React.useEffect(() => {
     axios
       .get<PaginacionResultado<ClienteJ>>(
         "http://localhost:5187/api/ClienteJuridico/ObtenerClienteJuridicoes",
@@ -176,8 +172,8 @@ export default function TablaClientesJuridicos() {
           response.data.datos.map((t) => ({
             ...t,
             id: t.idCliente,
-            ruc:t.clienteJuridico.ruc,
-            nombre:t.clienteJuridico.nombre
+            ruc: t.clienteJuridico.ruc,
+            nombre: t.clienteJuridico.nombre,
           }))
         );
       })
@@ -204,13 +200,12 @@ export default function TablaClientesJuridicos() {
   };
 
   const MantenerClickBorrar = (id: GridRowId) => async () => {
-      //let f = rows.filter((row)=>row.id === id);
-       let f = rows.find((row)=> row.id===id);
-       let Ruc = f?.ruc;
-      await eliminarClienteJuridico(String(Ruc));
-      setRows(rows.filter((row) => row.id !== id));
-    };
-  
+    //let f = rows.filter((row)=>row.id === id);
+    let f = rows.find((row) => row.id === id);
+    let Ruc = f?.ruc;
+    await eliminarClienteJuridico(String(Ruc));
+    setRows(rows.filter((row) => row.id !== id));
+  };
 
   const MantenerClickCancelar = (id: GridRowId) => () => {
     setRowModesModel({
@@ -224,44 +219,133 @@ export default function TablaClientesJuridicos() {
     }
   };
 
- const processRowUpdate = async (newRow: GridRowModel) => {
-  //let updatedRow = { ...newRow, isNew: false };
-let updatedRow: { id: number; isNew: boolean, ruc:string, nombre:string } = { id: newRow.id, isNew: false,ruc:newRow.ruc,nombre:newRow.nombre };
+  const processRowUpdate = async (newRow: GridRowModel) => {
+    //let updatedRow = { ...newRow, isNew: false };
 
-  if (newRow.isNew) {
-    const ClienteJuridicoCreado = await crearClienteJuridico(mapRowToClienteJuridico(newRow));
+    // VALIDACIONES
+    const soloLetrasRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,30}$/;
 
-    updatedRow = {
-      ...newRow,
-      ...ClienteJuridicoCreado,
-      id: ClienteJuridicoCreado.idCliente,
-      
-      isNew: false,
+    const validarCampoTextoObligatorio = (
+      valor: string,
+      nombreCampo: string
+    ) => {
+      const texto = valor?.trim();
+
+      if (!texto) {
+        throw new Error(`${nombreCampo} no puede estar vacío.`);
+      }
+
+      if (!soloLetrasRegex.test(texto)) {
+        throw new Error(
+          `${nombreCampo} solo debe contener letras y espacios (máximo 30 caracteres).`
+        );
+      }
     };
-  } else {
-    const ClienteJuridicoActualizado = await actualizarClienteJuridico(mapRowToClienteJuridico(newRow));
-    updatedRow = {
-      ...ClienteJuridicoActualizado,
-      id: ClienteJuridicoActualizado.idCliente, 
-      isNew: false,
-      ruc:ClienteJuridicoActualizado.clienteJuridico.ruc,
-      nombre:ClienteJuridicoActualizado.clienteJuridico.nombre
+
+    const validarDireccion = (valor: string) => {
+      const texto = valor?.trim();
+
+      if (!texto) {
+        throw new Error("El campo Dirección no puede estar vacío.");
+      }
+
+      if (texto.length > 100) {
+        throw new Error("La Dirección no puede exceder los 100 caracteres.");
+      }
+
+      const direccionRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s.,#-]+$/;
+
+      if (!direccionRegex.test(texto)) {
+        throw new Error(
+          "La Dirección solo debe contener letras, números y espacios."
+        );
+      }
     };
-  }
 
-  // Actualizás las filas del grid
-  setRows((prevRows) =>
-    prevRows.map((row) =>
-      row.id === newRow.id ? updatedRow : row
-    )
-  );
-  setRowModesModel((prevModel) => ({
-    ...prevModel,
-    [newRow.id]: { mode: GridRowModes.View }, // usar el id final
-  }));
+    // 🔒 Validación de nombre
+    try {
+      validarCampoTextoObligatorio(newRow.nombre, "Nombre");
 
-  return updatedRow;
-};
+      // 🔒 Validación del teléfono
+      const telefono = newRow.telefono?.toString().trim();
+
+      if (!telefono) {
+        throw new Error("El campo Teléfono no puede estar vacío.");
+      }
+
+      if (!/^\d+$/.test(telefono)) {
+        throw new Error("El Teléfono solo debe contener números.");
+      }
+
+      if (telefono.length !== 8) {
+        throw new Error("El Teléfono debe tener exactamente 8 dígitos.");
+      }
+
+      // 🔒 Validación del RUC
+      const ruc = newRow.ruc?.toString().trim();
+
+      if (!ruc) {
+        throw new Error("El campo RUC no puede estar vacío.");
+      }
+
+      if (!/^\d+$/.test(ruc)) {
+        throw new Error("El RUC solo debe contener números.");
+      }
+
+      if (ruc.length !== 14) {
+        throw new Error("El RUC debe tener exactamente 14 dígitos.");
+      }
+
+      // 🔒 Validar dirección
+      validarDireccion(newRow.direccion);
+    } catch (error: any) {
+      toast.error(error.message); // o toast.error(error.message)
+      throw error;
+    }
+
+    let updatedRow: {
+      id: number;
+      isNew: boolean;
+      ruc: string;
+      nombre: string;
+    } = { id: newRow.id, isNew: false, ruc: newRow.ruc, nombre: newRow.nombre };
+
+    if (newRow.isNew) {
+      const ClienteJuridicoCreado = await crearClienteJuridico(
+        mapRowToClienteJuridico(newRow)
+      );
+
+      updatedRow = {
+        ...newRow,
+        ...ClienteJuridicoCreado,
+        id: ClienteJuridicoCreado.idCliente,
+
+        isNew: false,
+      };
+    } else {
+      const ClienteJuridicoActualizado = await actualizarClienteJuridico(
+        mapRowToClienteJuridico(newRow)
+      );
+      updatedRow = {
+        ...ClienteJuridicoActualizado,
+        id: ClienteJuridicoActualizado.idCliente,
+        isNew: false,
+        ruc: ClienteJuridicoActualizado.clienteJuridico.ruc,
+        nombre: ClienteJuridicoActualizado.clienteJuridico.nombre,
+      };
+    }
+
+    // Actualizás las filas del grid
+    setRows((prevRows) =>
+      prevRows.map((row) => (row.id === newRow.id ? updatedRow : row))
+    );
+    setRowModesModel((prevModel) => ({
+      ...prevModel,
+      [newRow.id]: { mode: GridRowModes.View }, // usar el id final
+    }));
+
+    return updatedRow;
+  };
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);

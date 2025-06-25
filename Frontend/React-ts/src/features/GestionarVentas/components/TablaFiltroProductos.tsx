@@ -12,13 +12,13 @@ import axios from "axios";
 };*/
 
 type FilaProductos = {
-    id: number;
-    nombre: string;
-    idPresentacion:number,
-    nombreP:string
-    precio:number;
-    cantidad:number;
-    estado:string;
+  id: number;
+  nombre: string;
+  idPresentacion: number;
+  nombreP: string;
+  precio: number;
+  cantidad: number;
+  estado: string;
 };
 
 /*interface Producto{
@@ -50,7 +50,7 @@ export default function TablaFiltroProductos({
   AgregarSeleccionado,
   productosYaAgregados,
 }: Props) {
-  const [rows,setRows] = useState<FilaProductos[]>(); // Lista de productos base
+  const [rows, setRows] = useState<FilaProductos[]>(); // Lista de productos base
   const [IDSeleccionado, setIDSeleccionado] = useState<number[]>([]); // IDs seleccionados
   const [textoFiltrado, setFilterText] = useState(""); // Texto de filtro
   const [isClicked, setIsClicked] = useState(false);
@@ -70,27 +70,25 @@ export default function TablaFiltroProductos({
           },
         }
       )
-     .then((response) => {
-    const filas = response.data.datos.flatMap((producto) =>
-       producto.presentaciones.map((p) => ({
-       
-        id:producto.idProducto,
-        nombre:producto.nombre,
-        idPresentacion:p.idPresentacion,
-        nombreP:p.nombre,
-        precio:p.precio,
-        cantidad:p.inventario,
-        estado:"Activo"
-      
-    }))
-  );
+      .then((response) => {
+        const filas = response.data.datos.flatMap((producto) =>
+          producto.presentaciones.map((p) => ({
+            id: producto.idProducto,
+            nombre: producto.nombre,
+            idPresentacion: p.idPresentacion,
+            nombreP: p.nombre,
+            precio: p.precio,
+            cantidad: p.inventario,
+            estado: "Activo",
+          }))
+        );
 
-      setRows(filas);
-    })
-    .catch((error) => {
-      console.error("Error al obtener productos:", error);
-    });
-}, []);
+        setRows(filas);
+      })
+      .catch((error) => {
+        console.error("Error al obtener productos:", error);
+      });
+  }, []);
 
   const FilasFiltradas = useMemo(() => {
     const lowerFilter = textoFiltrado.toLowerCase();
@@ -134,34 +132,34 @@ export default function TablaFiltroProductos({
     }
   };
 
-const handleAddSelected = () => {
-  if (IDSeleccionado.length === 0) return;
+  const handleAddSelected = () => {
+    if (IDSeleccionado.length === 0) return;
 
-  // Obtiene productos seleccionados
-  const nuevosSeleccionados = rows!
-    .filter((row) => IDSeleccionado.includes(row.idPresentacion))
-    .map((row: FilaProductos) => ({ ...row, cantidad: 1 }));
+    // Obtiene productos seleccionados
+    const nuevosSeleccionados = rows!
+      .filter((row) => IDSeleccionado.includes(row.idPresentacion))
+      .map((row: FilaProductos) => ({ ...row, cantidad: 1 }));
 
-  const yaAgregados = nuevosSeleccionados.filter((row) =>
-    productosYaAgregados.some((p) => p.idPresentacion === row.idPresentacion)
-  );
-
-  // Mostrar error si hay duplicados
-  if (yaAgregados.length > 0) {
-    setMensajeError(
-      `Los siguientes productos ya fueron agregados: ${yaAgregados
-        .map((r) => r.nombreP)
-        .join(", ")}`
+    const yaAgregados = nuevosSeleccionados.filter((row) =>
+      productosYaAgregados.some((p) => p.idPresentacion === row.idPresentacion)
     );
-    return;
-  }
 
-  setIsClicked(true);
-  setTimeout(() => setIsClicked(false), 150);
-  // Llama al padre para agregarlos
-  AgregarSeleccionado(nuevosSeleccionados);
-  setIDSeleccionado([]); // limpiar selección tras agregar
-};
+    // Mostrar error si hay duplicados
+    if (yaAgregados.length > 0) {
+      setMensajeError(
+        `Los siguientes productos ya fueron agregados: ${yaAgregados
+          .map((r) => r.nombreP)
+          .join(", ")}`
+      );
+      return;
+    }
+
+    setIsClicked(true);
+    setTimeout(() => setIsClicked(false), 150);
+    // Llama al padre para agregarlos
+    AgregarSeleccionado(nuevosSeleccionados);
+    setIDSeleccionado([]); // limpiar selección tras agregar
+  };
   // Muestra un mensaje de error por 3 segundos si se intenta agregar un producto duplicado.
   useEffect(() => {
     if (mensajeError) {
@@ -320,7 +318,7 @@ const handleAddSelected = () => {
           ) : (
             <tr>
               {/* No se encontraron resultados similares */}
-              <td style={tdStyle} colSpan={6} align="center">
+              <td style={tdStyle} colSpan={8} align="center">
                 Sin resultados encontrados
               </td>
             </tr>
