@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
+import axios from "axios";
 
 // Definir el tipo de valor de cada fila (producto)
 type FilaRoles = {
@@ -7,14 +9,11 @@ type FilaRoles = {
   estado: string;
 };
 
-// Lista temporal solo para probar
-const initialRows: FilaRoles[] = [
-  { id: 1, rol: "Administrador", estado: "Activo" },
-  { id: 2, rol: "Usuario", estado: "Activo" },
-  { id: 3, rol: "Jefe de Bodega", estado: "Activo" },
-  { id: 4, rol: "Gerente", estado: "Activo" },
-  { id: 5, rol: "Cajero", estado: "Desactivo" },
-];
+export interface Roles {
+  idRol: number;
+  nombre: string;
+  estado: "Activo" | "Inativo";
+}
 
 type Props = {
   // Cambio para que reciba un solo roles, no un array
@@ -28,7 +27,7 @@ export default function TablaFiltroRoles({
   AgregarSeleccionado,
   onSelectSingle,
 }: Props) {
-  const [rows] = useState<FilaRoles[]>(initialRows); // Lista de roless base
+  const [rows, setRows] = useState<FilaRoles[]>([]); // Lista de clientes base
   const [IDSeleccionado, setIDSeleccionado] = useState<number | null>(null); // IDs seleccionados
   const [textoFiltrado, setFilterText] = useState(""); // Texto de filtro
   const [isClicked, setIsClicked] = useState(false);
@@ -36,6 +35,34 @@ export default function TablaFiltroRoles({
   const [isNextClicked, setIsNextClicked] = useState(false);
   const [paginaActual, setpaginaActual] = useState(1); // Página actual
   const [mensajeError, setMensajeError] = useState<string | null>(null); // Mensaje de error
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await axios.get<PaginacionResultado<Roles>>(
+          "http://localhost:5187/api/Rol/ObtenerRoles",
+          {
+            params: {
+              pagina: 1,
+              tamanioPagina: 100,
+            },
+          }
+        );
+
+        const roles: FilaRoles[] = response.data.datos.map((r) => ({
+          id: r.idRol,
+          rol: r.nombre,
+          estado: r.estado,
+        }));
+
+        setRows(roles);
+      } catch (error) {
+        console.error("Error al obtener roles:", error);
+      }
+    };
+
+    fetchRoles();
+  }, []);
 
   const FilasFiltradas = useMemo(() => {
     const lowerFilter = textoFiltrado.toLowerCase();

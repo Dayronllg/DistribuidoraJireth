@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 
 type Row = {
   id: number;
@@ -12,52 +13,74 @@ type Row = {
 
 type Props = {
   data: Row[]; // Lista de productos a mostrar
+  datosUsuario: Record<number, { nombreUsuario: string; contrasena: string }>;
+  setDatosUsuario: React.Dispatch<
+    React.SetStateAction<
+      Record<number, { nombreUsuario: string; contrasena: string }>
+    >
+  >; // Función para editar un producto
   Eliminar: (id: number) => void; // Función para eliminar un producto por ID
-  Editar: (filaEditada: Row) => void; // Función para editar un producto
 };
 
-export default function TablaVentas({ data, Eliminar, Editar }: Props) {
+export default function TablaVentas({
+  data,
+  datosUsuario,
+  setDatosUsuario,
+  Eliminar,
+}: Props) {
   const [editarID, setEditarID] = useState<number | null>(null); // Almacena el id de la fila que está siendo editada actualmente.
-  const [editForm, setEditForm] = useState<Partial<Row>>({}); // Almacena temporalmente los valores del formulario de edición.
 
   // Editar una Fila
-  const empezarEditar = (fila: Row) => {
-    setEditarID(fila.id);
-    setEditForm(fila);
+  const empezarEditar = (id: number) => {
+    setEditarID(id);
   };
 
   // Cancelar edición
   const cancelarEditar = () => {
     setEditarID(null);
-    setEditForm({});
   };
 
   // Manejar cambios en los inputs del formulario
   const manejarCambio = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    id: number,
+    campo: "nombreUsuario" | "contrasena",
+    valor: string
   ) => {
-    const { name, value } = e.target;
-    setEditForm((prev) => ({
+    setDatosUsuario((prev) => ({
       ...prev,
-      [name]: value,
+      [id]: {
+        ...prev[id],
+        [campo]: valor,
+      },
     }));
   };
 
   // Guardar los cambios editados
-  const guardarEditar = () => {
-    if (
-      editarID !== null &&
-      editForm.primerNombre &&
-      editForm.primerApellido &&
-      editForm.telefono &&
-      editForm.estado &&
-      editForm.nombreUsuario &&
-      editForm.contraseña
-    ) {
-      Editar(editForm as Row);
-      setEditarID(null);
-      setEditForm({});
+  const guardarEditar = (id: number) => {
+    const datos = datosUsuario[id];
+    if (!datos) return;
+
+    const { nombreUsuario, contrasena } = datos;
+
+    if (!nombreUsuario || nombreUsuario.trim() === "") {
+      toast.error("El nombre de usuario es obligatorio.");
+      return;
     }
+    if (nombreUsuario.length > 50) {
+      toast.error("El nombre de usuario no debe superar los 50 caracteres.");
+      return;
+    }
+    if (!contrasena || contrasena.trim() === "") {
+      toast.error("La contraseña es obligatoria.");
+      return;
+    }
+    if (contrasena.length > 200) {
+      toast.error("La contraseña no debe superar los 200 caracteres.");
+      return;
+    }
+
+    toast.success("Campos actualizados correctamente.");
+    setEditarID(null);
   };
 
   return (
@@ -84,111 +107,95 @@ export default function TablaVentas({ data, Eliminar, Editar }: Props) {
           </tr>
         </thead>
         <tbody>
-          {data.map((row) => (
-            <tr key={row.id}>
-              <td style={tdStyle}>{row.id}</td>
-              {editarID === row.id ? (
-                <>
-                  <td style={tdStyle}>
-                    <input
-                      type="text"
-                      name="primerNombre"
-                      value={editForm.primerNombre ?? ""}
-                      onChange={manejarCambio}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={tdStyle}>
-                    <input
-                      type="text"
-                      name="primerApellido"
-                      value={editForm.primerApellido ?? ""}
-                      onChange={manejarCambio}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={tdStyle}>
-                    <input
-                      type="text"
-                      name="telefono"
-                      value={editForm.telefono ?? ""}
-                      onChange={manejarCambio}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={tdStyle}>
-                    <input
-                      type="text"
-                      name="estado"
-                      value={editForm.estado ?? ""}
-                      onChange={manejarCambio}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={tdStyle}>
-                    <input
-                      type="text"
-                      name="nombreUsuario"
-                      value={editForm.nombreUsuario ?? ""}
-                      onChange={manejarCambio}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={tdStyle}>
-                    <input
-                      type="text"
-                      name="contraseña"
-                      value={editForm.contraseña ?? ""}
-                      onChange={manejarCambio}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={tdStyle}>
-                    <button
-                      onClick={guardarEditar}
-                      style={{ ...actionButton, backgroundColor: "#28a745" }}
-                    >
-                      Guardar
-                    </button>
-                    <button
-                      onClick={cancelarEditar}
-                      style={{ ...actionButton, backgroundColor: "#6c757d" }}
-                    >
-                      Cancelar
-                    </button>
-                  </td>
-                </>
-              ) : (
-                <>
-                  <td style={tdStyle}>{row.primerNombre}</td>
-                  <td style={tdStyle}>{row.primerApellido}</td>
-                  <td style={tdStyle}>{row.telefono}</td>
-                  <td style={tdStyle}>{row.estado}</td>
+          {data.map((row) => {
+            const usuario = datosUsuario[row.id] ?? {
+              nombreUsuario: "",
+              contrasena: "",
+            };
 
-                  {/* Si row.nombreUsuario no es null ni undefined, se muestra su valor.
-                      Si es null o undefined, se muestra "-" como texto por defecto */}
-                  <td style={tdStyle}>{row.nombreUsuario ?? "-"}</td>
+            return (
+              <tr key={row.id}>
+                <td style={tdStyle}>{row.id}</td>
+                <td style={tdStyle}>{row.primerNombre}</td>
+                <td style={tdStyle}>{row.primerApellido}</td>
+                <td style={tdStyle}>{row.telefono}</td>
+                <td style={tdStyle}>{row.estado}</td>
 
-                  {/* Si row.contraseña tiene algún valor (no vacío, ni undefined, ni null), se muestra •••••• */}
-                  <td style={tdStyle}>{row.contraseña ? "••••••" : "-"}</td>
-                  <td style={tdStyle}>
-                    <button
-                      onClick={() => empezarEditar(row)}
-                      style={actionButton}
-                    >
-                      Modificar
-                    </button>
-                    <button
-                      onClick={() => Eliminar(row.id)}
-                      style={{ ...actionButton, backgroundColor: "#dc3545" }}
-                    >
-                      Eliminar
-                    </button>
-                  </td>
-                </>
-              )}
-            </tr>
-          ))}
+                {editarID === row.id ? (
+                  <>
+                    <td style={tdStyle}>
+                      <input
+                        type="text"
+                        value={usuario.nombreUsuario}
+                        onChange={(e) =>
+                          manejarCambio(row.id, "nombreUsuario", e.target.value)
+                        }
+                        maxLength={50}
+                        style={inputStyle}
+                      />
+                    </td>
+                    <td style={tdStyle}>
+                      <input
+                        type="text"
+                        value={usuario.contrasena}
+                        onChange={(e) =>
+                          manejarCambio(row.id, "contrasena", e.target.value)
+                        }
+                        maxLength={200}
+                        style={inputStyle}
+                      />
+                    </td>
+                    <td style={tdStyle}>
+                      <button
+                        onClick={() => guardarEditar(row.id)}
+                        style={{
+                          ...actionButton,
+                          backgroundColor: "#28a745",
+                        }}
+                      >
+                        Guardar
+                      </button>
+                      <button
+                        onClick={cancelarEditar}
+                        style={{
+                          ...actionButton,
+                          backgroundColor: "#6c757d",
+                        }}
+                      >
+                        Cancelar
+                      </button>
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td style={tdStyle}>
+                      {usuario.nombreUsuario.trim() || "-"}
+                    </td>
+                    <td style={tdStyle}>
+                      {usuario.contrasena ? "••••••" : "-"}
+                    </td>
+                    <td style={tdStyle}>
+                      <button
+                        onClick={() => empezarEditar(row.id)}
+                        style={actionButton}
+                      >
+                        Modificar
+                      </button>
+                      <button
+                        onClick={() => Eliminar(row.id)}
+                        style={{
+                          ...actionButton,
+                          backgroundColor: "#dc3545",
+                        }}
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                  </>
+                )}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

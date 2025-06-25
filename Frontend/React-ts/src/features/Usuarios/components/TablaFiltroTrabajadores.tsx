@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
+import axios from "axios";
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
 
 // Definir el tipo de valor de cada fila (producto)
 type FilaTrabajadores = {
@@ -9,44 +11,15 @@ type FilaTrabajadores = {
   estado: string;
 };
 
-// Lista temporal solo para probar
-const initialRows: FilaTrabajadores[] = [
-  {
-    id: 1,
-    primerNombre: "Jon",
-    primerApellido: "Sanchez",
-    telefono: "9023-0932",
-    estado: "Trabajando",
-  },
-  {
-    id: 2,
-    primerNombre: "Cersei",
-    primerApellido: "Lopez",
-    telefono: "9482-9056",
-    estado: "Trabajando",
-  },
-  {
-    id: 3,
-    primerNombre: "Jaime",
-    primerApellido: "Salasblancas",
-    telefono: "5389-9021",
-    estado: "Despedido",
-  },
-  {
-    id: 4,
-    primerNombre: "Arya",
-    primerApellido: "Campos",
-    telefono: "7432-9015",
-    estado: "Despedido",
-  },
-  {
-    id: 5,
-    primerNombre: "Daenerys",
-    primerApellido: "Romero",
-    telefono: "8314-9034",
-    estado: "Trabajando",
-  },
-];
+export interface Trabajadores {
+  idTrabajador: number;
+  primerNombre: string;
+  //segundoNombre: string;
+  primerApellido: string;
+  //segundoApellido: string;
+  telefono: string;
+  estado: string;
+}
 
 type Props = {
   AgregarSeleccionado: (rows: FilaTrabajadores[]) => void; // función para notificar al componente padre qué productos se van a agregar.
@@ -59,7 +32,7 @@ export default function TablaFiltroProductos({
   AgregarSeleccionado,
   trabajadoresYaAgregados,
 }: Props) {
-  const [rows] = useState<FilaTrabajadores[]>(initialRows); // Lista de productos base
+  const [rows, setRows] = useState<FilaTrabajadores[]>(); // Lista de productos base
   const [IDSeleccionado, setIDSeleccionado] = useState<number[]>([]); // IDs seleccionados
   const [textoFiltrado, setFilterText] = useState(""); // Texto de filtro
   const [isClicked, setIsClicked] = useState(false);
@@ -68,9 +41,38 @@ export default function TablaFiltroProductos({
   const [paginaActual, setpaginaActual] = useState(1); // Página actual
   const [mensajeError, setMensajeError] = useState<string | null>(null); // Mensaje de error
 
+  React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<Trabajadores>>(
+        "http://localhost:5187/api/Trabajadores/ObtenerTrabajadores",
+        {
+          params: {
+            pagina: 1,
+            tamanioPagina: 100,
+          },
+        }
+      )
+      .then((response) => {
+        const filas = response.data.datos.map((trabajador) => ({
+          id: trabajador.idTrabajador,
+          primerNombre: trabajador.primerNombre,
+          //segundoNombre: trabajador.segundoNombre,
+          primerApellido: trabajador.primerApellido,
+          //segundoApellido: trabajador.segundoApellido,
+          telefono: trabajador.telefono,
+          estado: trabajador.estado,
+        }));
+
+        setRows(filas);
+      })
+      .catch((error) => {
+        console.error("Error al obtener trabajadores:", error);
+      });
+  }, []);
+
   const FilasFiltradas = useMemo(() => {
     const lowerFilter = textoFiltrado.toLowerCase();
-    return rows.filter(
+    return (rows ?? []).filter(
       (row) =>
         (row.primerNombre ?? "").toLowerCase().includes(lowerFilter) ||
         row.estado.toLowerCase().includes(lowerFilter)
@@ -112,10 +114,11 @@ export default function TablaFiltroProductos({
 
   const handleAddSelected = () => {
     if (IDSeleccionado.length === 0) return;
+
     // Obtiene productos seleccionados
-    const nuevosSeleccionados = rows
+    const nuevosSeleccionados = rows!
       .filter((row) => IDSeleccionado.includes(row.id))
-      .map((row) => ({ ...row }));
+      .map((row: FilaTrabajadores) => ({ ...row }));
 
     const yaAgregados = nuevosSeleccionados.filter((row) =>
       trabajadoresYaAgregados.some((p) => p.id === row.id)
@@ -136,7 +139,7 @@ export default function TablaFiltroProductos({
     setIDSeleccionado([]); // limpiar selección tras agregar
   };
 
-  // Muestra un mensaje de error por 3 segundos si se intenta agregar un producto duplicado.
+  // Muestra un mensaje de error por 3 segundos si se intenta agregar un trabajador duplicado.
   useEffect(() => {
     if (mensajeError) {
       const timer = setTimeout(() => setMensajeError(null), 3000);
