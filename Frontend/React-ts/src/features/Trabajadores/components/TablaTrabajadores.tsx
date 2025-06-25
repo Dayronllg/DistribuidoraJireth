@@ -7,7 +7,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import Button from "@mui/material/Button";
-
+import { toast } from "react-toastify";
 
 import {
   GridRowModes,
@@ -24,13 +24,9 @@ import type {
   GridRowId,
   GridRowModel,
   GridSlotProps,
-  GridValidRowModel,
 } from "@mui/x-data-grid";
 
-import {
-  randomId
- 
-} from "@mui/x-data-grid-generator";
+import { randomId } from "@mui/x-data-grid-generator";
 import axios from "axios";
 
 export interface PaginacionResultado<T> {
@@ -63,11 +59,14 @@ export function mapRowToTrabajador(row: GridRowModel): Trabajador {
   };
 }
 
-const API_BASE='http://localhost:5187/api'
+const API_BASE = "http://localhost:5187/api";
 
 export const crearTrabajador = async (nuevo: Trabajador) => {
   try {
-    const response = await axios.post(`${API_BASE}/Trabajadores/CrearTrabajador`, nuevo);
+    const response = await axios.post(
+      `${API_BASE}/Trabajadores/CrearTrabajador`,
+      nuevo
+    );
     return response.data;
   } catch (error) {
     console.error("Error al crear trabajador", error);
@@ -75,8 +74,9 @@ export const crearTrabajador = async (nuevo: Trabajador) => {
   }
 };
 
-
-export async function actualizarTrabajador(trabajador: Trabajador): Promise<Trabajador> {
+export async function actualizarTrabajador(
+  trabajador: Trabajador
+): Promise<Trabajador> {
   try {
     const response = await axios.put<Trabajador>(
       `${API_BASE}/Trabajadores/ActualizarTrabajador`,
@@ -91,11 +91,14 @@ export async function actualizarTrabajador(trabajador: Trabajador): Promise<Trab
 
 const eliminarTrabajador = async (id: number) => {
   try {
-    const response = await axios.put(`${API_BASE}/Trabajadores/BajaTrabajadores`,null,{params:{id:id}} 
+    const response = await axios.put(
+      `${API_BASE}/Trabajadores/BajaTrabajadores`,
+      null,
+      { params: { id: id } }
     );
     return response.data;
   } catch (error) {
-    console.error('Error al eliminar (inhabilitar) el trabajador:', error);
+    console.error("Error al eliminar (inhabilitar) el trabajador:", error);
     throw error;
   }
 };
@@ -122,13 +125,10 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
 
   const handleClick = () => {
     const id = randomId();
-    setRows((oldRows) => [
-      ...oldRows,
-      { id, name: "", age: "", role: "", isNew: true },
-    ]);
+    setRows((oldRows) => [...oldRows, { id, estado: "Activo", isNew: true }]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: "primerNombre" },
     }));
   };
 
@@ -152,7 +152,6 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
     </Toolbar>
   );
 }
-
 
 export default function TablaRegistroVentas() {
   const [rows, setRows] = React.useState<GridRowsProp>([]);
@@ -184,7 +183,6 @@ export default function TablaRegistroVentas() {
       });
   }, []);
 
-
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
     event
@@ -203,7 +201,6 @@ export default function TablaRegistroVentas() {
   };
 
   const MantenerClickBorrar = (id: GridRowId) => async () => {
-    
     await eliminarTrabajador(Number(id));
     setRows(rows.filter((row) => row.id !== id));
   };
@@ -220,42 +217,103 @@ export default function TablaRegistroVentas() {
     }
   };
 
- const processRowUpdate = async (newRow: GridRowModel) => {
-  //let updatedRow = { ...newRow, isNew: false };
-let updatedRow: { id: number; isNew: boolean } = { id: newRow.id, isNew: false };
+  const processRowUpdate = async (newRow: GridRowModel) => {
+    //let updatedRow = { ...newRow, isNew: false };
 
-  if (newRow.isNew) {
-    const trabajadorCreado = await crearTrabajador(mapRowToTrabajador(newRow));
+    // VALIDACIONES
+    const soloLetrasRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,30}$/;
 
-    updatedRow = {
-      ...newRow,
-      ...trabajadorCreado,
-      id: trabajadorCreado.idTrabajador, 
+    const validarCampoTextoObligatorio = (
+      valor: string,
+      nombreCampo: string
+    ) => {
+      const texto = valor?.trim();
+
+      if (!texto) {
+        throw new Error(`${nombreCampo} no puede estar vacío.`);
+      }
+
+      if (!soloLetrasRegex.test(texto)) {
+        throw new Error(
+          `${nombreCampo} solo debe contener letras y espacios (máximo 30 caracteres).`
+        );
+      }
+    };
+
+    const validarCampoTextoOpcional = (valor: string, nombreCampo: string) => {
+      const texto = valor?.trim();
+
+      if (texto && !soloLetrasRegex.test(texto)) {
+        throw new Error(
+          `${nombreCampo} solo debe contener letras y espacios (máximo 30 caracteres).`
+        );
+      }
+    };
+
+    // 🔒 Validación de nombres y apellidos
+    try {
+      validarCampoTextoObligatorio(newRow.primerNombre, "Primer Nombre");
+      validarCampoTextoOpcional(newRow.segundoNombre, "Segundo Nombre");
+      validarCampoTextoObligatorio(newRow.primerApellido, "Primer Apellido");
+      validarCampoTextoOpcional(newRow.segundoApellido, "Segundo Apellido");
+
+      // 🔒 Validación del teléfono
+      const telefono = newRow.telefono?.toString().trim();
+
+      if (!telefono) {
+        throw new Error("El campo Teléfono no puede estar vacío.");
+      }
+
+      if (!/^\d+$/.test(telefono)) {
+        throw new Error("El Teléfono solo debe contener números.");
+      }
+
+      if (telefono.length !== 8) {
+        throw new Error("El Teléfono debe tener exactamente 8 dígitos.");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+      throw error;
+    }
+
+    let updatedRow: { id: number; isNew: boolean } = {
+      id: newRow.id,
       isNew: false,
     };
-  } else {
-    const trabajadorActualizado = await actualizarTrabajador(mapRowToTrabajador(newRow));
-    updatedRow = {
-      ...trabajadorActualizado,
-      id: trabajadorActualizado.idTrabajador, 
-      isNew: false
-    };
-  }
 
-  // Actualizás las filas del grid
-  setRows((prevRows) =>
-    prevRows.map((row) =>
-      row.id === newRow.id ? updatedRow : row
-    )
-  );
-  setRowModesModel((prevModel) => ({
-    ...prevModel,
-    [newRow.id]: { mode: GridRowModes.View }, // usar el id final
-  }));
+    if (newRow.isNew) {
+      const trabajadorCreado = await crearTrabajador(
+        mapRowToTrabajador(newRow)
+      );
 
-  return updatedRow;
-};
+      updatedRow = {
+        ...newRow,
+        ...trabajadorCreado,
+        id: trabajadorCreado.idTrabajador,
+        isNew: false,
+      };
+    } else {
+      const trabajadorActualizado = await actualizarTrabajador(
+        mapRowToTrabajador(newRow)
+      );
+      updatedRow = {
+        ...trabajadorActualizado,
+        id: trabajadorActualizado.idTrabajador,
+        isNew: false,
+      };
+    }
 
+    // Actualizás las filas del grid
+    setRows((prevRows) =>
+      prevRows.map((row) => (row.id === newRow.id ? updatedRow : row))
+    );
+    setRowModesModel((prevModel) => ({
+      ...prevModel,
+      [newRow.id]: { mode: GridRowModes.View }, // usar el id final
+    }));
+
+    return updatedRow;
+  };
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
