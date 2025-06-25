@@ -8,6 +8,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import Button from "@mui/material/Button";
 import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
+import { toast } from "react-toastify";
 
 import {
   GridRowModes,
@@ -26,26 +27,24 @@ import type {
   GridSlotProps,
 } from "@mui/x-data-grid";
 
-import {
-  randomId,
-} from "@mui/x-data-grid-generator";
+import { randomId } from "@mui/x-data-grid-generator";
 import axios from "axios";
 
-export interface Marca{
-  idMarca:number,
-  nombre:string,
-  estado: "Activo" | "Inactivo"
+export interface Marca {
+  idMarca: number;
+  nombre: string;
+  estado: "Activo" | "Inactivo";
 }
 
 export function mapRowToMarca(row: GridRowModel): Marca {
   return {
     idMarca: row.idMarca,
     nombre: row.nombre,
-    estado:row.estado // si tienes este campo
+    estado: row.estado, // si tienes este campo
   };
 }
 
-const API_BASE='http://localhost:5187/api'
+const API_BASE = "http://localhost:5187/api";
 
 export const crearMarca = async (nuevo: Marca) => {
   try {
@@ -56,7 +55,6 @@ export const crearMarca = async (nuevo: Marca) => {
     throw error;
   }
 };
-
 
 export async function actualizarMarca(Marca: Marca): Promise<Marca> {
   try {
@@ -73,11 +71,12 @@ export async function actualizarMarca(Marca: Marca): Promise<Marca> {
 
 const eliminarMarca = async (id: number) => {
   try {
-    const response = await axios.put(`${API_BASE}/Marcas/BajaMarca`,null,{params:{id:id}} 
-    );
+    const response = await axios.put(`${API_BASE}/Marcas/BajaMarca`, null, {
+      params: { id: id },
+    });
     return response.data;
   } catch (error) {
-    console.error('Error al eliminar (inhabilitar) el Marca:', error);
+    console.error("Error al eliminar (inhabilitar) el Marca:", error);
     throw error;
   }
 };
@@ -104,13 +103,10 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
 
   const handleClick = () => {
     const id = randomId();
-    setRows((oldRows) => [
-      ...oldRows,
-      { id, name: "", age: "", role: "", isNew: true },
-    ]);
+    setRows((oldRows) => [...oldRows, { id, estado: "Activo", isNew: true }]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: "nombre" },
     }));
   };
 
@@ -135,15 +131,13 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
   );
 }
 
-
 export default function TablaRegistroVentas() {
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
 
-
-    React.useEffect(() => {
+  React.useEffect(() => {
     axios
       .get<PaginacionResultado<Marca>>(
         "http://localhost:5187/api/Marcas/ObtenerMarcas",
@@ -167,8 +161,6 @@ export default function TablaRegistroVentas() {
       });
   }, []);
 
-
-  
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
     event
@@ -186,11 +178,10 @@ export default function TablaRegistroVentas() {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
- const MantenerClickBorrar = (id: GridRowId) => async () => {
-     
-     await eliminarMarca(Number(id));
-     setRows(rows.filter((row) => row.id !== id));
-   };
+  const MantenerClickBorrar = (id: GridRowId) => async () => {
+    await eliminarMarca(Number(id));
+    setRows(rows.filter((row) => row.id !== id));
+  };
 
   const MantenerClickCancelar = (id: GridRowId) => () => {
     setRowModesModel({
@@ -206,40 +197,69 @@ export default function TablaRegistroVentas() {
 
   const processRowUpdate = async (newRow: GridRowModel) => {
     //let updatedRow = { ...newRow, isNew: false };
-  let updatedRow: { id: number; isNew: boolean } = { id: newRow.id, isNew: false };
-  
+
+    // VALIDACIONES
+    const soloLetrasRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s.,#-]+$/;
+
+    const validarCampoTextoObligatorio = (
+      valor: string,
+      nombreCampo: string
+    ) => {
+      const texto = valor?.trim();
+
+      if (!texto) {
+        throw new Error(`${nombreCampo} no puede estar vacío.`);
+      }
+
+      if (!soloLetrasRegex.test(texto)) {
+        throw new Error(
+          `${nombreCampo} solo debe contener letras, números y espacios. (máximo 30 caracteres).`
+        );
+      }
+    };
+
+    // 🔒 Validación de nombres de marcas
+    try {
+      validarCampoTextoObligatorio(newRow.nombre, "Nombre");
+    } catch (error: any) {
+      toast.error(error.message);
+      throw error;
+    }
+
+    let updatedRow: { id: number; isNew: boolean } = {
+      id: newRow.id,
+      isNew: false,
+    };
+
     if (newRow.isNew) {
       const MarcaCreado = await crearMarca(mapRowToMarca(newRow));
-  
+
       updatedRow = {
         ...newRow,
         ...MarcaCreado,
-        id: MarcaCreado.idMarca, 
+        id: MarcaCreado.idMarca,
         isNew: false,
       };
     } else {
       const MarcaActualizado = await actualizarMarca(mapRowToMarca(newRow));
       updatedRow = {
         ...MarcaActualizado,
-        id: MarcaActualizado.idMarca, 
-        isNew: false
+        id: MarcaActualizado.idMarca,
+        isNew: false,
       };
     }
-  
+
     // Actualizás las filas del grid
     setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === newRow.id ? updatedRow : row
-      )
+      prevRows.map((row) => (row.id === newRow.id ? updatedRow : row))
     );
     setRowModesModel((prevModel) => ({
       ...prevModel,
       [newRow.id]: { mode: GridRowModes.View }, // usar el id final
     }));
-  
+
     return updatedRow;
   };
-  
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);

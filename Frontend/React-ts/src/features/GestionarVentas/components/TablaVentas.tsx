@@ -1,13 +1,14 @@
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 
 type Row = {
- id: number;
-    nombre: string;
-    idPresentacion:number,
-    nombreP:string
-    precio:number;
-    cantidad:number;
-    estado:string;
+  id: number;
+  nombre: string;
+  idPresentacion: number;
+  nombreP: string;
+  precio: number;
+  cantidad: number;
+  estado: string;
 };
 
 type Props = {
@@ -52,6 +53,11 @@ export default function TablaVentas({ data, Eliminar, Editar }: Props) {
       editForm.cantidad !== undefined &&
       editForm.estado !== undefined
     ) {
+      if (editForm.cantidad <= 0) {
+        toast.error("La cantidad debe ser mayor a cero.");
+        return;
+      }
+
       Editar(editForm as Row);
       setEditarID(null);
       setEditForm({});
@@ -85,11 +91,11 @@ export default function TablaVentas({ data, Eliminar, Editar }: Props) {
             <tr key={row.idPresentacion}>
               <td style={tdStyle}>{row.id}</td>
               {editarID === row.idPresentacion ? (
-                <> 
+                <>
                   <td style={tdStyle}>{row.nombre}</td>
                   <td style={tdStyle}>{row.idPresentacion}</td>
                   <th style={tdStyle}>{row.nombreP}</th>
-                   <td style={tdStyle}>{row.precio}</td>
+                  <td style={tdStyle}>{row.precio}</td>
                   <td style={tdStyle}>
                     <input
                       type="number"
@@ -121,7 +127,7 @@ export default function TablaVentas({ data, Eliminar, Editar }: Props) {
                   <th style={tdStyle}>{row.nombreP}</th>
                   <td style={tdStyle}>{row.precio}</td>
                   <td style={tdStyle}>{row.cantidad}</td>
-                 
+
                   <td style={tdStyle}>
                     <button
                       onClick={() => empezarEditar(row)}

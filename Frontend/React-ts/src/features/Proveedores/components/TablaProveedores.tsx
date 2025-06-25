@@ -8,6 +8,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import Button from "@mui/material/Button";
 import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
+import { toast } from "react-toastify";
 
 import {
   GridRowModes,
@@ -26,34 +27,35 @@ import type {
   GridSlotProps,
 } from "@mui/x-data-grid";
 
-import {
-  randomId
-} from "@mui/x-data-grid-generator";
+import { randomId } from "@mui/x-data-grid-generator";
 import axios from "axios";
 
 export interface Proveedor {
-  ruc: string,
-  nombre: string,
-  telefono: string,
-  direccion: string,
-  estado: "Activo" | "Inactivo"
+  ruc: string;
+  nombre: string;
+  telefono: string;
+  direccion: string;
+  estado: "Activo" | "Inactivo";
 }
 
 export function mapRowToProveedor(row: GridRowModel): Proveedor {
   return {
     ruc: row.ruc,
-  nombre: row.nombre,
-  telefono: row.telefono,
-  direccion: row.direccion,
-  estado: row.estado // si tienes este campo
+    nombre: row.nombre,
+    telefono: row.telefono,
+    direccion: row.direccion,
+    estado: row.estado, // si tienes este campo
   };
 }
 
-const API_BASE='http://localhost:5187/api'
+const API_BASE = "http://localhost:5187/api";
 
 export const crearProveedor = async (nuevo: Proveedor) => {
   try {
-    const response = await axios.post(`${API_BASE}/Proveedor/CrearProveedor`, nuevo);
+    const response = await axios.post(
+      `${API_BASE}/Proveedor/CrearProveedor`,
+      nuevo
+    );
     return response.data;
   } catch (error) {
     console.error("Error al crear Proveedor", error);
@@ -61,8 +63,9 @@ export const crearProveedor = async (nuevo: Proveedor) => {
   }
 };
 
-
-export async function actualizarProveedor(Proveedor: Proveedor): Promise<Proveedor> {
+export async function actualizarProveedor(
+  Proveedor: Proveedor
+): Promise<Proveedor> {
   try {
     const response = await axios.put<Proveedor>(
       `${API_BASE}/Proveedor/ActualizarProveedor`,
@@ -77,15 +80,17 @@ export async function actualizarProveedor(Proveedor: Proveedor): Promise<Proveed
 
 const eliminarProveedor = async (id: string) => {
   try {
-    const response = await axios.put(`${API_BASE}/Proveedor/BajaProveedor`,null,{params:{ruc:id}} 
+    const response = await axios.put(
+      `${API_BASE}/Proveedor/BajaProveedor`,
+      null,
+      { params: { ruc: id } }
     );
     return response.data;
   } catch (error) {
-    console.error('Error al eliminar (inhabilitar) el Proveedor:', error);
+    console.error("Error al eliminar (inhabilitar) el Proveedor:", error);
     throw error;
   }
 };
-
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -109,13 +114,10 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
 
   const handleClick = () => {
     const id = randomId();
-    setRows((oldRows) => [
-      ...oldRows,
-      { id, name: "", age: "", role: "", isNew: true },
-    ]);
+    setRows((oldRows) => [...oldRows, { id, estado: "Activo", isNew: true }]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: "ruc" },
     }));
   };
 
@@ -146,7 +148,6 @@ export default function TablaProveedores() {
     {}
   );
 
-
   React.useEffect(() => {
     axios
       .get<PaginacionResultado<Proveedor>>(
@@ -171,7 +172,6 @@ export default function TablaProveedores() {
       });
   }, []);
 
-
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
     event
@@ -189,11 +189,10 @@ export default function TablaProveedores() {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
- const MantenerClickBorrar = (id: GridRowId) => async () => {
-     
-     await eliminarProveedor(String(id));
-     setRows(rows.filter((row) => row.id !== id));
-   };
+  const MantenerClickBorrar = (id: GridRowId) => async () => {
+    await eliminarProveedor(String(id));
+    setRows(rows.filter((row) => row.id !== id));
+  };
 
   const MantenerClickCancelar = (id: GridRowId) => () => {
     setRowModesModel({
@@ -209,40 +208,124 @@ export default function TablaProveedores() {
 
   const processRowUpdate = async (newRow: GridRowModel) => {
     //let updatedRow = { ...newRow, isNew: false };
-  let updatedRow: { id: string; isNew: boolean } = { id: newRow.id, isNew: false };
-  
+
+    // VALIDACIONES
+    const soloLetrasRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,50}$/;
+
+    const validarCampoTextoObligatorio = (
+      valor: string,
+      nombreCampo: string
+    ) => {
+      const texto = valor?.trim();
+
+      if (!texto) {
+        throw new Error(`${nombreCampo} no puede estar vacío.`);
+      }
+
+      if (!soloLetrasRegex.test(texto)) {
+        throw new Error(
+          `${nombreCampo} solo debe contener letras y espacios (máximo 50 caracteres).`
+        );
+      }
+    };
+
+    const validarDireccion = (valor: string) => {
+      const texto = valor?.trim();
+
+      if (!texto) {
+        throw new Error("El campo Dirección no puede estar vacío.");
+      }
+
+      if (texto.length > 60) {
+        throw new Error("La Dirección no puede exceder los 60 caracteres.");
+      }
+
+      const direccionRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s.,#-]+$/;
+
+      if (!direccionRegex.test(texto)) {
+        throw new Error(
+          "La Dirección solo debe contener letras, números y espacios."
+        );
+      }
+    };
+
+    // 🔒 Validación de nombre
+    try {
+      validarCampoTextoObligatorio(newRow.nombre, "Nombre");
+
+      // 🔒 Validación del teléfono
+      const telefono = newRow.telefono?.toString().trim();
+
+      if (!telefono) {
+        throw new Error("El campo Teléfono no puede estar vacío.");
+      }
+
+      if (!/^\d+$/.test(telefono)) {
+        throw new Error("El Teléfono solo debe contener números.");
+      }
+
+      if (telefono.length !== 8) {
+        throw new Error("El Teléfono debe tener exactamente 8 dígitos.");
+      }
+
+      // 🔒 Validación del RUC
+      const ruc = newRow.ruc?.toString().trim();
+
+      if (!ruc) {
+        throw new Error("El campo RUC no puede estar vacío.");
+      }
+
+      if (!/^\d+$/.test(ruc)) {
+        throw new Error("El RUC solo debe contener números.");
+      }
+
+      if (ruc.length !== 14) {
+        throw new Error("El RUC debe tener exactamente 14 dígitos.");
+      }
+
+      // 🔒 Validar dirección
+      validarDireccion(newRow.direccion);
+    } catch (error: any) {
+      toast.error(error.message);
+      throw error;
+    }
+
+    let updatedRow: { id: string; isNew: boolean } = {
+      id: newRow.id,
+      isNew: false,
+    };
+
     if (newRow.isNew) {
       const ProveedorCreado = await crearProveedor(mapRowToProveedor(newRow));
-  
+
       updatedRow = {
         ...newRow,
         ...ProveedorCreado,
-        id: ProveedorCreado.ruc, 
+        id: ProveedorCreado.ruc,
         isNew: false,
       };
     } else {
-      const ProveedorActualizado = await actualizarProveedor(mapRowToProveedor(newRow));
+      const ProveedorActualizado = await actualizarProveedor(
+        mapRowToProveedor(newRow)
+      );
       updatedRow = {
         ...ProveedorActualizado,
-        id: ProveedorActualizado.ruc, 
-        isNew: false
+        id: ProveedorActualizado.ruc,
+        isNew: false,
       };
     }
-  
+
     // Actualizás las filas del grid
     setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === newRow.id ? updatedRow : row
-      )
+      prevRows.map((row) => (row.id === newRow.id ? updatedRow : row))
     );
     setRowModesModel((prevModel) => ({
       ...prevModel,
       [newRow.id]: { mode: GridRowModes.View }, // usar el id final
     }));
-  
+
     return updatedRow;
   };
-  
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
