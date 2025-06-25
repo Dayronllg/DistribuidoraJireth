@@ -1,4 +1,7 @@
+import axios from "axios";
 import React, { useState, useMemo, useEffect } from "react";
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
+import type { Proveedor } from "../../Proveedores/components/TablaProveedores";
 
 // Definir el tipo de valor de cada fila (producto)
 type FilaProveedores = {
@@ -7,14 +10,8 @@ type FilaProveedores = {
   telefono: string;
 };
 
-// Lista temporal solo para probar
-const initialRows: FilaProveedores[] = [
-  { ruc: 1, nombreProveedor: "Jon", telefono: "9063-9012" },
-  { ruc: 2, nombreProveedor: "Cersei", telefono: "8439-1045" },
-  { ruc: 3, nombreProveedor: "Jaime", telefono: "4298-5134" },
-  { ruc: 4, nombreProveedor: "Arya", telefono: "3589-4126" },
-  { ruc: 5, nombreProveedor: "Daenerys", telefono: "9318-6312" },
-];
+
+
 
 type Props = {
   // Cambio para que reciba un solo cliente, no un array
@@ -28,7 +25,7 @@ export default function TablaFiltroClientes({
   AgregarSeleccionado,
   onSelectSingle,
 }: Props) {
-  const [rows] = useState<FilaProveedores[]>(initialRows); // Lista de clientes base
+  const [rows,setRows] = useState<FilaProveedores[]>([]); // Lista de clientes base
   const [IDSeleccionado, setIDSeleccionado] = useState<number | null>(null); // IDs seleccionados
   const [textoFiltrado, setFilterText] = useState(""); // Texto de filtro
   const [isClicked, setIsClicked] = useState(false);
@@ -36,6 +33,34 @@ export default function TablaFiltroClientes({
   const [isNextClicked, setIsNextClicked] = useState(false);
   const [paginaActual, setpaginaActual] = useState(1); // Página actual
   const [mensajeError, setMensajeError] = useState<string | null>(null); // Mensaje de error
+  
+  React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<Proveedor>>(
+        "http://localhost:5187/api/Proveedor/ObtenerProveedores",
+        {
+          params: {
+            pagina: 1,
+            tamanioPagina: 100,
+          },
+        }
+      )
+      .then((response) => {
+        setRows(
+          response.data.datos.map((t) => ({
+          
+            ruc:Number(t.ruc),
+            nombreProveedor:t.nombre,
+            telefono:t.telefono
+
+            
+          }))
+        );
+      })
+      .catch((error) => {
+        console.error("Error al obtener Proveedores:", error);
+      });
+  }, []);
 
   const FilasFiltradas = useMemo(() => {
     const lowerFilter = textoFiltrado.toLowerCase();
