@@ -38,7 +38,7 @@ public class VentaService : Service<Venta>, IVentaService
             return Result<VentaDto>.Fail(VentaCreada.Error, VentaCreada.status);
 
         if (VentaCreada.Success)
-    {
+        {
         foreach (var detalle in VentaCreada.Value.DetalleVenta)
         {
             var presentacion = await _context.Presentaciones.FindAsync(detalle.IdPresentacion);
@@ -53,10 +53,10 @@ public class VentaService : Service<Venta>, IVentaService
             }
 
             presentacion.Inventario -= detalle.Cantidad;
-        }
+       }
 
         await _context.SaveChangesAsync(); 
-    }
+     }
         return Result<VentaDto>.Ok(_mapper.Map<VentaDto>(VentaCreada.Value)); 
     }
 

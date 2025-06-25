@@ -57,7 +57,6 @@ public partial class DistribuidoraContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){}
 
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Cliente>(entity =>
@@ -148,13 +147,9 @@ public partial class DistribuidoraContext : DbContext
 
         modelBuilder.Entity<DetalleCompra>(entity =>
         {
-            entity.HasKey(e => new { e.IdCompra, e.IdProducto, e.IdPresentacion }).HasName("PK__DetalleC__D6A527DC86CCE9B0");
+            entity.HasKey(e => new { e.IdCompra, e.IdProducto, e.IdPresentacion }).HasName("PK__DetalleC__D6A527DCC53D8FE9");
 
             entity.ToTable("DetalleCompra");
-
-            entity.Property(e => e.Cantidad)
-                .HasMaxLength(50)
-                .IsUnicode(false);
 
             entity.HasOne(d => d.IdCompraNavigation).WithMany(p => p.DetalleCompras)
                 .HasForeignKey(d => d.IdCompra)

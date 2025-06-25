@@ -11,13 +11,14 @@ namespace Api.Controllers
     public class PedidosController : ControllerBase
     {
         private readonly IPedidoRepositery _pedidoService;
+        private readonly IDetallePedidoService _detallePedidoService;
 
-        public PedidosController(IPedidoRepositery pedidoService)
+        public PedidosController(IPedidoRepositery pedidoService, IDetallePedidoService detallePedidoService)
         {
             _pedidoService = pedidoService;
+            _detallePedidoService = detallePedidoService;
         }
 
-        
         [HttpGet("ObtenerPedidos")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -95,5 +96,19 @@ namespace Api.Controllers
 
             return Ok(RespuestaPedido.Value);
         }
+
+
+
+        [HttpGet("ObtenerDetallePedidoCompra")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> PagDetallePedidoCompra(int id)
+        {
+            var respuestPagDetallePedidoCompra = await _detallePedidoService.PagDetallePedidoVerificarCompra(id);
+
+            return Ok(respuestPagDetallePedidoCompra);
+        }
     }
+
+
 }

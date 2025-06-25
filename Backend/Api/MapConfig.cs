@@ -1,6 +1,8 @@
 using System;
 using Api.Dto;
 using Api.Dto.ClientesDto;
+using Api.Dto.ComprasDtos;
+using Api.Dto.ComprasDtos.DetallesComprasDtos;
 using Api.Dto.MarcasDto;
 using Api.Dto.PedidosDto;
 using Api.Dto.PedidosDto.DetalleDePedidoDto;
@@ -81,11 +83,18 @@ public class MapConfig:Profile
         CreateMap<DetallePedidoDto, DetallePedido>().ReverseMap();
         CreateMap<CrearPedidoDto, Pedido>().ForMember(dest => dest.DetallePedidos, opt => opt.MapFrom(src => src.DetallePedidos)).ReverseMap();
         CreateMap<Pedido, PedidoDto>().ReverseMap();
+        CreateMap<PagDetallePedidoCompra, DetallePedido>().ForMember(dest => dest.IdProductoNavigation, opt => opt.MapFrom(src => src.IdProductoNavigation)).
+        ForMember(src => src.IdPresentacionNavigation, opt => opt.MapFrom(src => src.IdPresentacionNavigation)).ReverseMap();
         //MapeoVentas
         CreateMap<CrearDetalleVentaDto, DetalleVenta>().ReverseMap();
         CreateMap<DetalleVentaDto, DetalleVenta>().ReverseMap();
         CreateMap<CrearVentaDto, Venta>().ForMember(dest => dest.DetalleVenta, opt => opt.MapFrom(src => src.DetalleVenta)).ReverseMap();
         CreateMap<Venta, VentaDto>().ReverseMap();
+        //MapeoCompras
+        CreateMap<CrearDetalleCompraDto, DetalleCompra>().ReverseMap();
+        CreateMap<DetalleCompraDto, DetalleCompra>().ReverseMap();
+        CreateMap<CrearCompraDto, Compra>().ForMember(dest => dest.DetalleCompras, opt => opt.MapFrom(src => src.DetalleCompras)).ReverseMap();
+        CreateMap<Compra, CompraDto>().ReverseMap();
     
     }
 }
