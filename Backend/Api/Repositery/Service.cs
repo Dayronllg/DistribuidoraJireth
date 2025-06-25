@@ -26,21 +26,37 @@ public class Service<T> : IService<T> where T : class
 
     public virtual async Task<Result<T>> create(T entity)
     {
-        await using var transaction = await _context.Database.BeginTransactionAsync();
+        if (_context.Database.CurrentTransaction == null)
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+
+                await dbset.AddAsync(entity);
+                await Save();
+                await transaction.CommitAsync();
+                return Result<T>.Ok(entity);
+            }
+            catch (Exception e)
+            {
+                if (transaction.GetDbTransaction().Connection != null)
+                {
+                    await transaction.RollbackAsync();
+                }
+                return Result<T>.Fail(e.Message);
+            }
+        }
+
+
         try
         {
-
             await dbset.AddAsync(entity);
             await Save();
-            await transaction.CommitAsync();
             return Result<T>.Ok(entity);
         }
         catch (Exception e)
         {
-           if (transaction.GetDbTransaction().Connection != null)
-            {
-                await transaction.RollbackAsync();
-            }
+            
             return Result<T>.Fail(e.Message);
         }
     }
@@ -51,7 +67,7 @@ public class Service<T> : IService<T> where T : class
         var EntityExist = await dbset.FirstOrDefaultAsync(func);
 
         if (EntityExist == null)
-            return Result<T>.Fail("El registro no existe",Status.NotFound);
+            return Result<T>.Fail("El registro no existe", Status.NotFound);
 
         return Result<T>.Ok(EntityExist);
     }
@@ -63,8 +79,11 @@ public class Service<T> : IService<T> where T : class
         if (pagina < 1) pagina = 1;
         if (tamanioPagina < 1) tamanioPagina = 10;
 
+
         var totalRegistros = await query.Where(func).CountAsync();
         var totalPaginas = (int)Math.Ceiling(totalRegistros / (double)tamanioPagina);
+
+
 
         var datos = await query.Where(func)
             .Skip((pagina - 1) * tamanioPagina)
@@ -93,12 +112,12 @@ public class Service<T> : IService<T> where T : class
         _context.Update(entity);
         var AfectedRows = await Save();
         if (AfectedRows == 0)
-            return Result<T>.Fail("0 registros afectados",Status.WithoutChanges);
+            return Result<T>.Fail("0 registros afectados", Status.WithoutChanges);
 
-      
+
 
         return Result<T>.Ok(entity);
     }
-    
-    
+
+
 }
