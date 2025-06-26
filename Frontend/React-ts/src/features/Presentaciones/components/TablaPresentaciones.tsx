@@ -43,12 +43,12 @@ type Presentacion ={
 
 export function mapRowToPresentacion(row: GridRowModel): Presentacion {
   return {
-    idPresentacion: row.idPresentacion,
+    idPresentacion: row.idPresentaciones,
   nombre: row.nombre,
   precio: row.precio,
   inventario: row.inventario,
   estado: row.estado,
-  idProductos: row.idPresentacions
+  idProductos: row.idProductos
   }
 }
 
@@ -285,6 +285,8 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
           isNew: false,
         };
       } else {
+
+        
         const PresentacionActualizado = await actualizarPresentacion(mapRowToPresentacion(newRow));
         updatedRow = {
           id:PresentacionActualizado.idPresentacion,
