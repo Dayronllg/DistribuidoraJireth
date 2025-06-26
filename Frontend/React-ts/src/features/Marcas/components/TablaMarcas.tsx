@@ -199,7 +199,7 @@ export default function TablaRegistroVentas() {
     //let updatedRow = { ...newRow, isNew: false };
 
     // VALIDACIONES
-    const soloLetrasRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s.,#-]+$/;
+    const soloLetrasRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s.,#-]{1,30}$/;
 
     const validarCampoTextoObligatorio = (
       valor: string,
