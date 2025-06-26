@@ -32,6 +32,7 @@ import {
 } from "@mui/x-data-grid-generator";
 import axios from "axios";
 import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
+import { toast } from "react-toastify";
 
 
 export type FilaMarcas = {
@@ -40,13 +41,10 @@ export type FilaMarcas = {
   estado: string;
 };
 
-export type Props = {
-  marca: FilaMarcas|null;
-};
 
 
 
-type FilaProducto = {
+/*//type FilaProducto = {
   idProducto: number;
   nombre: string;
   estado: string;
@@ -60,7 +58,7 @@ interface Presentacion{
   inventario:number,
   estado:"Activo"|"Inactivo"
   
-} 
+} */
 
 interface marca {
     idMarca: number,
@@ -73,35 +71,47 @@ export interface Producto{
   idProducto: number,
   nombre: string,
   estado: string,
-  marca:marca,
-  presentaciones:Presentacion[]
+  idMarcaNavigation:marca
+ 
 
 }
 
-export function mapRowToProducto(row: GridRowModel): Producto {
+export interface crearProducto{
+  nombre:string
+  idMarca:number,
+   estado:string
+}
+
+export interface ActualizarProducto{
+   idProducto:number,
+   nombre:string,
+   idMarca:number,
+   estado:string
+
+}
+export function mapRowToProducto(row: GridRowModel,marca:marca): crearProducto {
   return {
-    idProducto: row.idProducto,
+    
     nombre: row.nombre,
+    idMarca:marca.idMarca,
+    estado:row.estado 
+  };
+}
+
+export function mapRowToProductoAct(row: GridRowModel,marca:marca): ActualizarProducto {
+  return {
+    idProducto:row.idProducto,
+    nombre: row.nombre,
+    idMarca:marca.idMarca,
     estado:row.estado,
-      marca:{
-      idMarca:row.idMarca,
-      nombre:row.nombre,
-      estado:row.estado
-    },
-    presentaciones: (row.presentaciones || []).map((p: any) => ({
-      idPresentacion: p.idPresentacion,
-      nombre: p.nombre,
-      precio: p.precio,
-      inventario: p.inventario,
-      Estado:"activo",
-      idProductos: p.idProductos
-    }))
+    
+    
   };
 }
 
 const API_BASE='http://localhost:5187/api'
 
-export const crearProducto = async (nuevo: Producto) => {
+export const crearProducto = async (nuevo: crearProducto) => {
   try {
     const response = await axios.post(`${API_BASE}/Productos/CrearProducto`, nuevo);
     return response.data;
@@ -112,7 +122,7 @@ export const crearProducto = async (nuevo: Producto) => {
 };
 
 
-export async function actualizarProducto(Producto: Producto): Promise<Producto> {
+export async function actualizarProducto(Producto: ActualizarProducto): Promise<Producto> {
   try {
     const response = await axios.put<Producto>(
       `${API_BASE}/Productos/ActualizarProducto`,
@@ -136,7 +146,9 @@ const eliminarProducto = async (id: number) => {
   }
 };
 
-  
+  type Props ={
+    marca:marca | null
+  }
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -148,7 +160,7 @@ declare module "@mui/x-data-grid" {
 }
 
 
-export default function TablaRegistroProductos(marca:Props) {
+export default function TablaRegistroProductos({marca}:Props) {
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
@@ -157,7 +169,7 @@ export default function TablaRegistroProductos(marca:Props) {
  React.useEffect(() => {
     axios
       .get<PaginacionResultado<Producto>>(
-        "http://localhost:5187/api/Marcas/ObtenerMarcas",
+        "http://localhost:5187/api/Productos/ObtenerSoloProductos",
         {
           params: {
             pagina: 1,
@@ -166,23 +178,16 @@ export default function TablaRegistroProductos(marca:Props) {
         }
       )
      .then((response) => {
-      const filas = response.data.datos.flatMap((producto) =>
-        producto.presentaciones.map((p) => ({
-          id: p.idPresentacion, // este es el ID que necesita el DataGrid
-          idProducto: producto.idProducto,
-          nombre: producto.nombre,
-          estado: producto.estado,
-          idMarca: producto.marca.idMarca,
-          nombreMarca: producto.marca.nombre,
-          // Datos de la presentación
-          idPresentacion: p.idPresentacion,
-          nombreP: p.nombre,
-          precio: p.precio,
-          inventario: p.inventario,
+      const filas = response.data.datos.map((p) => ({
+          id: p.idProducto, // este es el ID que necesita el DataGrid
+          idProducto: p.idProducto,
+          nombre: p.nombre,
+          estado:p.estado,
+          nombreMarca:p.idMarcaNavigation.nombre,
+          idMarca:p.idMarcaNavigation.idMarca,
           
-        }))
+        })
       );
-
       setRows(filas);
     })
     .catch((error) => {
@@ -278,22 +283,33 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
 
   const processRowUpdate = async (newRow: GridRowModel) => {
       //let updatedRow = { ...newRow, isNew: false };
-    let updatedRow: { id: number; isNew: boolean } = { id: newRow.id, isNew: false };
+    let updatedRow: { id: number; isNew: boolean, nombre:string, idMarca:number,nombreMarca:string } = 
+    { id: newRow.id,nombre:newRow.nombre,idMarca:newRow.nombreMarca,nombreMarca:newRow.nombreMarca ,isNew: false };
     
       if (newRow.isNew) {
-        const ProductoCreado = await crearProducto(mapRowToProducto(newRow));
-    
-        updatedRow = {
-          ...newRow,
-          ...ProductoCreado,
-          id: ProductoCreado.idProducto, 
-          isNew: false,
-        };
+        
+        if(!marca){
+          toast.warning("Tiene que seleccionar una marca");
+          return
+        }
+       if (marca !==null) {
+         const ProductoCreado = await crearProducto(mapRowToProducto(newRow,marca));
+     
+         updatedRow = {
+           ...newRow,
+           ...ProductoCreado,
+           id: ProductoCreado.idProducto, 
+           isNew: false,
+         };
+       }
       } else {
-        const ProductoActualizado = await actualizarProducto(mapRowToProducto(newRow));
+        const ProductoActualizado = await actualizarProducto(mapRowToProductoAct(newRow,marca!));
         updatedRow = {
           ...ProductoActualizado,
-          id: ProductoActualizado.idProducto, 
+          id: ProductoActualizado.idProducto,
+          nombre:ProductoActualizado.nombre, 
+          idMarca:ProductoActualizado.idMarcaNavigation.idMarca,
+          nombreMarca:ProductoActualizado.idMarcaNavigation.nombre,
           isNew: false
         };
       }
@@ -341,59 +357,39 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
       minWidth: 150,
       editable: true,
     },
-    {
-      field: "idPresentacion",
-      headerName: "ID",
-      headerAlign: "center",
-      align: "center",
-      type: "number",
-      flex: 0.5,
-      minWidth: 150,
-      editable: true,
-    },
-    {
-      field: "nombreP",
-      headerName: "Nombre",
-      headerAlign: "center",
-      align: "center",
-      type: "string",
-      flex: 0.5,
-      minWidth: 150,
-      editable: true,
-    },
-    {
-      field: "precio",
-      headerName: "precio",
-      headerAlign: "center",
-      align: "center",
-      type: "number",
-      flex: 0.5,
-      minWidth: 150,
-      editable: true
-      
-    },
-    {
-      field: "idProducto",
-      headerName: "ID Producto",
-      headerAlign: "center",
-      align: "center",
-      type: "number",
-      flex: 0.5,
-      minWidth: 150,
-      editable: true
-      
-    },
      {
       field: "estado",
       headerName: "Estado",
       headerAlign: "center",
       align: "center",
       type: "singleSelect",
-      valueOptions: ["Realizado", "Cancelado"],
+      valueOptions: ["Activo", "Inactivo"],
       flex: 0.7,
       minWidth: 150,
       editable: true,
     },
+    {
+      field: "idMarca",
+      headerName: "Id Marca",
+      headerAlign: "center",
+      align: "center",
+      type: "number",
+      flex: 0.7,
+      minWidth: 150,
+      editable: false,
+    },
+      {
+      field: "nombreMarca",
+      headerName: "Marca",
+      headerAlign: "center",
+      align: "center",
+      type: "singleSelect",
+      valueOptions: ["Activo", "Inactivo"],
+      flex: 0.7,
+      minWidth: 150,
+      editable: false,
+    }
+    
   ];
 
   // Después de forma condicional se renderiza o no la columna de actions:
