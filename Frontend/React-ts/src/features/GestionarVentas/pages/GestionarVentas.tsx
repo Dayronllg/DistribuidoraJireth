@@ -26,6 +26,7 @@ type FilaProductos = {
     precio:number;
     cantidad:number;
     estado:string;
+    
 };
 
 type FilaClientes = {
@@ -59,13 +60,17 @@ export default function GestionarVentas() {
   const [clienteUnicoSeleccionado, setClienteUnicoSeleccionado] =
     useState<FilaClientes | null>(null);
 
-  // const TablaFiltroProductos.tsx
-  const AñadirFilasSeleccionadas = (rows: FilaProductos[]) => {
-    const nuevos = rows.filter(
-      (row) => !FilasSeleccionadas.some((r) => r.idPresentacion === row.idPresentacion)
-    );
-    setFilasSeleccionadas((prev) => [...prev, ...nuevos]);
-  };
+ const AñadirFilasSeleccionadas = (rows: FilaProductos[]) => {
+  const nuevos = rows
+    .filter((row) => !FilasSeleccionadas.some((r) => r.idPresentacion === row.idPresentacion))
+    .map((row) => ({
+      ...row,
+      stockDisponible: row.cantidad,    // ✅ Guardar la cantidad original
+      cantidad: 1                       // ✅ Iniciar con cantidad 1 por defecto
+    }));
+  
+  setFilasSeleccionadas((prev) => [...prev, ...nuevos]);
+};
 
   // const para TablaProductosVender.tsx
   const EliminarFilasSeleccionadas = (id: number) => {
@@ -96,13 +101,24 @@ export default function GestionarVentas() {
 
 
 
+ //Calcular total de subtotales
+const totalSubtotales = FilasSeleccionadas.reduce(
+  (sum, row) => sum + row.precio * row.cantidad,
+  0
+);
+
+// Calcular total con 7% extra
+const totalConIncremento = totalSubtotales + totalSubtotales * 0.07;
+
+// Al guardar la venta
 const handleAgregarVenta = () => {
   if (!clienteUnicoSeleccionado || FilasSeleccionadas.length === 0) {
     toast.error("Debe seleccionar un cliente y al menos un producto");
     return;
   }
 
-  // Mostrar alerta de confirmación
+  
+
   confirmAlert({
     title: "¿Confirmar venta?",
     message: "¿Estás seguro que deseas registrar esta venta?",
@@ -111,7 +127,7 @@ const handleAgregarVenta = () => {
         label: "Sí, confirmar",
         onClick: async () => {
           const venta: Venta = {
-            totalVenta: total,
+            totalVenta: totalConIncremento,  // ✅ Aquí mandás el total con el 7%
             idCliente: clienteUnicoSeleccionado.id,
             idUsuario: Number(localStorage.getItem("idUsuario")),
             detalleVenta: FilasSeleccionadas.map((item) => ({
@@ -120,6 +136,7 @@ const handleAgregarVenta = () => {
               subtotal: item.precio * item.cantidad,
               idProducto: item.id,
               idPresentacion: item.idPresentacion,
+             
             })),
           };
 
@@ -129,8 +146,9 @@ const handleAgregarVenta = () => {
             toast.success("Venta exitosa");
             setFilasSeleccionadas([]);
             setClienteUnicoSeleccionado(null);
-          } catch (error) {
+          } catch (error:any) {
             toast.error("Error al registrar la venta.");
+            toast.error(error.response.data)
           }
         },
       },
@@ -143,7 +161,6 @@ const handleAgregarVenta = () => {
     ],
   });
 };
-
   return (
     <div
       style={{
@@ -191,12 +208,17 @@ const handleAgregarVenta = () => {
         Eliminar={EliminarFilasSeleccionadas}
         Editar={EditarFilaSeleccionada}
       />
-      <div style={{ padding: "2rem" }}>
-        {/* Input del Total a Pagar C$ */}
-        <AmountInput Total={total} />
-        {/* Boton Agregar */}
-        <BotonAgregar AgregarVenta={handleAgregarVenta} />
-      </div>
-    </div>
+    <div style={{ padding: "2rem" }}>
+  <div style={{ marginBottom: "1rem" }}>
+    <strong>Subtotal:</strong> C$ {totalSubtotales.toFixed(2)}
+  </div>
+  <div style={{ marginBottom: "1rem" }}>
+    <strong>Total + 7%:</strong> C$ {totalConIncremento.toFixed(2)}
+  </div>
+
+  <AmountInput Total={totalConIncremento} />
+  <BotonAgregar AgregarVenta={handleAgregarVenta} />
+</div>
+</div>
   );
 }

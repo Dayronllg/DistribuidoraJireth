@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
-import type { Producto } from "../../Productos/components/TablaProductos";
+import type { marca, Presentacion } from "../../Productos/components/TablaProductos";
 import axios from "axios";
 // Definir el tipo de valor de cada fila (producto)
 /*type FilaProductos = {
@@ -21,7 +21,7 @@ type FilaProductos = {
   estado: string;
 };
 
-/*interface Producto{
+interface Producto{
 
   idProducto: number,
   nombre: string,
@@ -29,7 +29,7 @@ type FilaProductos = {
   marca:marca,
   presentaciones:Presentacion[]
 
-}*/
+}
 // Lista temporal solo para probar
 /*const initialRows: FilaProductos[] = [
   { id: 1, nombre: "Pan", precio: 35, cantidad: 3, estado: "Activo" },

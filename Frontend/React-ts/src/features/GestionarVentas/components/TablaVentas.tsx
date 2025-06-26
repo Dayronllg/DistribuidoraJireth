@@ -9,6 +9,7 @@ type Row = {
   precio: number;
   cantidad: number;
   estado: string;
+ 
 };
 
 type Props = {

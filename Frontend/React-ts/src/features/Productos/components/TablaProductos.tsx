@@ -42,18 +42,18 @@ export type FilaMarcas = {
   idProducto: number;
   nombre: string;
   estado: string;
-};
+};*/
 
-interface Presentacion{
+export interface Presentacion{
   idPresentacion:number
   nombre:string,
   precio:number,
   inventario:number,
   estado:"Activo"|"Inactivo"
   
-} */
+} 
 
-interface marca {
+export interface marca {
   idMarca: number;
   nombre: string;
   estado: string;
