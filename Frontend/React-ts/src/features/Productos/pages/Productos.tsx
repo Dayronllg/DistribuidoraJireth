@@ -13,6 +13,10 @@ function Productos() {
   //Pasar datos del componente TablaFiltroClientes al componente ClienteInput
   const [marcaUnicoSeleccionado, setMarcaUnicoSeleccionado] =
     useState<FilaMarcas | null>(null);
+
+  
+
+
   return (
     <div
       style={{
