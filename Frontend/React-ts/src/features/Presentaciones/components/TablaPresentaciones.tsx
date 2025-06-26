@@ -23,33 +23,41 @@ import type {
   GridRowId,
   GridRowModel,
   GridSlotProps,
-  GridRowProps,
 } from "@mui/x-data-grid";
 import { randomId } from "@mui/x-data-grid-generator";
 
 import axios from "axios";
 import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
+import { toast } from "react-toastify";
 
-type Presentacion ={
-  idPresentacion:number,
-  nombre: number,
-  precio: number,
-  inventario: number,
-  estado: string,
-  idProductos: number
-}
+type Presentacion = {
+  idPresentacion: number;
+  nombre: string;
+  precio: number;
+  inventario: number;
+  estado: string;
+  idProductos: number;
+};
 
+export type FilaProductos = {
+  id: number;
+  nombre: string;
+  estado: string;
+};
 
+type Props = {
+  producto: FilaProductos | null;
+};
 
 export function mapRowToPresentacion(row: GridRowModel): Presentacion {
   return {
-    idPresentacion: row.idPresentaciones,
-  nombre: row.nombre,
-  precio: row.precio,
-  inventario: row.inventario,
-  estado: row.estado,
-  idProductos: row.idProductos
-  }
+    idPresentacion: row.idPresentacion,
+    nombre: row.nombre,
+    precio: row.precio,
+    inventario: row.inventario,
+    estado: row.estado,
+    idProductos: row.idProductos,
+  };
 }
 
 const API_BASE = "http://localhost:5187/api";
@@ -96,7 +104,6 @@ const eliminarPresentacion = async (id: number) => {
   }
 };
 
-
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
     setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
@@ -106,51 +113,7 @@ declare module "@mui/x-data-grid" {
   }
 }
 
-// Toolbar de Agregar
-function EditToolbar(props: GridSlotProps["toolbar"]) {
-  const { setRows, setRowModesModel } = props;
-
-  // Obtener rol de localStorage
-  const rol = localStorage.getItem("rol");
-
-  if (rol !== "Administrador") {
-    return null; // Así no se renderiza nada de la Toolbar
-  }
-
-  const handleClick = () => {
-    const id = randomId();
-    setRows((oldRows) => [
-      ...oldRows,
-      { id, name: "", age: "", role: "", isNew: true },
-    ]);
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
-    }));
-  };
-
-  return (
-    <Toolbar>
-      <Tooltip title="Agregar">
-        <Button
-          onClick={handleClick}
-          startIcon={<AddIcon />}
-          variant="contained"
-          sx={{
-            borderRadius: "10px",
-            color: "white",
-            backgroundColor: "#007bff",
-            "&:hover": { backgroundColor: "#0056b3" },
-          }}
-        >
-          Agregar
-        </Button>
-      </Tooltip>
-    </Toolbar>
-  );
-}
-
-export default function TablaRegistroVentas() {
+export default function TablaRegistroVentas({ producto }: Props) {
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
@@ -167,70 +130,95 @@ export default function TablaRegistroVentas() {
           },
         }
       )
-     .then((response) => {
-      const filas = response.data.datos.map((p) => ({
-          id:p.idPresentacion,
-          idPresentaciones:p.idPresentacion,
-          nombre:p.nombre,
-          inventario:p.inventario,
-          precio:p.precio,
-          idProductos:p.idProductos,
-          estado:p.estado
+      .then((response) => {
+        const filas = response.data.datos.map((p) => ({
+          id: p.idPresentacion,
+          idPresentacion: p.idPresentacion,
+          nombre: p.nombre,
+          inventario: p.inventario,
+          precio: p.precio,
+          estado: p.estado,
+          idProductos: p.idProductos,
+        }));
+        setRows(filas);
+      })
+      .catch((error) => {
+        console.error("Error al obtener Presentacions:", error);
+      });
+  }, []);
 
-          
-        })
-      );
-      setRows(filas);
-    })
-    .catch((error) => {
-      console.error("Error al obtener Presentacions:", error);
-    });
-}, []);
+  React.useEffect(() => {
+    if (!producto) return;
 
-//Toolbar de Agregar
-function EditToolbar(props: GridSlotProps["toolbar"]) {
-  const { setRows, setRowModesModel } = props;
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.isNew
+          ? {
+              ...row,
+              idProductos: producto.id,
+            }
+          : row
+      )
+    );
+  }, [producto]);
 
-  // Obtener rol de localStorage
-  const rol = localStorage.getItem("rol");
+  //Toolbar de Agregar
+  function EditToolbar(props: GridSlotProps["toolbar"]) {
+    const { setRows, setRowModesModel } = props;
 
-  if (rol !== "Administrador") {
-    return null; // Así no se renderiza nada de la Toolbar
+    // Obtener rol de localStorage
+    const rol = localStorage.getItem("rol");
+
+    if (rol !== "Administrador") {
+      return null; // Así no se renderiza nada de la Toolbar
+    }
+
+    const handleClick = () => {
+      if (!producto) {
+        toast.warning(
+          "Debe seleccionar un producto antes de agregar una presentacion."
+        );
+        return;
+      }
+      const id = randomId();
+      setRows((oldRows) => [
+        ...oldRows,
+        {
+          id,
+          nombre: "",
+          precio: 1,
+          inventario: 1,
+          estado: "Activo",
+          idProductos: producto.id, // ✅ Aquí estás pasando el ID
+          isNew: true,
+        },
+      ]);
+      setRowModesModel((oldModel) => ({
+        ...oldModel,
+        [id]: { mode: GridRowModes.Edit, fieldToFocus: "nombre" },
+      }));
+    };
+
+    return (
+      <Toolbar>
+        <Tooltip title="Agregar">
+          <Button
+            onClick={handleClick}
+            startIcon={<AddIcon />}
+            variant="contained"
+            sx={{
+              borderRadius: "10px",
+              color: "white",
+              backgroundColor: "#007bff",
+              "&:hover": { backgroundColor: "#0056b3" },
+            }}
+          >
+            Agregar
+          </Button>
+        </Tooltip>
+      </Toolbar>
+    );
   }
-
-  const handleClick = () => {
-    const id = randomId();
-    setRows((oldRows) => [
-      ...oldRows,
-      { id, name: "", age: "", role: "", isNew: true },
-    ]);
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
-    }));
-  };
-
-  return (
-    <Toolbar>
-      <Tooltip title="Agregar">
-        <Button
-          onClick={handleClick}
-          startIcon={<AddIcon />}
-          variant="contained"
-          sx={{
-            borderRadius: "10px",
-            color: "white",
-            backgroundColor: "#007bff",
-            "&:hover": { backgroundColor: "#0056b3" },
-          }}
-          
-        >
-          Agregar
-        </Button>
-      </Tooltip>
-    </Toolbar>
-  );
-}
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -249,8 +237,9 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-  const MantenerClickBorrar = (id: GridRowId) => () => {
+  const MantenerClickBorrar = (id: GridRowId) => async () => {
     setRows(rows.filter((row) => row.id !== id));
+    await eliminarPresentacion(Number(id));
   };
 
   const MantenerClickCancelar = (id: GridRowId) => () => {
@@ -265,50 +254,106 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
     }
   };
 
-   const processRowUpdate = async (newRow: GridRowModel) => {
-      //let updatedRow = { ...newRow, isNew: false };
-  
-      
-      let updatedRow: { id: number; isNew: boolean } = {
-        id: newRow.id,
-        isNew: false,
-        
-      };
-  
-      if (newRow.isNew) {
-        const PresentacionCreado = await crearPresentacion(mapRowToPresentacion(newRow));
-  
+  const processRowUpdate = async (newRow: GridRowModel) => {
+    //let updatedRow = { ...newRow, isNew: false };
+
+    // VALIDACIONES
+    const soloLetrasRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s.,#\-]{1,50}$/;
+
+    const validarCampoTextoObligatorio = (
+      valor: string,
+      nombreCampo: string
+    ) => {
+      const texto = valor?.trim();
+
+      if (!texto) {
+        throw new Error(`${nombreCampo} no puede estar vacío.`);
+      }
+
+      if (!soloLetrasRegex.test(texto)) {
+        throw new Error(
+          `${nombreCampo} solo debe contener letras, numeros y espacios (máximo 50 caracteres).`
+        );
+      }
+    };
+
+    try {
+      // 🔒 Validación de nombre de la presentacion
+      validarCampoTextoObligatorio(newRow.nombre, "Nombre");
+
+      if (newRow.precio <= 0) {
+        throw new Error("El precio debe ser mayor que 0.");
+      }
+      if (newRow.inventario <= 0) {
+        throw new Error("El inventario debe ser mayor que 0.");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+      throw error;
+    }
+
+    let updatedRow: {
+      id: number;
+      idPresentacion: number;
+      isNew: boolean;
+      nombre: string;
+      precio: number;
+      inventario: number;
+      idProductos: number;
+    } = {
+      id: newRow.id,
+      idPresentacion: newRow.idPresentacion,
+      nombre: newRow.nombre,
+      precio: newRow.precio,
+      inventario: newRow.inventario,
+      idProductos: newRow.idProductos,
+      isNew: false,
+    };
+
+    if (newRow.isNew) {
+      if (!producto) {
+        toast.warning("Tiene que seleccionar un producto");
+        return;
+      }
+      if (producto !== null) {
+        const PresentacionCreado = await crearPresentacion(
+          mapRowToPresentacion(newRow)
+        );
         updatedRow = {
           ...newRow,
           ...PresentacionCreado,
           id: PresentacionCreado.idPresentacion,
           isNew: false,
         };
-      } else {
-
-        
-        const PresentacionActualizado = await actualizarPresentacion(mapRowToPresentacion(newRow));
-        updatedRow = {
-          id:PresentacionActualizado.idPresentacion,
-          ...PresentacionActualizado,
-          isNew:false
-        };
       }
-  
-      // Actualizás las filas del grid
-      setRows((prevRows) =>
-        prevRows.map((row) => (row.id === newRow.id ? updatedRow : row))
+    } else {
+      const PresentacionActualizado = await actualizarPresentacion(
+        mapRowToPresentacion(newRow)
       );
-      setRowModesModel((prevModel) => ({
-        ...prevModel,
-        [newRow.id]: { mode: GridRowModes.View }, // usar el id final
-      }));
-  
-      return updatedRow;
-    };
-      //let updatedRow = { ...newRow, isNew: false };
-  
-  
+      updatedRow = {
+        ...PresentacionActualizado,
+        id: PresentacionActualizado.idPresentacion,
+        nombre: PresentacionActualizado.nombre,
+        precio: PresentacionActualizado.precio,
+        inventario: PresentacionActualizado.inventario,
+        idProductos: PresentacionActualizado.idProductos,
+        isNew: false,
+      };
+    }
+
+    // Actualizás las filas del grid
+    setRows((prevRows) =>
+      prevRows.map((row) => (row.id === newRow.id ? updatedRow : row))
+    );
+    setRowModesModel((prevModel) => ({
+      ...prevModel,
+      [newRow.id]: { mode: GridRowModes.View }, // usar el id final
+    }));
+
+    return updatedRow;
+    console.log(updatedRow);
+  };
+  //let updatedRow = { ...newRow, isNew: false };
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
@@ -320,14 +365,14 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
   // Primero declarar las columnas comunes:
   const baseColumns: GridColDef[] = [
     {
-      field: "idPresentaciones",
+      field: "idPresentacion",
       headerName: "ID",
       headerAlign: "center",
       align: "center",
       type: "number",
       flex: 0.5,
       minWidth: 50,
-      editable: true,
+      editable: false,
     },
     {
       field: "nombre",

@@ -1,13 +1,11 @@
-type FilaProductos = {
+export type FilaProductos = {
   id: number;
   nombre: string;
-  precio: number;
-  cantidad: number;
   estado: string;
 };
 
-type Props = {
-  producto: FilaProductos;
+export type Props = {
+  producto: FilaProductos | null;
 };
 
 export default function MarcaInput({ producto }: Props) {
@@ -47,7 +45,7 @@ export default function MarcaInput({ producto }: Props) {
               color: "#fff",
               outline: "none",
             }}
-            value={producto.id}
+            value={producto?.id}
             readOnly
           />
         </div>
@@ -82,77 +80,7 @@ export default function MarcaInput({ producto }: Props) {
               color: "#fff",
               outline: "none",
             }}
-            value={producto.nombre}
-            readOnly
-          />
-        </div>
-      </div>
-
-      {/* Precio */}
-      <div style={{ marginBottom: "1rem" }}>
-        <label
-          style={{
-            display: "block",
-            color: "#fff",
-            textTransform: "uppercase",
-            marginBottom: "0.5rem",
-          }}
-        >
-          Precio
-        </label>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            background: "#1f1f1f",
-            padding: "0.5rem 1rem",
-            borderRadius: "4px",
-          }}
-        >
-          <input
-            style={{
-              flex: 1,
-              background: "none",
-              border: "none",
-              color: "#fff",
-              outline: "none",
-            }}
-            value={producto.precio}
-            readOnly
-          />
-        </div>
-      </div>
-
-      {/* Cantidad */}
-      <div style={{ marginBottom: "1rem" }}>
-        <label
-          style={{
-            display: "block",
-            color: "#fff",
-            textTransform: "uppercase",
-            marginBottom: "0.5rem",
-          }}
-        >
-          Cantidad
-        </label>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            background: "#1f1f1f",
-            padding: "0.5rem 1rem",
-            borderRadius: "4px",
-          }}
-        >
-          <input
-            style={{
-              flex: 1,
-              background: "none",
-              border: "none",
-              color: "#fff",
-              outline: "none",
-            }}
-            value={producto.cantidad}
+            value={producto?.nombre}
             readOnly
           />
         </div>
@@ -187,7 +115,7 @@ export default function MarcaInput({ producto }: Props) {
               color: "#fff",
               outline: "none",
             }}
-            value={producto.estado}
+            value={producto?.estado}
             readOnly
           />
         </div>
