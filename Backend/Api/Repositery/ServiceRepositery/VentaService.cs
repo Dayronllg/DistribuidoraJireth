@@ -60,8 +60,12 @@ public class VentaService : Service<Venta>, IVentaService
         return Result<VentaDto>.Ok(_mapper.Map<VentaDto>(VentaCreada.Value)); 
     }
 
-    public Task<PaginacionResultado<VentaDto>> PaginarVenta(int pagina, int tamanioPagina)
+    public async Task<PaginacionResultado<VentaDto>> PaginarVenta(int pagina, int tamanioPagina)
     {
-        throw new NotImplementedException();
+
+         var query = _context.Ventas.AsQueryable();
+        var PaginacionVenta = await PaginarAsync(query, tamanioPagina, pagina, x => x.DetalleVenta != null );
+
+        return MapearPaginador.MapearPaginacion<Venta, VentaDto>(PaginacionVenta,_mapper);
     }
 }
