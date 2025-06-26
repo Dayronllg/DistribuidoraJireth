@@ -26,54 +26,34 @@ import type {
 } from "@mui/x-data-grid";
 
 import {
-  randomCreatedDate,
-  randomTraderName,
+  
   randomId,
-  randomArrayItem,
+ 
 } from "@mui/x-data-grid-generator";
+import axios from "axios";
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
 
-const roles = ["Market", "Finance", "Development"];
-const randomRole = () => {
-  return randomArrayItem(roles);
-};
 
-const initialRows: GridRowsProp = [
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 25,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 36,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 19,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 28,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 23,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-];
+type Venta ={
+ idVenta:number;
+ totalVenta:Number;
+ fecha:Date;
+ estado:string
+ idUsuario:number;
+ idCliente:number
+detalleVenta:DetalleVentas[] | null
+}
+
+type DetalleVentas ={
+ cantidad:number;
+ precio:number;
+ subTotal:number;
+ idVenta:number;
+ idProducto:number;
+ idPresentacion:number;
+
+}
+
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -99,7 +79,7 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
     const id = randomId();
     setRows((oldRows) => [
       ...oldRows,
-      { id, name: "", age: "", role: "", isNew: true },
+      { id, estado:'Realizado', isNew: true },
     ]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
@@ -129,10 +109,40 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
 }
 
 export default function TablaRegistroVentas() {
-  const [rows, setRows] = React.useState(initialRows);
+  const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+
+
+  React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<Venta>>(
+        "http://localhost:5187/api/Ventas/ObtenerVentas",
+        {
+          params: {
+            pagina: 1,
+            tamanioPagina: 100,
+          },
+        }
+      )
+      .then((response) => {
+        setRows(
+          response.data.datos.map((t) => ({
+            id:t.idVenta,
+            total:t.totalVenta,
+            fecha:t.fecha,
+            estado:t.estado,
+            idCliente:t.idCliente,
+            idUsuario:t.idUsuario          
+          }))
+        );
+      })
+      .catch((error) => {
+        console.error("Error al obtener Proveedores:", error);
+      });
+  }, []);
+
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -231,7 +241,7 @@ export default function TablaRegistroVentas() {
       type: "number",
       flex: 0.5,
       minWidth: 150,
-      editable: true,
+      editable: false,
     },
   ];
 
