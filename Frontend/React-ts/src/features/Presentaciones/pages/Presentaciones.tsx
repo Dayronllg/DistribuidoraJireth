@@ -6,8 +6,6 @@ import { useState } from "react";
 type FilaProductos = {
   id: number;
   nombre: string;
-  precio: number;
-  cantidad: number;
   estado: string;
 };
 
@@ -54,7 +52,7 @@ function Presentaciones() {
         <h2 style={{ marginBottom: "1.5rem", textAlign: "center" }}>
           Agregar Presentacion
         </h2>
-        <TablaPresentaciones />
+        <TablaPresentaciones producto={productoUnicoSeleccionado} />
       </div>
     </div>
   );
