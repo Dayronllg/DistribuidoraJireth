@@ -89,7 +89,7 @@ public class MapConfig:Profile
         CreateMap<CrearDetalleVentaDto, DetalleVenta>().ReverseMap();
         CreateMap<DetalleVentaDto, DetalleVenta>().ReverseMap();
         CreateMap<CrearVentaDto, Venta>().ForMember(dest => dest.DetalleVenta, opt => opt.MapFrom(src => src.DetalleVenta)).ReverseMap();
-        CreateMap<Venta, VentaDto>().ReverseMap();
+        CreateMap<Venta, VentaDto>().ForMember(dest => dest.DetalleVenta, opt => opt.MapFrom(src => src.DetalleVenta)).ReverseMap();
         //MapeoCompras
         CreateMap<CrearDetalleCompraDto, DetalleCompra>().ReverseMap();
         CreateMap<DetalleCompraDto, DetalleCompra>().ReverseMap();

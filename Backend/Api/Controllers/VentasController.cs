@@ -34,13 +34,25 @@ namespace Api.Controllers
 
                 if (RespuestaVenta.status == Status.None)
                     return StatusCode(500, RespuestaVenta.Error);
-                    
+
                 if (RespuestaVenta.status == Status.NotFound)
-                    return NotFound(RespuestaVenta.Error);   
+                    return NotFound(RespuestaVenta.Error);
             }
 
             return Ok(RespuestaVenta.Value);
         }
+        
+        
+        [HttpGet("ObtenerVentas")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ObtenerPedidos(int Pagina, int TamanioPagina)
+        {
+            var RespuestaTrabajadores = await _ventaService.PaginarVenta(Pagina, TamanioPagina);
+
+            return Ok(RespuestaTrabajadores);
+        }
+
 
     }
 }
