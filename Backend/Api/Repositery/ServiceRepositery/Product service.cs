@@ -40,7 +40,12 @@ public class Product_service : Service<Producto>, IProductService
         if (SuccessUpdated.Failed)
             return Result<ProductoDto>.Fail(SuccessUpdated.Error, SuccessUpdated.status);
 
-        return Result<ProductoDto>.Ok(_mapper.Map<ProductoDto>(SuccessUpdated.Value));
+         var productoConMarca = await _context.Productos
+        .Include(p => p.IdMarcaNavigation)
+        .FirstOrDefaultAsync(p => p.IdProducto==SuccessUpdated.Value.IdProducto);
+
+
+        return Result<ProductoDto>.Ok(_mapper.Map<ProductoDto>(productoConMarca));
     }
 
     public async Task<ResultNoValue> BajaProducto(int id)
