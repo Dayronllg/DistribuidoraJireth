@@ -32,6 +32,7 @@ import {
 } from "@mui/x-data-grid-generator";
 import axios from "axios";
 import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
+import { toast } from "react-toastify";
 
 
 export type FilaMarcas = {
@@ -82,8 +83,8 @@ export interface crearProducto{
 }
 
 export interface ActualizarProducto{
-
-   nombre:string
+   idProducto:number,
+   nombre:string,
    idMarca:number,
    estado:string
 
@@ -99,7 +100,7 @@ export function mapRowToProducto(row: GridRowModel,marca:marca): crearProducto {
 
 export function mapRowToProductoAct(row: GridRowModel,marca:marca): ActualizarProducto {
   return {
-    
+    idProducto:row.idProducto,
     nombre: row.nombre,
     idMarca:marca.idMarca,
     estado:row.estado,
@@ -287,9 +288,10 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
     
       if (newRow.isNew) {
         
-        if(!marca)
+        if(!marca){
+          toast.warning("Tiene que seleccionar una marca");
           return
-
+        }
        if (marca !==null) {
          const ProductoCreado = await crearProducto(mapRowToProducto(newRow,marca));
      
@@ -361,7 +363,7 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
       headerAlign: "center",
       align: "center",
       type: "singleSelect",
-      valueOptions: ["Realizado", "Cancelado"],
+      valueOptions: ["Activo", "Inactivo"],
       flex: 0.7,
       minWidth: 150,
       editable: true,
