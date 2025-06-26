@@ -131,7 +131,7 @@ export default function TablaRegistroVentas() {
           response.data.datos.map((t) => ({
             id:t.idVenta,
             total:t.totalVenta,
-            fecha:t.fecha,
+            fecha:new Date(t.fecha),
             estado:t.estado,
             idCliente:t.idCliente,
             idUsuario:t.idUsuario          
