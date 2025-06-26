@@ -25,7 +25,7 @@ public class Product_service : Service<Producto>, IProductService
         _mapper = mapper;
     }
 
-    public async Task<Result<ProductoDto>> ActualizarProducto(ProductoDto ActualizarProducto)
+    public async Task<Result<ProductoDto>> ActualizarProducto(ActualizarProductoDto ActualizarProducto)
     {
         var ProductoRespuesta = await base.Exists(x => x.IdProducto == ActualizarProducto.IdProducto
                                         && x.Estado == "Activo");
