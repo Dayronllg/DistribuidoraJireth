@@ -26,10 +26,11 @@ import type {
   GridRowProps,
 } from "@mui/x-data-grid";
 import { randomId } from "@mui/x-data-grid-generator";
-import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
-import axios from "axios";
 
-type Presentaciones ={
+import axios from "axios";
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
+
+type Presentacion ={
   idPresentacion:number,
   nombre: number,
   precio: number,
@@ -37,6 +38,64 @@ type Presentaciones ={
   estado: string,
   idProductos: number
 }
+
+
+
+export function mapRowToPresentacion(row: GridRowModel): Presentacion {
+  return {
+    idPresentacion: row.idPresentacion,
+  nombre: row.nombre,
+  precio: row.precio,
+  inventario: row.inventario,
+  estado: row.estado,
+  idProductos: row.idPresentacions
+  }
+}
+
+const API_BASE = "http://localhost:5187/api";
+
+export const crearPresentacion = async (nuevo: Presentacion) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE}/Presentaciones/CrearPresentacion`,
+      nuevo
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear Presentacion", error);
+    throw error;
+  }
+};
+
+export async function actualizarPresentacion(
+  Presentacion: Presentacion
+): Promise<Presentacion> {
+  try {
+    const response = await axios.put<Presentacion>(
+      `${API_BASE}/Presentaciones/ActualizarPresentacion`,
+      Presentacion
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar Presentacion:", error);
+    throw error; // Puedes lanzar un error más específico si querés
+  }
+}
+
+const eliminarPresentacion = async (id: number) => {
+  try {
+    const response = await axios.put(
+      `${API_BASE}/Presentaciones/BajaPresentaciones`,
+      null,
+      { params: { id: id } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al eliminar (inhabilitar) el Presentacion:", error);
+    throw error;
+  }
+};
+
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -99,7 +158,7 @@ export default function TablaRegistroVentas() {
 
   React.useEffect(() => {
     axios
-      .get<PaginacionResultado<Presentaciones>>(
+      .get<PaginacionResultado<Presentacion>>(
         "http://localhost:5187/api/Presentaciones/ObtenerPresentaciones",
         {
           params: {
@@ -124,7 +183,7 @@ export default function TablaRegistroVentas() {
       setRows(filas);
     })
     .catch((error) => {
-      console.error("Error al obtener productos:", error);
+      console.error("Error al obtener Presentacions:", error);
     });
 }, []);
 
@@ -206,11 +265,48 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
     }
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    return updatedRow;
-  };
+   const processRowUpdate = async (newRow: GridRowModel) => {
+      //let updatedRow = { ...newRow, isNew: false };
+  
+      
+      let updatedRow: { id: number; isNew: boolean } = {
+        id: newRow.id,
+        isNew: false,
+        
+      };
+  
+      if (newRow.isNew) {
+        const PresentacionCreado = await crearPresentacion(mapRowToPresentacion(newRow));
+  
+        updatedRow = {
+          ...newRow,
+          ...PresentacionCreado,
+          id: PresentacionCreado.idPresentacion,
+          isNew: false,
+        };
+      } else {
+        const PresentacionActualizado = await actualizarPresentacion(mapRowToPresentacion(newRow));
+        updatedRow = {
+          id:PresentacionActualizado.idPresentacion,
+          ...PresentacionActualizado,
+          isNew:false
+        };
+      }
+  
+      // Actualizás las filas del grid
+      setRows((prevRows) =>
+        prevRows.map((row) => (row.id === newRow.id ? updatedRow : row))
+      );
+      setRowModesModel((prevModel) => ({
+        ...prevModel,
+        [newRow.id]: { mode: GridRowModes.View }, // usar el id final
+      }));
+  
+      return updatedRow;
+    };
+      //let updatedRow = { ...newRow, isNew: false };
+  
+  
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
@@ -274,7 +370,7 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
     },
     {
       field: "idProductos",
-      headerName: "ID Producto",
+      headerName: "ID Productos",
       headerAlign: "center",
       align: "center",
       type: "number",
