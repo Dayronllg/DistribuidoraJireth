@@ -85,7 +85,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> ActualizarProductos([FromBody] ProductoDto ActualizarProducto)
+        public async Task<IActionResult> ActualizarProductos([FromBody] ActualizarProductoDto ActualizarProducto)
         {
             var RespuestaProducto = await _productoService.ActualizarProducto(ActualizarProducto);
 
