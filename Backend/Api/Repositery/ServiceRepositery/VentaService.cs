@@ -64,7 +64,7 @@ public class VentaService : Service<Venta>, IVentaService
     {
 
          var query = _context.Ventas.AsQueryable();
-        var PaginacionVenta = await PaginarAsync(query, tamanioPagina, pagina, x => x.DetalleVenta != null );
+        var PaginacionVenta = await PaginarAsync(query, pagina,tamanioPagina ,x => x.DetalleVenta != null );
 
         return MapearPaginador.MapearPaginacion<Venta, VentaDto>(PaginacionVenta,_mapper);
     }
