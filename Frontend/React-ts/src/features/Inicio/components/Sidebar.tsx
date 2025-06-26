@@ -165,6 +165,13 @@ const demoTheme = createTheme({
 //import { useLocation, useNavigate } from "react-router-dom";
 //import type { Router } from "@toolpad/core";
 export default function SidebarAdmin() {
+  const cerrarSesion = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("rol");
+    localStorage.removeItem("usuario");
+    window.location.href = "/"; // o la ruta de login
+  };
+
   //   const location = useLocation();
   // const navigateRR = useNavigate(); // navigate original de React Router
 
@@ -187,11 +194,44 @@ export default function SidebarAdmin() {
       //router={router}
     >
       <DashboardLayout>
-        {/* <PageContainer> */}
-        <div style={{ padding: "3rem" }}>
-          <Outlet />
+        <div style={{ display: "flex", height: "100%" }}>
+          {/* Contenedor principal */}
+          <div style={{ flex: 1, padding: "3rem" }}>
+            <Outlet />
+          </div>
+
+          {/* Botón fijo dentro del sidebar */}
+          <div
+            style={{
+              position: "fixed",
+              left: "1rem",
+              bottom: "1rem",
+              zIndex: 9999,
+            }}
+          >
+            <button
+              onClick={cerrarSesion}
+              style={{
+                padding: "0.5rem 1rem",
+                backgroundColor: "#007bff",
+                color: "#fff",
+                border: "none",
+                borderRadius: "8px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                transition: "background-color 0.3s ease",
+              }}
+              onMouseOver={
+                (e) => (e.currentTarget.style.backgroundColor = "#0056b3") // Azul más oscuro al pasar el mouse
+              }
+              onMouseOut={
+                (e) => (e.currentTarget.style.backgroundColor = "#007bff") // Vuelve al color original
+              }
+            >
+              Cerrar Sesión
+            </button>
+          </div>
         </div>
-        {/* </PageContainer> */}
       </DashboardLayout>
     </AppProvider>
   );
