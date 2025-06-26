@@ -50,7 +50,6 @@ export type FilaMarcas = {
   estado: string;
 };
 
-
 interface Presentacion{
   idPresentacion:number
   nombre:string,
@@ -165,6 +164,7 @@ export default function TablaRegistroProductos({marca}:Props) {
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+
 
  React.useEffect(() => {
     axios
@@ -285,7 +285,7 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
       //let updatedRow = { ...newRow, isNew: false };
     let updatedRow: { id: number; isNew: boolean, nombre:string, idMarca:number,nombreMarca:string } = 
     { id: newRow.id,nombre:newRow.nombre,idMarca:newRow.nombreMarca,nombreMarca:newRow.nombreMarca ,isNew: false };
-    
+        
       if (newRow.isNew) {
         
         if(!marca){

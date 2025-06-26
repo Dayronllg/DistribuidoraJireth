@@ -59,6 +59,7 @@ export const crearProveedor = async (nuevo: Proveedor) => {
     return response.data;
   } catch (error) {
     console.error("Error al crear Proveedor", error);
+    
     throw error;
   }
 };
@@ -147,6 +148,7 @@ export default function TablaProveedores() {
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+  const [errorRowId, setErrorRowId] = React.useState<GridRowId | null>(null);
 
   React.useEffect(() => {
     axios
@@ -294,42 +296,69 @@ export default function TablaProveedores() {
       id: newRow.id,
       isNew: false,
     };
-
-    if (newRow.isNew) {
-      const ProveedorCreado = await crearProveedor(mapRowToProveedor(newRow));
-
-      updatedRow = {
-        ...newRow,
-        ...ProveedorCreado,
-        id: ProveedorCreado.ruc,
-        isNew: false,
-      };
-    } else {
-      const ProveedorActualizado = await actualizarProveedor(
-        mapRowToProveedor(newRow)
+      
+    try {
+       
+      if (newRow.isNew) {
+        const ProveedorCreado = await crearProveedor(mapRowToProveedor(newRow));
+         setErrorRowId(newRow.id);
+        updatedRow = {
+          ...newRow,
+          ...ProveedorCreado,
+          id: ProveedorCreado.ruc,
+          isNew: false,
+        };
+      } else {
+        const ProveedorActualizado = await actualizarProveedor(
+          mapRowToProveedor(newRow)
+        );
+        updatedRow = {
+          ...ProveedorActualizado,
+          id: ProveedorActualizado.ruc,
+          isNew: false,
+        };
+      }
+  
+      // Actualizás las filas del grid
+      setRows((prevRows) =>
+        prevRows.map((row) => (row.id === newRow.id ? updatedRow : row))
       );
-      updatedRow = {
-        ...ProveedorActualizado,
-        id: ProveedorActualizado.ruc,
-        isNew: false,
-      };
+      setRowModesModel((prevModel) => ({
+        ...prevModel,
+        [newRow.id]: { mode: GridRowModes.View }, // usar el id final
+      }));
+
+      return updatedRow;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+      const status = error.response.status;
+      const mensaje = error.response.data;
+      toast.error(`Error ${status}:   ${mensaje}`);
+    } else {
+      toast.error("Error inesperado al guardar proveedor");
+    }
+     
+       
     }
 
-    // Actualizás las filas del grid
-    setRows((prevRows) =>
-      prevRows.map((row) => (row.id === newRow.id ? updatedRow : row))
-    );
-    setRowModesModel((prevModel) => ({
-      ...prevModel,
-      [newRow.id]: { mode: GridRowModes.View }, // usar el id final
-    }));
-
-    return updatedRow;
+     
   };
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
   };
+
+ const handleProcessRowUpdateError = React.useCallback(
+  (error: any) => {
+    if (errorRowId !== null) {
+      setRowModesModel((prev) => ({
+        ...prev,
+        [errorRowId]: { mode: GridRowModes.Edit },
+      }));
+    }
+  },
+  [errorRowId]
+);
 
   // Leer rol
   const rol = localStorage.getItem("rol");
@@ -460,6 +489,7 @@ export default function TablaProveedores() {
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
+        onProcessRowUpdateError={ handleProcessRowUpdateError}
         slots={{ toolbar: EditToolbar }}
         slotProps={{ toolbar: { setRows, setRowModesModel } }}
         showToolbar

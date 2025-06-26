@@ -23,57 +23,20 @@ import type {
   GridRowId,
   GridRowModel,
   GridSlotProps,
+  GridRowProps,
 } from "@mui/x-data-grid";
+import { randomId } from "@mui/x-data-grid-generator";
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
+import axios from "axios";
 
-import {
-  randomCreatedDate,
-  randomTraderName,
-  randomId,
-  randomArrayItem,
-} from "@mui/x-data-grid-generator";
-
-const roles = ["Market", "Finance", "Development"];
-const randomRole = () => {
-  return randomArrayItem(roles);
-};
-
-const initialRows: GridRowsProp = [
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 25,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 36,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 19,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 28,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 23,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-];
+type Presentaciones ={
+  idPresentacion:number,
+  nombre: number,
+  precio: number,
+  inventario: number,
+  estado: string,
+  idProductos: number
+}
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -129,10 +92,86 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
 }
 
 export default function TablaRegistroVentas() {
-  const [rows, setRows] = React.useState(initialRows);
+  const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+
+  React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<Presentaciones>>(
+        "http://localhost:5187/api/Presentaciones/ObtenerPresentaciones",
+        {
+          params: {
+            pagina: 1,
+            tamanioPagina: 100,
+          },
+        }
+      )
+     .then((response) => {
+      const filas = response.data.datos.map((p) => ({
+          id:p.idPresentacion,
+          idPresentaciones:p.idPresentacion,
+          nombre:p.nombre,
+          inventario:p.inventario,
+          precio:p.precio,
+          idProductos:p.idProductos,
+          estado:p.estado
+
+          
+        })
+      );
+      setRows(filas);
+    })
+    .catch((error) => {
+      console.error("Error al obtener productos:", error);
+    });
+}, []);
+
+//Toolbar de Agregar
+function EditToolbar(props: GridSlotProps["toolbar"]) {
+  const { setRows, setRowModesModel } = props;
+
+  // Obtener rol de localStorage
+  const rol = localStorage.getItem("rol");
+
+  if (rol !== "Administrador") {
+    return null; // Así no se renderiza nada de la Toolbar
+  }
+
+  const handleClick = () => {
+    const id = randomId();
+    setRows((oldRows) => [
+      ...oldRows,
+      { id, name: "", age: "", role: "", isNew: true },
+    ]);
+    setRowModesModel((oldModel) => ({
+      ...oldModel,
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
+    }));
+  };
+
+  return (
+    <Toolbar>
+      <Tooltip title="Agregar">
+        <Button
+          onClick={handleClick}
+          startIcon={<AddIcon />}
+          variant="contained"
+          sx={{
+            borderRadius: "10px",
+            color: "white",
+            backgroundColor: "#007bff",
+            "&:hover": { backgroundColor: "#0056b3" },
+          }}
+          
+        >
+          Agregar
+        </Button>
+      </Tooltip>
+    </Toolbar>
+  );
+}
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -220,16 +259,6 @@ export default function TablaRegistroVentas() {
       type: "number",
       flex: 0.7,
       minWidth: 100,
-      editable: true,
-    },
-    {
-      field: "unidadMedida",
-      headerName: "Unidad de Medida",
-      headerAlign: "center",
-      align: "center",
-      type: "string",
-      flex: 0.8,
-      minWidth: 150,
       editable: true,
     },
     {

@@ -36,6 +36,7 @@ export default function App() {
         hideProgressBar={false}
         closeOnClick={false}
         pauseOnFocusLoss
+        closeButton={false}
         draggable
         pauseOnHover
         theme="dark" // También puedes usar "light" o "colored"

@@ -1,22 +1,33 @@
 import React, { useState, useMemo, useEffect } from "react";
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
+import axios from "axios";
 
 // Definir el tipo de valor de cada fila (producto)
 type FilaProductos = {
   id: number;
   nombre: string;
-  precio: number;
-  cantidad: number;
+  idMarca:number;
+  nombreM: string
   estado: string;
 };
 
-// Lista temporal solo para probar
-const initialRows: FilaProductos[] = [
-  { id: 1, nombre: "Pan", precio: 35, cantidad: 3, estado: "Activo" },
-  { id: 2, nombre: "Mondongo", precio: 42, cantidad: 5, estado: "Inactivo" },
-  { id: 3, nombre: "Jabon", precio: 45, cantidad: 7, estado: "Activo" },
-  { id: 4, nombre: "Arroz", precio: 16, cantidad: 2, estado: "Activo" },
-  { id: 5, nombre: "Aceite", precio: 29, cantidad: 6, estado: "Activo" },
-];
+interface marca {
+    idMarca: number,
+    nombre: string,
+    estado: string
+}
+
+
+export interface Producto{
+
+  idProducto: number,
+  nombre: string,
+  estado: string,
+  idMarcaNavigation:marca
+ 
+
+}
+
 
 type Props = {
   // Cambio para que reciba una sola marca, no un array
@@ -30,7 +41,7 @@ export default function TablaFiltroProductos({
   AgregarSeleccionado,
   onSelectSingle,
 }: Props) {
-  const [rows] = useState<FilaProductos[]>(initialRows); // Lista de marcas base
+  const [rows,setRows] = useState<FilaProductos[]>([]); // Lista de marcas base
   const [IDSeleccionado, setIDSeleccionado] = useState<number | null>(null); // IDs seleccionados
   const [textoFiltrado, setFilterText] = useState(""); // Texto de filtro
   const [isClicked, setIsClicked] = useState(false);
@@ -38,6 +49,37 @@ export default function TablaFiltroProductos({
   const [isNextClicked, setIsNextClicked] = useState(false);
   const [paginaActual, setpaginaActual] = useState(1); // Página actual
   const [mensajeError, setMensajeError] = useState<string | null>(null); // Mensaje de error
+
+  
+ React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<Producto>>(
+        "http://localhost:5187/api/Productos/ObtenerSoloProductos",
+        {
+          params: {
+            pagina: 1,
+            tamanioPagina: 100,
+          },
+        }
+      )
+     .then((response) => {
+      const filas = response.data.datos.map((p) => ({
+          id: p.idProducto, // este es el ID que necesita el DataGrid
+          idProducto: p.idProducto,
+          nombre: p.nombre,
+          estado:p.estado,
+          nombreM:p.idMarcaNavigation.nombre,
+          idMarca:p.idMarcaNavigation.idMarca,
+          
+        })
+      );
+      setRows(filas);
+    })
+    .catch((error) => {
+      console.error("Error al obtener productos:", error);
+    });
+}, []);
+
 
   const FilasFiltradas = useMemo(() => {
     const lowerFilter = textoFiltrado.toLowerCase();
@@ -184,8 +226,8 @@ export default function TablaFiltroProductos({
             <th style={thStyle}></th>
             <th style={thStyle}>ID</th>
             <th style={thStyle}>Nombre</th>
-            <th style={thStyle}>Precio</th>
-            <th style={thStyle}>Cantidad</th>
+            <th style={thStyle}>ID Marca</th>
+            <th style={thStyle}>Marca</th>
             <th style={thStyle}>Estado</th>
           </tr>
         </thead>
@@ -210,8 +252,8 @@ export default function TablaFiltroProductos({
                 </td>
                 <td style={tdStyle}>{row.id}</td>
                 <td style={tdStyle}>{row.nombre}</td>
-                <td style={tdStyle}>{row.precio}</td>
-                <td style={tdStyle}>{row.cantidad}</td>
+                <td style={tdStyle}>{row.idMarca}</td>
+                <td style={tdStyle}>{row.nombreM}</td>
                 <td style={tdStyle}>{row.estado}</td>
               </tr>
             ))
