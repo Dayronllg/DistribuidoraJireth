@@ -25,40 +25,19 @@ public class Service<T> : IService<T> where T : class
     }
 
     public virtual async Task<Result<T>> create(T entity)
-    {
-        if (_context.Database.CurrentTransaction == null)
-        {
-            await using var transaction = await _context.Database.BeginTransactionAsync();
+    {   
             try
             {
 
                 await dbset.AddAsync(entity);
                 await Save();
-                await transaction.CommitAsync();
                 return Result<T>.Ok(entity);
             }
             catch (Exception e)
             {
-                if (transaction.GetDbTransaction().Connection != null)
-                {
-                    await transaction.RollbackAsync();
-                }
                 return Result<T>.Fail(e.Message);
             }
-        }
-
-
-        try
-        {
-            await dbset.AddAsync(entity);
-            await Save();
-            return Result<T>.Ok(entity);
-        }
-        catch (Exception e)
-        {
-            
-            return Result<T>.Fail(e.Message);
-        }
+      
     }
 
 
