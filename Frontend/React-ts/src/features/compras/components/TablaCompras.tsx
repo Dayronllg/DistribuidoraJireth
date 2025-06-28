@@ -26,7 +26,6 @@ type PropsTablaCompras = {
   rows: FilaCompra[];
   setRows: React.Dispatch<React.SetStateAction<FilaCompra[]>>;
   nuevaFila: FilaCompra | null;
-  onClick: () => void;
  
 };
 
