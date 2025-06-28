@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using Api.Dto;
 using Api.Dto.VentasDto;
 using Api.Models;
@@ -32,32 +33,48 @@ public class VentaService : Service<Venta>, IVentaService
 
     public async Task<Result<VentaDto>> CrearVenta(CrearVentaDto CrearVenta)
     {
-        var VentaCreada = await create(_mapper.Map<Venta>(CrearVenta));
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        
+          try
 
-        if (VentaCreada.Failed)
-            return Result<VentaDto>.Fail(VentaCreada.Error, VentaCreada.status);
-
-        if (VentaCreada.Success)
-        {
-        foreach (var detalle in VentaCreada.Value.DetalleVenta)
-        {
-            var presentacion = await _context.Presentaciones.FindAsync(detalle.IdPresentacion);
-            if (presentacion == null)
             {
-                return Result<VentaDto>.Fail($"Presentación con ID {detalle.IdPresentacion} no encontrada",Status.NotFound);
+                // Mapear y agregar la venta (SIN SAVE aún)
+                var ventaEntity = _mapper.Map<Venta>(CrearVenta);
+                await _context.Ventas.AddAsync(ventaEntity);
+                
+                // Aquí ya tienes la venta en memoria, pero no guardada
+
+            foreach (var detalle in ventaEntity.DetalleVenta)
+            {
+                var presentacion = await _context.Presentaciones.FindAsync(detalle.IdPresentacion);
+
+                if (presentacion == null)
+                {
+                    await transaction.RollbackAsync();
+                    return Result<VentaDto>.Fail($"Presentación con ID {detalle.IdPresentacion} no encontrada", Status.NotFound);
+                }
+
+                if (presentacion.Inventario < detalle.Cantidad)
+                {
+                    await transaction.RollbackAsync();
+                    return Result<VentaDto>.Fail($"Inventario insuficiente para la presentación {presentacion.Nombre}", Status.Conflict);
+                }
+
+                presentacion.Inventario -= detalle.Cantidad;
+
             }
 
-            if (presentacion.Inventario < detalle.Cantidad)
-            {
-                return Result<VentaDto>.Fail($"Inventario insuficiente para la presentación {presentacion.Nombre}",Status.Conflict);
+                // Guardar TODO JUNTO
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return Result<VentaDto>.Ok(_mapper.Map<VentaDto>(ventaEntity));
             }
-
-            presentacion.Inventario -= detalle.Cantidad;
-       }
-
-        await _context.SaveChangesAsync(); 
-     }
-        return Result<VentaDto>.Ok(_mapper.Map<VentaDto>(VentaCreada.Value)); 
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return Result<VentaDto>.Fail($"Error al crear la venta: {ex.Message}");
+            }
     }
 
     public async Task<PaginacionResultado<VentaDto>> PaginarVenta(int pagina, int tamanioPagina)
