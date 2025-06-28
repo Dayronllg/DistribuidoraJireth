@@ -97,7 +97,7 @@ function Pedidos() {
               idUsuario: Number(localStorage.getItem("idUsuario")),
               detallePedidos: FilasSeleccionadas.map((item) => ({
               cantidadProducto:item.cantidad,
-               estado: "Activo",
+               estado: "En espera",
                idProducto:item.id,
                idPresentacion:item.idPresentacion
               })),
