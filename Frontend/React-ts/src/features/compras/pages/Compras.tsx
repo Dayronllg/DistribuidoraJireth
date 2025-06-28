@@ -237,9 +237,8 @@ function Compras() {
         nuevaFila={nuevaFila}
         setRows={setFilasCompra}
         rows={filasCompra}
-        onClick={handleGuardarCompra}
       />
-      <BotonFinalizarCompra />
+      <BotonFinalizarCompra onClick={handleGuardarCompra} />
     </div>
   );
 }
