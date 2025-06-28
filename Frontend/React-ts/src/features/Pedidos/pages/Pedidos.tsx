@@ -5,11 +5,11 @@ import TablaFiltroProveedores from "../components/TablaFiltroProveedores";
 import TablaFiltroProductos from "../components/TablaFiltroProductos";
 import BotonAgregar from "../components/BotonAgregar";
 import { toast } from "react-toastify";
-import  { confirmAlert } from "react-confirm-alert";
+import { confirmAlert } from "react-confirm-alert";
 import axios from "axios";
 
 type FilaProductos = {
- id: number;
+  id: number;
   nombre: string;
   idPresentacion: number;
   nombreP: string;
@@ -24,25 +24,25 @@ type FilaProveedores = {
   telefono: string;
 };
 
-type detallePedio={
-  cantidadProducto: number,
-  estado: string,
-  idProducto: number,
-  idPresentacion:number
-      
-}
-type CrearPedido={
-
-  ruc: string,
-  estado: string,
-  idUsuario: number
-  detallePedidos:detallePedio[]
-}
+type detallePedio = {
+  cantidadProducto: number;
+  estado: string;
+  idProducto: number;
+  idPresentacion: number;
+};
+type CrearPedido = {
+  ruc: string;
+  estado: string;
+  idUsuario: number;
+  detallePedidos: detallePedio[];
+};
 const enviarPedido = async (venta: CrearPedido) => {
   try {
-    const response = await axios.post("http://localhost:5187/api/Pedidos/CrearPedido", venta);
+    const response = await axios.post(
+      "http://localhost:5187/api/Pedidos/CrearPedido",
+      venta
+    );
     return response.data;
-    
   } catch (error) {
     console.error("Error al guardar la venta:", error);
     throw error;
@@ -61,19 +61,24 @@ function Pedidos() {
   // const TablaFiltroProductos.tsx
   const AñadirFilasSeleccionadas = (rows: FilaProductos[]) => {
     const nuevos = rows.filter(
-      (row) => !FilasSeleccionadas.some((r) => r.idPresentacion === row.idPresentacion)
+      (row) =>
+        !FilasSeleccionadas.some((r) => r.idPresentacion === row.idPresentacion)
     );
     setFilasSeleccionadas((prev) => [...prev, ...nuevos]);
   };
 
   // const para TablaProductosVender.tsx
   const EliminarFilasSeleccionadas = (id: number) => {
-    setFilasSeleccionadas((prev) => prev.filter((row) => row.idPresentacion !== id));
+    setFilasSeleccionadas((prev) =>
+      prev.filter((row) => row.idPresentacion !== id)
+    );
   };
 
   const EditarFilaSeleccionada = (editarFila: FilaProductos) => {
     setFilasSeleccionadas((prev) =>
-      prev.map((row) => (row.idPresentacion === editarFila.idPresentacion ? editarFila : row))
+      prev.map((row) =>
+        row.idPresentacion === editarFila.idPresentacion ? editarFila : row
+      )
     );
   };
 
@@ -82,7 +87,7 @@ function Pedidos() {
       toast.error("Debe seleccionar un cliente y al menos un producto");
       return;
     }
-  
+
     // Mostrar alerta de confirmación
     confirmAlert({
       title: "¿Confirmar Pedido?",
@@ -96,17 +101,17 @@ function Pedidos() {
               estado: "Activo",
               idUsuario: Number(localStorage.getItem("idUsuario")),
               detallePedidos: FilasSeleccionadas.map((item) => ({
-              cantidadProducto:item.cantidad,
-               estado: "Activo",
-               idProducto:item.id,
-               idPresentacion:item.idPresentacion
+                cantidadProducto: item.cantidad,
+                estado: "Activo",
+                idProducto: item.id,
+                idPresentacion: item.idPresentacion,
               })),
             };
-  
+
             try {
               const resultado = await enviarPedido(pedido);
               console.log("Pedido registrado con éxito:", resultado);
-              toast.success("pedido exitoso");
+              toast.success("Pedido exitoso");
               setFilasSeleccionadas([]);
               setProveedorUnicoSeleccionado(null);
             } catch (error) {
@@ -123,7 +128,7 @@ function Pedidos() {
       ],
     });
   };
- 
+
   return (
     <div
       style={{
