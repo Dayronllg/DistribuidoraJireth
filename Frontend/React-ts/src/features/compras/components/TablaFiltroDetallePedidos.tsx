@@ -1,8 +1,12 @@
 import React, { useState, useMemo, useEffect } from "react";
+import type { FilaPedidos } from "../pages/Compras";
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
+import axios from "axios";
+import Pedidos from "../../Pedidos/pages/Pedidos";
 
 // Definir el tipo de valor de cada fila (producto)
 type FilaDetallePedido = {
-  idDetalle: number;
+  idDetalle: string;
   cantidadProducto: number;
   estado: string;
   idPedido: number;
@@ -10,37 +14,24 @@ type FilaDetallePedido = {
   idPresentacion: number;
 };
 
+
+type DetallePedido ={
+
+  idDetalle: string;
+  cantidadProducto: number;
+  estado: string;
+  idPedido: number;
+  idProducto: number;
+  idPresentacion: number;
+}
+
+
 // Lista temporal solo para probar
-const initialRows: FilaDetallePedido[] = [
-  {
-    idDetalle: 1,
-    cantidadProducto: 10,
-    estado: "Pendiente",
-    idPedido: 101,
-    idProducto: 201,
-    idPresentacion: 301,
-  },
-  {
-    idDetalle: 2,
-    cantidadProducto: 5,
-    estado: "Entregado",
-    idPedido: 102,
-    idProducto: 202,
-    idPresentacion: 302,
-  },
-  {
-    idDetalle: 3,
-    cantidadProducto: 8,
-    estado: "Cancelado",
-    idPedido: 103,
-    idProducto: 203,
-    idPresentacion: 303,
-  },
-];
 
 type Props = {
   AgregarSeleccionado: (rows: FilaDetallePedido[]) => void;
   productosYaAgregados: FilaDetallePedido[];
+  pedido:FilaPedidos | null
 };
 
 const FILAS_POR_PAGINA = 3;
@@ -48,15 +39,45 @@ const FILAS_POR_PAGINA = 3;
 export default function TablaFiltroDetallePedidos({
   AgregarSeleccionado,
   productosYaAgregados,
+  pedido
 }: Props) {
-  const [rows] = useState<FilaDetallePedido[]>(initialRows);
-  const [IDSeleccionado, setIDSeleccionado] = useState<number | null>(null);
+  const [rows,setRows] = useState<FilaDetallePedido[]>([]);
+  const [IDSeleccionado, setIDSeleccionado] = useState<string | null>(null);
   const [textoFiltrado, setFilterText] = useState("");
   const [isClicked, setIsClicked] = useState(false);
   const [isPrevClicked, setIsPrevClicked] = useState(false);
   const [isNextClicked, setIsNextClicked] = useState(false);
   const [paginaActual, setpaginaActual] = useState(1);
   const [mensajeError, setMensajeError] = useState<string | null>(null);
+
+
+  
+  React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<DetallePedido>>(
+        "http://localhost:5187/api/Pedidos/ObtenerDetallePedidoCompra",
+        {
+          params: {
+            id:pedido?.idPedido
+          },
+        }
+      )
+      .then((response) => {
+        setRows(
+          response.data.datos.map((t) => ({
+            ...t,
+            idPedido:t.idPedido,
+            idDetalle:`${t.idPedido}-${t.idProducto}-${t.idPresentacion}`,
+            idProducto:t.idProducto,
+            idPresentacion:t.idPresentacion,
+            cantidadProducto:t.cantidadProducto
+          }))
+        );
+      })
+      .catch((error) => {
+        console.error("Error al obtener Marcas:", error);
+      });
+  }, [pedido]);
 
   const FilasFiltradas = useMemo(() => {
     const lowerFilter = textoFiltrado.toLowerCase();
@@ -79,7 +100,7 @@ export default function TablaFiltroDetallePedidos({
     return FilasFiltradas.slice(startIndex, startIndex + FILAS_POR_PAGINA);
   }, [FilasFiltradas, paginaActual]);
 
-  const handleSelect = (id: number) => {
+  const handleSelect = (id: string) => {
     setIDSeleccionado((prev) => (prev === id ? null : id));
   };
 

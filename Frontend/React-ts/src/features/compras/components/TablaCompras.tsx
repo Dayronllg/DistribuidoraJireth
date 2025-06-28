@@ -22,13 +22,20 @@ import type {
   GridRowModel,
   GridRowsProp,
   GridSlotProps,
+  GridValidRowModel,
 } from "@mui/x-data-grid";
 import { randomId } from "@mui/x-data-grid-generator";
 
 import type { FilaCompra } from "../pages/Compras";
-type Props = {
+type PropsTablaCompras = {
+  rows: FilaCompra[];
+  setRows: React.Dispatch<React.SetStateAction<FilaCompra[]>>;
   nuevaFila: FilaCompra | null;
+  onClick:() => void
 };
+
+
+
 
 // Toolbar de Agregar
 function EditToolbar(props: GridSlotProps["toolbar"]) {
@@ -41,17 +48,25 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
     return null; // Así no se renderiza nada de la Toolbar
   }
 
-  const handleClick = () => {
-    const id = randomId();
-    setRows((oldRows) => [
-      ...oldRows,
-      { id, name: "", age: "", role: "", isNew: true },
-    ]);
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
-    }));
-  };
+const handleClick = () => {
+  const id = randomId();
+  setRows((oldRows) => [
+    ...oldRows,
+    {
+      id,
+      cantidad: 0,
+      idProducto: 0,
+      idPresentacion: 0,
+      nombreProducto: "",
+      nombrePresentacion: "",
+      isNew: true,
+    },
+  ]);
+  setRowModesModel((oldModel) => ({
+    ...oldModel,
+    [id]: { mode: GridRowModes.Edit, fieldToFocus: "cantidad" },
+  }));
+};
 
   return (
     <Toolbar>
@@ -74,8 +89,8 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
   );
 }
 
-export default function TablaCompras({ nuevaFila }: Props) {
-  const [rows, setRows] = React.useState<GridRowsProp>([]);
+export default function TablaCompras({ nuevaFila,rows,setRows,onClick }: PropsTablaCompras) {
+  //const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
@@ -92,6 +107,7 @@ export default function TablaCompras({ nuevaFila }: Props) {
         idPresentacion: nuevaFila.idPresentacion,
         nombreProducto: "", // Texto Vacio
         nombrePresentacion: "", // Texto Vacio
+        isNew:true
       };
       setRows((prev) => [...prev, filaConId]);
     }
@@ -130,14 +146,13 @@ export default function TablaCompras({ nuevaFila }: Props) {
     }
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows((prev) =>
-      prev.map((row) => (row.id === newRow.id ? updatedRow : row))
-    );
-    return updatedRow;
-  };
-
+const processRowUpdate = (newRow: FilaCompra) => {
+  const updatedRow = { ...newRow as FilaCompra, isNew: false };
+  setRows((prev) =>
+    prev.map((row) => (row.id === newRow.id ? updatedRow : row))
+  );
+  return updatedRow;
+};
   const handleRowModesModelChange = (newModel: GridRowModesModel) => {
     setRowModesModel(newModel);
   };
@@ -246,30 +261,36 @@ export default function TablaCompras({ nuevaFila }: Props) {
           fontWeight: "bold",
         },
       }}
-    >
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        editMode="row"
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={handleRowModesModelChange}
-        onRowEditStop={handleRowEditStop}
-        processRowUpdate={processRowUpdate}
-        slots={{ toolbar: EditToolbar }}
-        slotProps={{ toolbar: { setRows, setRowModesModel } }}
-        showToolbar
-        sx={{
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: "#007bff",
-            color: "#ffffff",
-            fontWeight: "bold",
-            fontSize: "1rem",
-          },
-          "& .MuiDataGrid-columnHeaders .MuiDataGrid-columnTitle": {
-            padding: "0.5rem",
-          },
-        }}
-      />
+    ><DataGrid
+  rows={rows}
+  columns={columns}
+  editMode="row"
+  rowModesModel={rowModesModel}
+  onRowModesModelChange={handleRowModesModelChange}
+  onRowEditStop={handleRowEditStop}
+  processRowUpdate={processRowUpdate}
+  slots={{ toolbar: EditToolbar }}
+  slotProps={{
+    toolbar: {
+      setRows: setRows as unknown as (
+        newRows: (oldRows: readonly GridValidRowModel[]) => readonly GridValidRowModel[]
+      ) => void,
+      setRowModesModel,
+    },
+  }}
+  showToolbar
+  sx={{
+    "& .MuiDataGrid-columnHeaders": {
+      backgroundColor: "#007bff",
+      color: "#ffffff",
+      fontWeight: "bold",
+      fontSize: "1rem",
+    },
+    "& .MuiDataGrid-columnHeaders .MuiDataGrid-columnTitle": {
+      padding: "0.5rem",
+    },
+  }}
+/>
     </Box>
   );
 }

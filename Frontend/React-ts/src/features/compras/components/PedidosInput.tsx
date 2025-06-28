@@ -7,16 +7,17 @@ type PedidosInputData = {
 
 type Props = {
   pedido?: PedidosInputData;
+  total: number;
+  onTotalChange: (nuevoTotal: number) => void;
 };
-
-export default function PedidosInput({ pedido }: Props) {
-  const [total, setTotal] = useState<number>(0);
+export default function PedidosInput({ pedido,total,onTotalChange }: Props) {
+ 
 
   // El valor ingresado en el input siempre se guarda como número.
   // Si el usuario borra el input o escribe algo no numérico, se guarda 0 para evitar errores.
   const handleTotalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10);
-    setTotal(isNaN(value) ? 0 : value);
+    onTotalChange(isNaN(value) ? 0 : value);
   };
 
   const containerStyle: React.CSSProperties = {

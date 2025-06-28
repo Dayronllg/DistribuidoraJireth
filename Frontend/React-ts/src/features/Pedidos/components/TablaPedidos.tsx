@@ -10,6 +10,7 @@ type Row = {
     estado:string;
 };
 
+
 type Props = {
   data: Row[]; // Lista de productos a mostrar
   Eliminar: (id: number) => void; // Función para eliminar un producto por ID

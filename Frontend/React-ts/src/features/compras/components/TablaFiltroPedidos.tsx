@@ -1,65 +1,71 @@
+import axios from "axios";
 import React, { useState, useMemo, useEffect } from "react";
+import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
 
 type FilaPedidos = {
   idPedido: number;
   fecha: Date; // <-- solo Date
-  ruc: number;
+  ruc: string;
   estado: string;
   idusuario: number;
 };
 
-const initialRows: FilaPedidos[] = [
-  {
-    idPedido: 1,
-    fecha: new Date("03-04-2005"),
-    ruc: 35,
-    estado: "Pedido",
-    idusuario: 3,
-  },
-  {
-    idPedido: 2,
-    fecha: new Date("04-04-2005"),
-    ruc: 42,
-    estado: "Pedido",
-    idusuario: 5,
-  },
-  {
-    idPedido: 3,
-    fecha: new Date("05-04-2005"),
-    ruc: 45,
-    estado: "Cancelado",
-    idusuario: 7,
-  },
-  {
-    idPedido: 4,
-    fecha: new Date("06-04-2005"),
-    ruc: 16,
-    estado: "Cancelado",
-    idusuario: 2,
-  },
-  {
-    idPedido: 5,
-    fecha: new Date("07-04-2005"),
-    ruc: 29,
-    estado: "Pedido",
-    idusuario: 6,
-  },
-];
+ type Pedidos ={
+     idPedido: number;
+    fechaPedido:Date;
+    ruc: string;        
+    estado: string;
+     idUsuario: number;
+
+}
+
+
+
 
 type Props = {
   AgregarSeleccionado: (rows: FilaPedidos[]) => void;
   productosYaAgregados: FilaPedidos[];
-  onSelectSingle?: (pedido: FilaPedidos) => void;
+  onSelectSingle: (pedido: FilaPedidos) => void;
 };
 
 const FILAS_POR_PAGINA = 3;
 
 export default function TablaFiltroPedidos({ onSelectSingle }: Props) {
-  const [rows] = useState<FilaPedidos[]>(initialRows);
+  const [rows,setRows] = useState<FilaPedidos[]>([]);
   const [IDSeleccionado, setIDSeleccionado] = useState<number | null>(null);
   const [textoFiltrado, setFilterText] = useState("");
   const [paginaActual, setpaginaActual] = useState(1);
   const [mensajeError, setMensajeError] = useState<string | null>(null);
+
+
+  React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<Pedidos>>(
+        "http://localhost:5187/api/Pedidos/ObtenerPedidos",
+        {
+          params: {
+            pagina: 1,
+            tamanioPagina: 100,
+          },
+        }
+      )
+      .then((response) => {
+        setRows(
+          response.data.datos.map((t) => ({
+            ...t,
+            idPedido:t.idPedido,
+            fecha:t.fechaPedido,
+            ruc:t.ruc,
+            idusuario:t.idUsuario
+          }))
+        );
+      })
+      .catch((error) => {
+        console.error("Error al obtener Marcas:", error);
+      });
+  }, []);
+
+
 
   const FilasFiltradas = useMemo(() => {
     return rows.filter((row) =>
@@ -133,6 +139,7 @@ export default function TablaFiltroPedidos({ onSelectSingle }: Props) {
           }}
         />
       </div>
+      
 
       {mensajeError && (
         <div
