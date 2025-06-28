@@ -27,6 +27,7 @@ type PropsTablaCompras = {
   setRows: React.Dispatch<React.SetStateAction<FilaCompra[]>>;
   nuevaFila: FilaCompra | null;
   onClick: () => void;
+ 
 };
 
 // Toolbar de Agregar
@@ -66,6 +67,48 @@ export default function TablaCompras({
   rows,
   setRows,
 }: PropsTablaCompras) {
+const handleClick = () => {
+  const id = randomId();
+  setRows((oldRows) => [
+    ...oldRows,
+    {
+      id,
+      cantidad: 0,
+      idProducto: 0,
+      idPresentacion: 0,
+      nombreProducto: "",
+      nombrePresentacion: "",
+      isNew: true,
+    },
+  ]);
+  setRowModesModel((oldModel) => ({
+    ...oldModel,
+    [id]: { mode: GridRowModes.Edit, fieldToFocus: "cantidad" },
+  }));
+};
+
+  return (
+    <Toolbar>
+      <Tooltip title="Agregar">
+        <Button
+          onClick={handleClick}
+          startIcon={<AddIcon />}
+          variant="contained"
+          sx={{
+            borderRadius: "10px",
+            color: "white",
+            backgroundColor: "#007bff",
+            "&:hover": { backgroundColor: "#0056b3" },
+          }}
+        >
+          Finalizar Registro de Compra
+        </Button>
+      </Tooltip>
+    </Toolbar>
+  );
+}
+
+export default function TablaCompras({ nuevaFila,rows,setRows }: PropsTablaCompras) {
   //const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
