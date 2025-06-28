@@ -14,4 +14,4 @@ public class ReporteDeVentsDto
     public required List<VentasPorDiaDto> VentasPorDia { get; set; }
     public required List<DetalleVentaDto> Detalles { get; set; }
 }
-}
+
