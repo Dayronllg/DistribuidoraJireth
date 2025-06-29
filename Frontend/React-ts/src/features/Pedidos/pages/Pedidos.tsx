@@ -101,17 +101,10 @@ function Pedidos() {
               estado: "Activo",
               idUsuario: Number(localStorage.getItem("idUsuario")),
               detallePedidos: FilasSeleccionadas.map((item) => ({
-<<<<<<< HEAD
               cantidadProducto:item.cantidad,
                estado: "En espera",
                idProducto:item.id,
                idPresentacion:item.idPresentacion
-=======
-                cantidadProducto: item.cantidad,
-                estado: "Activo",
-                idProducto: item.id,
-                idPresentacion: item.idPresentacion,
->>>>>>> f85ccfb4dbfa49c4d93db7308c9559d57e6de6f8
               })),
             };
 
