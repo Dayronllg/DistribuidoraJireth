@@ -98,7 +98,7 @@ function Pedidos() {
           onClick: async () => {
             const pedido: CrearPedido = {
               ruc: String(proveedorUnicoSeleccionado.ruc),
-              estado: "Activo",
+              estado: "En espera",
               idUsuario: Number(localStorage.getItem("idUsuario")),
               detallePedidos: FilasSeleccionadas.map((item) => ({
               cantidadProducto:item.cantidad,
@@ -107,7 +107,7 @@ function Pedidos() {
                idPresentacion:item.idPresentacion
               })),
             };
-
+                
             try {
               const resultado = await enviarPedido(pedido);
               console.log("Pedido registrado con éxito:", resultado);

@@ -61,7 +61,7 @@ export default function TablaFiltroPedidos({ onSelectSingle }: Props) {
         );
       })
       .catch((error) => {
-        console.error("Error al obtener Marcas:", error);
+        console.error("Error al obtener Pedidos:", error);
       });
   }, []);
 
