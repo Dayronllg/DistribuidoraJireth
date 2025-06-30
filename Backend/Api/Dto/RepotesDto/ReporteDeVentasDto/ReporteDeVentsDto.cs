@@ -12,6 +12,6 @@ public class ReporteDeVentsDto
     public decimal VentaMinima { get; set; }
     public int TotalClientesUnicos { get; set; }
     public required List<VentasPorDiaDto> VentasPorDia { get; set; }
-    public required List<DetalleVentaDto> Detalles { get; set; }
+    public required List<DetalleVentasReportesDto> Detalles { get; set; }
 }
 
