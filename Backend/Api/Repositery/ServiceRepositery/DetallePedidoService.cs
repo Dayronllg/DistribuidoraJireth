@@ -25,7 +25,7 @@ public class DetallePedidoService : Service<DetallePedido>, IDetallePedidoServic
         var query = _context.DetallePedidos.Include(x => x.IdPresentacionNavigation).Include(x => x.IdProductoNavigation).
         Where(x => x.IdPedido == IdPedido && x.IdPedidoNavigation != null);
 
-        var PaginacionResultado = await PaginarAsync(query, 1, 1, x => x.IdPedidoNavigation.Estado == "En espera");
+        var PaginacionResultado = await PaginarAsync(query, 1, 1000, x => x.IdPedidoNavigation.Estado == "En espera");
 
         return MapearPaginador.MapearPaginacion<DetallePedido, PagDetallePedidoCompra>(PaginacionResultado,_mapper);
     }
