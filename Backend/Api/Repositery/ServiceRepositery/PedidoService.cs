@@ -78,7 +78,7 @@ public class PedidoService : Service<Pedido>, IPedidoRepositery
     public async Task<PaginacionResultado<PedidoDto>> PaginarTodosPedidos(int pagina, int tamanioPagina)
     {
         var query = _context.Pedidos.AsQueryable();
-        var PaginacionPedido = await PaginarAsync(query, pagina, tamanioPagina, x => x.Estado == "En espera" || x.Estado=="Recibido" || x.Estado == "Cancelado");
+        var PaginacionPedido = await PaginarAsync(query, pagina, tamanioPagina, x =>  x.Estado=="Recibido" );
 
         return MapearPaginador.MapearPaginacion<Pedido, PedidoDto>(PaginacionPedido, _mapper);
     }

@@ -83,50 +83,74 @@ public class CompraService : Service<Compra>, ICompraService
                 await transaction.RollbackAsync();
                 return ResultNoValue.Fail($"Error al cancelar la compra: {ex.Message}");
             }
-          }
+}
     public async Task<Result<CompraDto>> CrearCompra(CrearCompraDto CrearCompra)
     {
         await using var transaction = await _context.Database.BeginTransactionAsync();
-        if (transaction == null)
-            return Result<CompraDto>.Fail("Error, al registrar la compra",Status.None);
-        try
-            {
-                var compraEntity = _mapper.Map<Compra>(CrearCompra);
-                var compraGuardada = await _context.Compras.AddAsync(compraEntity);
 
-                var pedido = await _context.Pedidos.FindAsync(compraEntity.IdPedido);
+    if (transaction == null)
+        return Result<CompraDto>.Fail("Error al iniciar la transacción", Status.None);
 
-                if (pedido == null)
-                {
-                    await transaction.RollbackAsync();
-                    return Result<CompraDto>.Fail($"El pedido referenciado con ID:{compraEntity.IdPedido} no existe");
-                }
+    try
+    {
+        var compraEntity = _mapper.Map<Compra>(CrearCompra);
+        await _context.Compras.AddAsync(compraEntity);
 
-                foreach (var detalle in compraEntity.DetalleCompras)
-                {
-                    var presentacion = await _context.Presentaciones.FindAsync(detalle.IdPresentacion);
-                    if (presentacion == null)
-                    {
-                        await transaction.RollbackAsync();
-                        return Result<CompraDto>.Fail($"Presentación con ID {detalle.IdPresentacion} no encontrada", Status.NotFound);
-                    }
+        var pedido = await _context.Pedidos
+            .Include(p => p.DetallePedidos)
+            .FirstOrDefaultAsync(p => p.IdPedido == compraEntity.IdPedido);
 
-                    presentacion.Inventario += detalle.Cantidad;
+        if (pedido == null)
+        {
+            await transaction.RollbackAsync();
+            return Result<CompraDto>.Fail($"El pedido con ID {compraEntity.IdPedido} no existe", Status.NotFound);
+        }
 
-                }
+        foreach (var detalle in compraEntity.DetalleCompras)
+        {
+            // Buscar el detalle del pedido correspondiente
+            var detallePedido = pedido.DetallePedidos.FirstOrDefault(dp =>
+                dp.IdProducto == detalle.IdProducto &&
+                dp.IdPresentacion == detalle.IdPresentacion);
 
-                pedido.Estado = "Recibido";
-
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-                return Result<CompraDto>.Ok(_mapper.Map<CompraDto>(compraGuardada.Entity));
-            }
-            catch (Exception ex)
+            if (detallePedido == null)
             {
                 await transaction.RollbackAsync();
-                return Result<CompraDto>.Fail($"Error al crear la compra: {ex.Message}");
+                return Result<CompraDto>.Fail($"No existe detalle de pedido para Producto ID {detalle.IdProducto} y Presentación ID {detalle.IdPresentacion}", Status.NotFound);
             }
 
+            // Validar que la cantidad comprada no supere la del pedido
+            if (detalle.Cantidad > detallePedido.CantidadProducto)
+            {
+                await transaction.RollbackAsync();
+                return Result<CompraDto>.Fail(
+                    $"Cantidad de compra para Producto ID {detalle.IdProducto} / Presentación ID {detalle.IdPresentacion} excede la solicitada en el pedido. Pedido: {detallePedido.CantidadProducto}, Intentado: {detalle.Cantidad}");
+            }
+
+            // Actualizar inventario
+            var presentacion = await _context.Presentaciones.FindAsync(detalle.IdPresentacion);
+            if (presentacion == null)
+            {
+                await transaction.RollbackAsync();
+                return Result<CompraDto>.Fail($"Presentación con ID {detalle.IdPresentacion} no encontrada", Status.NotFound);
+            }
+
+            presentacion.Inventario += detalle.Cantidad;
+        }
+
+        // Cambiar estado del pedido (opcional, según tu lógica)
+        pedido.Estado = "Recibido";
+
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        return Result<CompraDto>.Ok(_mapper.Map<CompraDto>(compraEntity));
+    }
+    catch (Exception ex)
+    {
+        await transaction.RollbackAsync();
+        return Result<CompraDto>.Fail($"Error al crear la compra: {ex.Message}");
+    }
        
     }
     

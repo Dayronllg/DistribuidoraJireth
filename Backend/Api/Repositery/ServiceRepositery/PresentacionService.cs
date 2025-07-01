@@ -42,7 +42,9 @@ public class PresentacionService : Service<Presentacione>, IPresentacionService
        var entity = await base.Exists(x => x.IdPresentacion == id && x.Estado == "Activo");
         if (entity.Failed)
             return ResultNoValue.Fail(entity.Error,Status.NotFound);
-            
+         if (entity.Value.Inventario> 0)
+         return ResultNoValue.Fail("No puedes dar de baja la presentación mientras tenga inventario. Primero realiza un ajuste de inventario.");   
+         
         entity.Value.Estado = "Inactivo";
         
        var SuccessUpdated= await base.UpdateEntity(entity.Value);

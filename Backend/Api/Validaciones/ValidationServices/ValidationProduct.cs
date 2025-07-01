@@ -17,7 +17,7 @@ public class ValidationProduct : IValidationProduct
 
     public async Task<Result<CrearProductoDto>> ProductoExiste(CrearProductoDto producto)
     {
-        if (await _context.Productos.AnyAsync(x => x.Nombre.ToLower() == producto.Nombre.ToLower() && x.IdMarca==producto.IdMarca))
+        if (await _context.Productos.AnyAsync(x => x.Nombre.ToLower() == producto.Nombre.ToLower()))
         {
             return Result<CrearProductoDto>.Fail("El Producto para esa marca ya existe");
         }

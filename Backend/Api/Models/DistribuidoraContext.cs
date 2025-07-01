@@ -55,7 +55,9 @@ public partial class DistribuidoraContext : DbContext
 
     public virtual DbSet<Venta> Ventas { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){}
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=LAPTOP-GJAFQBRR; Database=Distribuidora; Trusted_Connection=True;TrustServerCertificate=true");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -131,16 +133,14 @@ public partial class DistribuidoraContext : DbContext
         {
             entity.HasKey(e => e.IdCompra);
 
-            entity.HasIndex(e => e.IdPedido, "UFK_Compras").IsUnique();
-
             entity.Property(e => e.Estado)
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasDefaultValue("Realizada");
             entity.Property(e => e.TotalCompra).HasColumnType("decimal(10, 2)");
 
-            entity.HasOne(d => d.IdPedidoNavigation).WithOne(p => p.Compra)
-                .HasForeignKey<Compra>(d => d.IdPedido)
+            entity.HasOne(d => d.IdPedidoNavigation).WithMany(p => p.Compras)
+                .HasForeignKey(d => d.IdPedido)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Compras_Pedidos");
         });

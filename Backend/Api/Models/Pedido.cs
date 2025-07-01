@@ -15,7 +15,7 @@ public partial class Pedido
 
     public int IdUsuario { get; set; }
 
-    public virtual Compra? Compra { get; set; }
+    public virtual ICollection<Compra> Compras { get; set; } = new List<Compra>();
 
     public virtual ICollection<DetallePedido> DetallePedidos { get; set; } = new List<DetallePedido>();
 

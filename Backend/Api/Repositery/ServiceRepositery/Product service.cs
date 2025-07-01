@@ -53,6 +53,15 @@ public class Product_service : Service<Producto>, IProductService
          var entity = await base.Exists(x => x.IdProducto == id && x.Estado == "Activo");
         if (entity.Failed)
             return ResultNoValue.Fail(entity.Error,Status.NotFound);
+
+          var presentacionesActivas = await _context.Presentaciones
+         .Where(p => p.IdProductos == id && p.Estado == "Activo")
+    .     ToListAsync();
+
+    if (presentacionesActivas.Any())
+    {
+    return ResultNoValue.Fail("No puedes eliminar el producto porque todavía tiene presentaciones activas.",Status.Conflict);
+     }  
             
         entity.Value.Estado = "Inactivo";
         
@@ -61,7 +70,7 @@ public class Product_service : Service<Producto>, IProductService
         if (SuccessUpdated.Failed)
             return ResultNoValue.Fail(SuccessUpdated.Error, Status.WithoutChanges);
 
-        return ResultNoValue.Ok();
+           return ResultNoValue.Ok();
     }
 
     public async Task<Result<ProductoDto>> CrearProducto(CrearProductoDto producto)
