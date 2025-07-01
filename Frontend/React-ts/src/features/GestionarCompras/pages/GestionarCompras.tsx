@@ -50,7 +50,7 @@ export interface FilaCompra {
 type crearCompra = {
   totalCompra: number;
   idPedido: number;
-  detalleCompra: detalleCompra[];
+  detalleCompras: detalleCompra[];
 };
 
 export type RowModel = FilaCompra & GridValidRowModel;
@@ -108,7 +108,7 @@ function GestionarCompras() {
               const compra: crearCompra = {
                 totalCompra,
                 idPedido: pedidoSeleccionado?.idPedido || 0,
-                detalleCompra: filasCompra.map((item) => ({
+                detalleCompras: filasCompra.map((item) => ({
                   cantidad: item.cantidad,
                   idProducto: item.idProducto,
                   idPresentacion: item.idPresentacion,

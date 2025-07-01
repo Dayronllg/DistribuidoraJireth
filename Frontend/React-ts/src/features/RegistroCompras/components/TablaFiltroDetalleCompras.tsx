@@ -3,7 +3,7 @@ import type { Presentacion } from "../../Productos/components/TablaProductos";
 import type { Producto } from "../../Productos/components/TablaProductos";
 import axios from "axios";
 import type { RowModel } from "../pages/RegistroCompras"; // si tienes uno
-
+import type { FilaCompraTabla } from "../pages/RegistroCompras";
 // Tipo para cada fila de la tabla
 type FilaDetalleCompra = {
   idDetalle: string;
@@ -18,7 +18,7 @@ type FilaDetalleCompra = {
 
 type DetalleCompra = {
   idDetalle: string;
-  cantidadProducto: number;
+  cantidad: number;
   estado: string;
   idCompra: number;
   idProducto: number;
@@ -30,7 +30,7 @@ type DetalleCompra = {
 type Props = {
   AgregarSeleccionado: (rows: FilaDetalleCompra[]) => void;
   productosYaAgregados: FilaDetalleCompra[];
-  compraID: number | null;
+  compraID: FilaCompraTabla | null;
   busquedaIDCompra: RowModel[];
 };
 
@@ -57,7 +57,7 @@ export default function TablaFiltroDetalleCompras({
           "http://localhost:5187/api/Compras/ObtenerDetalleCompra", // AQUI PONE TU RUTA
           {
             params: {
-              id: compraID,
+              id: compraID.idCompra,
             },
           }
         );
@@ -67,7 +67,7 @@ export default function TablaFiltroDetalleCompras({
           idCompra: t.idCompra,
           idProducto: t.idProducto,
           idPresentacion: t.idPresentacion,
-          cantidadProducto: t.cantidadProducto,
+          cantidadProducto: t.cantidad,
           estado: t.estado,
           nombreProducto: t.idProductoNavigation.nombre,
           nombrePresentacion: t.idPresentacionNavigation.nombre,
@@ -85,7 +85,7 @@ export default function TablaFiltroDetalleCompras({
 
   const FilasFiltradas = useMemo(() => {
     return rows.filter((row) =>
-      row.estado.toLowerCase().includes(textoFiltrado.toLowerCase())
+      (row.estado?? "").toLowerCase().includes(textoFiltrado.toLowerCase())
     );
   }, [textoFiltrado, rows]);
 

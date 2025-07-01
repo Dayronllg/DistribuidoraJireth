@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useState, useMemo, useEffect } from "react";
 import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
 import { toast } from "react-toastify";
+import { confirmAlert } from "react-confirm-alert";
 
 type FilaCompra = {
   idCompra: number;
@@ -29,24 +30,87 @@ export default function TablaFiltroCompras({ onSelectSingle }: Props) {
   const [textoFiltrado, setFilterText] = useState("");
   const [paginaActual, setpaginaActual] = useState(1);
 
-  // useEffect(() => {
-  //   axios
-  //     .get<PaginacionResultado<Compra>>(
-  //       "DIRECCION HTTP DEL GET COMPRAS DE LA API",
-  //       {
-  //         params: {
-  //           pagina: 1,
-  //           tamanioPagina: 100,
-  //         },
-  //       }
-  //     )
-  //     .then((response) => {
-  //       setRows(response.data.datos);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error al obtener Compras:", error);
-  //     });
-  // }, []);
+const handleCancelarCompra = () => {
+  const compra = rows.find((c) => c.idCompra === IDSeleccionado);
+  // toast.error(IDSeleccionado);
+  if (!compra) {
+    toast.error("Debe seleccionar una compra para cancelar");
+    return;
+  }
+
+  confirmAlert({
+    title: "¿Cancelar compra?",
+    message: `¿Estás seguro que deseas cancelar la compra ID ${compra.idCompra}?`,
+    buttons: [
+      {
+        label: "Sí, cancelar",
+        onClick: async () => {
+          try {
+            
+            await axios.put(
+              "http://localhost:5187/api/Compras/bajaCompra",null,{
+              params:{ id:IDSeleccionado } 
+              }  // << Aquí el id por body
+            );
+          
+            toast.success(`Compra ID ${compra.idCompra} cancelada con éxito`);
+
+            // Actualizar estado local (opcional)
+            setRows((prev) =>
+              prev.map((r) =>
+                r.idCompra === compra.idCompra
+                  ? { ...r, estado: "Cancelada" }
+                  : r
+              )
+            );
+
+            setIDSeleccionado(null);
+          } catch (error: any) {
+            console.error("Error al cancelar compra:", error);
+            toast.error(IDSeleccionado+"ssss");
+            if (error.response?.data?.message) {
+              toast.error(error.response.data.message);
+            } else {
+              toast.error(error.message || "Error inesperado al cancelar");
+            }
+          }
+        },
+      },
+      {
+        label: "No, volver",
+        onClick: () => toast.info("Cancelación abortada"),
+      },
+    ],
+  });
+};
+
+  React.useEffect(() => {
+    axios
+      .get<PaginacionResultado<Compra>>(
+        "http://localhost:5187/api/Compras/ObtenerCompras",
+        {
+          params: {
+            pagina: 1,
+            tamanioPagina: 100,
+          },
+        }
+      )
+      .then((response) => {
+        setRows(
+          response.data.datos.map((t) => ({
+            ...t,
+            idCompra: t.idCompra,
+            totalCompra:t.totalCompra,
+            estado:t.estado,
+            idPedido:t.idPedido
+          }))
+        );
+      })
+      .catch((error) => {
+        console.error("Error al obtener Pedidos:", error);
+      });
+  }, []);
+
 
   const FilasFiltradas = useMemo(() => {
     return rows.filter((row) =>
@@ -70,9 +134,14 @@ export default function TablaFiltroCompras({ onSelectSingle }: Props) {
     return FilasFiltradas.slice(startIndex, startIndex + FILAS_POR_PAGINA);
   }, [FilasFiltradas, paginaActual]);
 
-  const handleSelect = (id: number) => {
-    setIDSeleccionado((prev) => (prev === id ? null : id));
-  };
+const handleSelect = (id: number) => {
+  setIDSeleccionado((prev) => (prev === id ? null : id));
+
+  const compra = rows.find((r) => r.idCompra === id);
+  if (compra) {
+    onSelectSingle(compra);
+  }
+};
 
   return (
     <div
@@ -145,9 +214,7 @@ export default function TablaFiltroCompras({ onSelectSingle }: Props) {
                 <td style={tdStyle}>{row.estado}</td>
                 <td style={tdStyle}>
                   <button
-                    onClick={() =>
-                      toast.success(`Compra ID ${row.idCompra} cancelada`)
-                    }
+                    onClick={handleCancelarCompra }
                     style={{
                       backgroundColor: "#dc3545",
                       color: "white",

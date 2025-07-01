@@ -43,6 +43,7 @@ function RegistroCompras() {
 
   const seleccionarCompra = (compra: FilaCompraTabla) => {
     setCompraSeleccionada(compra);
+    console.log(compra.idCompra);
     setDetalleSeleccionado(null);
   };
 
@@ -116,7 +117,7 @@ function RegistroCompras() {
 
       <div style={{ flex: 1, minWidth: "1200px" }}>
         <TablaFiltroDetalleCompras
-          compraID={compraSeleccionada?.idCompra || null}
+          compraID={compraSeleccionada}
           AgregarSeleccionado={seleccionarDetalle}
           productosYaAgregados={[]} // puedes pasar lo necesario
           busquedaIDCompra={filasCompra}
