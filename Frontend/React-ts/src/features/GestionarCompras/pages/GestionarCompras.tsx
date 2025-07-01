@@ -32,18 +32,18 @@ export type FilaDetallePedido = {
   estado: string;
   idPedido: number;
   idProducto: number;
-   nombreProducto:string;
+  nombreProducto: string;
   idPresentacion: number;
-   nombrePresentacion:string;
+  nombrePresentacion: string;
 };
 
 export interface FilaCompra {
   id: string;
   cantidad: number;
   idProducto: number;
-  nombreProducto:string;
+  nombreProducto: string;
   idPresentacion: number;
-  nombrePresentacion:string;
+  nombrePresentacion: string;
   isNew: boolean;
 }
 
@@ -55,7 +55,7 @@ type crearCompra = {
 
 export type RowModel = FilaCompra & GridValidRowModel;
 
-function Compras() {
+function GestionarCompras() {
   // Seleccionar el Pedido
   const [pedidoSeleccionado, setPedidoSeleccionado] =
     useState<FilaPedidos | null>(null);
@@ -165,9 +165,9 @@ function Compras() {
       id: detalleSeleccionado.idDetalle,
       cantidad,
       idProducto: detalleSeleccionado.idProducto,
-      nombreProducto:detalleSeleccionado.nombreProducto,
+      nombreProducto: detalleSeleccionado.nombreProducto,
       idPresentacion: detalleSeleccionado.idPresentacion,
-      nombrePresentacion:detalleSeleccionado.nombrePresentacion,
+      nombrePresentacion: detalleSeleccionado.nombrePresentacion,
       isNew: true,
     };
 
@@ -267,4 +267,4 @@ function Compras() {
   );
 }
 
-export default Compras;
+export default GestionarCompras;

@@ -6,6 +6,7 @@ import type { Navigation } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 //import { PageContainer } from "@toolpad/core/PageContainer";
 import {
+  AddShoppingCart,
   AssignmentAdd,
   AttachMoney,
   ContactPhone,
@@ -14,10 +15,13 @@ import {
   Engineering,
   Equalizer,
   Groups,
+  Inventory,
   LocalAtm,
+  LocalMall,
   LocalShipping,
   LunchDining,
   Payment,
+  Payments,
   PermMedia,
   PersonAdd,
   PointOfSale,
@@ -35,31 +39,52 @@ const NAVIGATION: Navigation = [
     title: "Gestión de Operaciones",
   },
   {
-    segment: rol + "",
     title: "Ventas",
     icon: <DashboardIcon />,
     children: [
       {
-        segment: "gestionarVentas",
+        segment: rol + "/gestionarVentas",
         title: "Gestionar Ventas",
         icon: <AttachMoney />,
       },
       {
-        segment: "registroVentas",
+        segment: rol + "/registroVentas",
         title: "Registro de Ventas",
         icon: <AssignmentAdd />,
       },
     ],
   },
   {
-    segment: rol + "/pedidos",
     title: "Pedidos",
     icon: <LocalShipping />,
+    children: [
+      {
+        segment: rol + "/gestionarPedidos",
+        title: "Gestionar Pedidos",
+        icon: <AddShoppingCart />,
+      },
+      {
+        segment: rol + "/registroPedidos",
+        title: "Registro de Pedidos",
+        icon: <Inventory />,
+      },
+    ],
   },
   {
-    segment: rol + "/compras",
     title: "Compras",
-    icon: <ShoppingCartIcon />,
+    icon: <Payments />,
+    children: [
+      {
+        segment: rol + "/gestionarCompras",
+        title: "Gestionar Compras",
+        icon: <ShoppingCartIcon />,
+      },
+      {
+        segment: rol + "/registroCompras",
+        title: "Registro de Compras",
+        icon: <LocalMall />,
+      },
+    ],
   },
   {
     kind: "divider",
