@@ -39,10 +39,14 @@ public class ReporteService : Service<Venta>,IReporteService
         })
         .OrderBy(v => v.Fecha)
         .ToList();
-
-var detalles = await _context.DetalleVentas
+    
+    var detalles = await _context.DetalleVentas
     .Include(d => d.IdVentaNavigation)
         .ThenInclude(v => v.IdClienteNavigation)
+            .ThenInclude(c => c.ClienteNatural)
+    .Include(d => d.IdVentaNavigation)
+        .ThenInclude(v => v.IdClienteNavigation)
+            .ThenInclude(c => c.ClienteJuridico)
     .Include(d => d.IdProductoNavigation)
     .Include(d => d.IdPresentacionNavigation)
     .Where(d => d.IdVentaNavigation.Fecha >= filtroFecha.FechaInicio && d.IdVentaNavigation.Fecha <= filtroFecha.FechaFin)
@@ -51,6 +55,11 @@ var detalles = await _context.DetalleVentas
         IdVenta = d.IdVenta,
         FechaVenta = d.IdVentaNavigation.Fecha,
         
+        ClienteNombre = 
+            d.IdVentaNavigation.IdClienteNavigation.ClienteNatural != null
+            ? d.IdVentaNavigation.IdClienteNavigation.ClienteNatural.PrimerNombre
+            : d.IdVentaNavigation.IdClienteNavigation.ClienteJuridico!.Nombre,
+
         ProductoNombre = d.IdProductoNavigation.Nombre,
         PresentacionNombre = d.IdPresentacionNavigation.Nombre,
         Cantidad = d.Cantidad,
@@ -60,16 +69,16 @@ var detalles = await _context.DetalleVentas
     .ToListAsync();
 
     return new ReporteDeVentsDto
-    {
-        TotalVentas = totalVentas,
-        TotalMonto = totalMonto,
-        MontoPromedioPorVenta = promedio,
-        VentaMaxima = ventaMaxima,
-        VentaMinima = ventaMinima,
-        TotalClientesUnicos = clientesUnicos,
-        VentasPorDia = ventasPorDia,
-        Detalles = detalles
-    };
+        {
+            TotalVentas = totalVentas,
+            TotalMonto = totalMonto,
+            MontoPromedioPorVenta = promedio,
+            VentaMaxima = ventaMaxima,
+            VentaMinima = ventaMinima,
+            TotalClientesUnicos = clientesUnicos,
+            VentasPorDia = ventasPorDia,
+            Detalles = detalles
+        };
     }
 }
 
