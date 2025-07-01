@@ -6,7 +6,6 @@ import DetallePedidosInput from "../components/DetallePedidosInput";
 import BotonAgregar from "../components/BotonAgregar";
 import TablaCompras from "../components/TablaCompras";
 import BotonFinalizarCompra from "../components/BotonFinalizarCompra";
-import { randomId } from "@mui/x-data-grid-generator";
 import type { GridValidRowModel } from "@mui/x-data-grid/models";
 import { confirmAlert } from "react-confirm-alert";
 import { toast } from "react-toastify";
@@ -37,7 +36,7 @@ export type FilaDetallePedido = {
 };
 
 export interface FilaCompra {
-  id: String;
+  id: string;
   cantidad: number;
   idProducto: number;
   idPresentacion: number;
@@ -50,6 +49,8 @@ type crearCompra = {
   detalleCompra: detalleCompra[];
 };
 
+export type RowModel = FilaCompra & GridValidRowModel;
+
 function Compras() {
   // Seleccionar el Pedido
   const [pedidoSeleccionado, setPedidoSeleccionado] =
@@ -61,7 +62,7 @@ function Compras() {
   };
 
   // Seleccionar el detallePedido
-  const [detalleSeleccionado, setDetalleSeleccionado] =
+  let [detalleSeleccionado, setDetalleSeleccionado] =
     useState<FilaDetallePedido | null>(null);
 
   const seleccionarDetalle = (rows: FilaDetallePedido[]) => {
@@ -71,8 +72,6 @@ function Compras() {
       setDetalleSeleccionado(null);
     }
   };
-
-  type RowModel = FilaCompra & GridValidRowModel;
 
   // Pasar datos (IdProducto, IdPresentacion y cantidad) de los input a la tablaCompras
   const [nuevaFila, setNuevaFila] = useState<FilaCompra | null>(null);
@@ -138,12 +137,28 @@ function Compras() {
     });
   };
 
+  // VALIDACIONES
   const handleAgregar = () => {
+    if (!pedidoSeleccionado || !detalleSeleccionado) {
+      toast.error(
+        "Debe seleccionar un pedido y su respectivo detalle del pedido"
+      );
+      return;
+    }
+    if (totalCompra <= 0) {
+      toast.error("El Total no puede ser 0 o negativo");
+      return;
+    }
+    if (cantidad <= 0) {
+      toast.error("La cantidad no puede ser 0 o negativa");
+      return;
+    }
+
     if (!detalleSeleccionado || cantidad <= 0) return;
 
     // Los datos no se pasan si la cantidad está en 0
     const fila = {
-      id: randomId(),
+      id: detalleSeleccionado.idDetalle,
       cantidad,
       idProducto: detalleSeleccionado.idProducto,
       idPresentacion: detalleSeleccionado.idPresentacion,
@@ -152,6 +167,7 @@ function Compras() {
 
     setNuevaFila(fila); // Se enviará a la tabla
     setCantidad(0); // Limpia cantidad después de agregar
+    setDetalleSeleccionado(null);
   };
 
   return (
@@ -171,6 +187,7 @@ function Compras() {
             AgregarSeleccionado={() => {}}
             productosYaAgregados={[]}
             onSelectSingle={seleccionarPedido}
+            bloquearCambioSeleccion={filasCompra.length > 0}
           />
         </div>
 
@@ -181,6 +198,7 @@ function Compras() {
               detalleSeleccionado ? [detalleSeleccionado] : []
             }
             pedido={pedidoSeleccionado}
+            busquedaIDPedido={filasCompra}
           />
         </div>
       </div>

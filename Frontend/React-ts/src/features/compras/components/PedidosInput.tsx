@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 type PedidosInputData = {
   idPedido: number;
@@ -10,9 +10,7 @@ type Props = {
   total: number;
   onTotalChange: (nuevoTotal: number) => void;
 };
-export default function PedidosInput({ pedido,total,onTotalChange }: Props) {
- 
-
+export default function PedidosInput({ pedido, total, onTotalChange }: Props) {
   // El valor ingresado en el input siempre se guarda como número.
   // Si el usuario borra el input o escribe algo no numérico, se guarda 0 para evitar errores.
   const handleTotalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
