@@ -10,33 +10,32 @@ type FilaPedidos = {
   idusuario: number;
 };
 
- type Pedidos ={
-     idPedido: number;
-    fechaPedido:Date;
-    ruc: string;        
-    estado: string;
-     idUsuario: number;
-
-}
-
-
-
+type Pedidos = {
+  idPedido: number;
+  fechaPedido: Date;
+  ruc: string;
+  estado: string;
+  idUsuario: number;
+};
 
 type Props = {
   AgregarSeleccionado: (rows: FilaPedidos[]) => void;
   productosYaAgregados: FilaPedidos[];
   onSelectSingle: (pedido: FilaPedidos) => void;
+  bloquearCambioSeleccion: boolean;
 };
 
 const FILAS_POR_PAGINA = 3;
 
-export default function TablaFiltroPedidos({ onSelectSingle }: Props) {
-  const [rows,setRows] = useState<FilaPedidos[]>([]);
+export default function TablaFiltroPedidos({
+  onSelectSingle,
+  bloquearCambioSeleccion,
+}: Props) {
+  const [rows, setRows] = useState<FilaPedidos[]>([]);
   const [IDSeleccionado, setIDSeleccionado] = useState<number | null>(null);
   const [textoFiltrado, setFilterText] = useState("");
   const [paginaActual, setpaginaActual] = useState(1);
   const [mensajeError, setMensajeError] = useState<string | null>(null);
-
 
   React.useEffect(() => {
     axios
@@ -53,10 +52,10 @@ export default function TablaFiltroPedidos({ onSelectSingle }: Props) {
         setRows(
           response.data.datos.map((t) => ({
             ...t,
-            idPedido:t.idPedido,
-            fecha:t.fechaPedido,
-            ruc:t.ruc,
-            idusuario:t.idUsuario
+            idPedido: t.idPedido,
+            fecha: t.fechaPedido,
+            ruc: t.ruc,
+            idusuario: t.idUsuario,
           }))
         );
       })
@@ -64,8 +63,6 @@ export default function TablaFiltroPedidos({ onSelectSingle }: Props) {
         console.error("Error al obtener Pedidos:", error);
       });
   }, []);
-
-
 
   const FilasFiltradas = useMemo(() => {
     return rows.filter((row) =>
@@ -90,6 +87,13 @@ export default function TablaFiltroPedidos({ onSelectSingle }: Props) {
   }, [FilasFiltradas, paginaActual]);
 
   const handleSelect = (id: number) => {
+    if (bloquearCambioSeleccion) {
+      setMensajeError(
+        "Ya hay productos agregados. No se puede cambiar el pedido."
+      );
+      return;
+    }
+
     setIDSeleccionado((prev) => (prev === id ? null : id));
     const seleccionado = rows.find((row) => row.idPedido === id);
     if (onSelectSingle && seleccionado) {
@@ -139,7 +143,6 @@ export default function TablaFiltroPedidos({ onSelectSingle }: Props) {
           }}
         />
       </div>
-      
 
       {mensajeError && (
         <div

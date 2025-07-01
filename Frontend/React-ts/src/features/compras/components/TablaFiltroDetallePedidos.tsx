@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import type { FilaPedidos } from "../pages/Compras";
 import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
 import axios from "axios";
-import Pedidos from "../../Pedidos/pages/Pedidos";
+import type { RowModel } from "../pages/Compras";
 
 // Definir el tipo de valor de cada fila (producto)
 type FilaDetallePedido = {
@@ -14,24 +14,21 @@ type FilaDetallePedido = {
   idPresentacion: number;
 };
 
-
-type DetallePedido ={
-
+type DetallePedido = {
   idDetalle: string;
   cantidadProducto: number;
   estado: string;
   idPedido: number;
   idProducto: number;
   idPresentacion: number;
-}
-
+};
 
 // Lista temporal solo para probar
-
 type Props = {
   AgregarSeleccionado: (rows: FilaDetallePedido[]) => void;
   productosYaAgregados: FilaDetallePedido[];
-  pedido:FilaPedidos | null
+  pedido: FilaPedidos | null;
+  busquedaIDPedido: RowModel[];
 };
 
 const FILAS_POR_PAGINA = 3;
@@ -39,9 +36,10 @@ const FILAS_POR_PAGINA = 3;
 export default function TablaFiltroDetallePedidos({
   AgregarSeleccionado,
   productosYaAgregados,
-  pedido
+  busquedaIDPedido,
+  pedido,
 }: Props) {
-  const [rows,setRows] = useState<FilaDetallePedido[]>([]);
+  const [rows, setRows] = useState<FilaDetallePedido[]>([]);
   const [IDSeleccionado, setIDSeleccionado] = useState<string | null>(null);
   const [textoFiltrado, setFilterText] = useState("");
   const [isClicked, setIsClicked] = useState(false);
@@ -50,15 +48,13 @@ export default function TablaFiltroDetallePedidos({
   const [paginaActual, setpaginaActual] = useState(1);
   const [mensajeError, setMensajeError] = useState<string | null>(null);
 
-
-  
   React.useEffect(() => {
     axios
       .get<PaginacionResultado<DetallePedido>>(
         "http://localhost:5187/api/Pedidos/ObtenerDetallePedidoCompra",
         {
           params: {
-            id:pedido?.idPedido
+            id: pedido?.idPedido,
           },
         }
       )
@@ -66,11 +62,11 @@ export default function TablaFiltroDetallePedidos({
         setRows(
           response.data.datos.map((t) => ({
             ...t,
-            idPedido:t.idPedido,
-            idDetalle:`${t.idPedido}-${t.idProducto}-${t.idPresentacion}`,
-            idProducto:t.idProducto,
-            idPresentacion:t.idPresentacion,
-            cantidadProducto:t.cantidadProducto
+            idPedido: t.idPedido,
+            idDetalle: `${t.idPedido}-${t.idProducto}-${t.idPresentacion}`,
+            idProducto: t.idProducto,
+            idPresentacion: t.idPresentacion,
+            cantidadProducto: t.cantidadProducto,
           }))
         );
       })
@@ -110,11 +106,14 @@ export default function TablaFiltroDetallePedidos({
     const seleccionado = rows.find((row) => row.idDetalle === IDSeleccionado);
     if (!seleccionado) return;
 
-    if (
-      productosYaAgregados.some((p) => p.idDetalle === seleccionado.idDetalle)
-    ) {
+    // Validar contra busquedaIDPedido (que viene de TablaCompras)
+    const yaExiste = busquedaIDPedido.some(
+      (compra) => compra.id === seleccionado.idDetalle
+    );
+
+    if (yaExiste) {
       setMensajeError(
-        `El pedido con ID ${seleccionado.idDetalle} ya fue agregado`
+        `El detalle con ID ${seleccionado.idDetalle} ya fue agregado a la tabla de compras`
       );
       return;
     }

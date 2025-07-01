@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable"
+import autoTable from "jspdf-autotable";
+import Button from "@mui/material/Button";
 
 type DetalleVentasReportesDto = {
   idVenta: number;
@@ -99,12 +100,16 @@ export default function Reportes() {
 
     doc.text(`Total Ventas: ${reporte.totalVentas}`, 15, 32);
     doc.text(`Total Monto: C$ ${reporte.totalMonto.toFixed(2)}`, 15, 38);
-    doc.text(`Promedio por Venta: C$ ${reporte.montoPromedioPorVenta.toFixed(2)}`, 15, 44);
+    doc.text(
+      `Promedio por Venta: C$ ${reporte.montoPromedioPorVenta.toFixed(2)}`,
+      15,
+      44
+    );
     doc.text(`Venta Máxima: C$ ${reporte.ventaMaxima.toFixed(2)}`, 15, 50);
     doc.text(`Venta Mínima: C$ ${reporte.ventaMinima.toFixed(2)}`, 15, 56);
     doc.text(`Clientes Únicos: ${reporte.totalClientesUnicos}`, 15, 62);
 
-     autoTable(doc, {
+    autoTable(doc, {
       startY: 70,
       head: [["Fecha", "Cantidad Ventas", "Monto Total"]],
       body: reporte.ventasPorDia.map((v) => [
@@ -116,8 +121,10 @@ export default function Reportes() {
       headStyles: { fillColor: [52, 152, 219], halign: "center" },
     });
 
-     autoTable(doc, {
-      startY: (doc as any).lastAutoTable ? (doc as any).lastAutoTable.finalY + 10 : 110,
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable
+        ? (doc as any).lastAutoTable.finalY + 10
+        : 110,
       head: [
         [
           "Venta",
@@ -153,7 +160,14 @@ export default function Reportes() {
   };
 
   return (
-    <div style={{ padding: "2rem", maxWidth: 1100, margin: "auto" }}>
+    <div
+      style={{
+        padding: "2rem",
+        backgroundColor: "#1b2631",
+        minHeight: "100vh",
+        color: "#fff",
+      }}
+    >
       <h2>Reporte de Ventas</h2>
 
       <div style={{ marginBottom: 20, display: "flex", gap: 15 }}>
@@ -175,72 +189,139 @@ export default function Reportes() {
           />
         </div>
 
-        <button onClick={cargarReporte} disabled={cargando}>
+        <Button
+          sx={{
+            marginTop: "15px",
+            color: "white",
+            fontWeight: "bold",
+            fontSize: "15px",
+            width: "100%",
+            backgroundColor: "#007bff",
+            "&:hover": { backgroundColor: "#0056b3" },
+          }}
+          onClick={cargarReporte}
+          disabled={cargando}
+        >
           {cargando ? "Cargando..." : "Cargar Reporte"}
-        </button>
+        </Button>
       </div>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       {reporte && (
         <>
-          <div style={{ marginBottom: 10 }}>
+          <div style={{ backgroundColor: "#121212", marginBottom: 10 }}>
             <p>
-              <b>Total Ventas:</b> {reporte.totalVentas} —{" "}
-              <b>Total Monto:</b> C$ {reporte.totalMonto.toFixed(2)}
+              <b>Total Ventas:</b> {reporte.totalVentas} — <b>Total Monto:</b>{" "}
+              C$ {reporte.totalMonto.toFixed(2)}
             </p>
             <p>
-              <b>Promedio por Venta:</b> C$ {reporte.montoPromedioPorVenta.toFixed(2)} —{" "}
-              <b>Venta Máxima:</b> C$ {reporte.ventaMaxima.toFixed(2)} —{" "}
-              <b>Venta Mínima:</b> C$ {reporte.ventaMinima.toFixed(2)} —{" "}
-              <b>Clientes Únicos:</b> {reporte.totalClientesUnicos}
+              <b>Promedio por Venta:</b> C${" "}
+              {reporte.montoPromedioPorVenta.toFixed(2)} — <b>Venta Máxima:</b>{" "}
+              C$ {reporte.ventaMaxima.toFixed(2)} — <b>Venta Mínima:</b> C${" "}
+              {reporte.ventaMinima.toFixed(2)} — <b>Clientes Únicos:</b>{" "}
+              {reporte.totalClientesUnicos}
             </p>
           </div>
-
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              marginBottom: 15,
-            }}
-          >
-            <thead>
-              <tr style={{ backgroundColor: "#3498db", color: "white" }}>
-                <th style={{ padding: 8, border: "1px solid #ddd" }}>Venta</th>
-                <th style={{ padding: 8, border: "1px solid #ddd" }}>Fecha</th>
-                <th style={{ padding: 8, border: "1px solid #ddd" }}>Cliente</th>
-                <th style={{ padding: 8, border: "1px solid #ddd" }}>Producto</th>
-                <th style={{ padding: 8, border: "1px solid #ddd" }}>Presentación</th>
-                <th style={{ padding: 8, border: "1px solid #ddd" }}>Cantidad</th>
-                <th style={{ padding: 8, border: "1px solid #ddd" }}>Precio Unitario</th>
-                <th style={{ padding: 8, border: "1px solid #ddd" }}>Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filasPagina.map((item, i) => (
-                <tr key={`${item.idVenta}-${i}`}>
-                  <td style={{ padding: 8, border: "1px solid #ddd", textAlign: "center" }}>
-                    {item.idVenta}
-                  </td>
-                  <td style={{ padding: 8, border: "1px solid #ddd", textAlign: "center" }}>
-                    {new Date(item.fechaVenta).toLocaleDateString()}
-                  </td>
-                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{item.clienteNombre}</td>
-                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{item.productoNombre}</td>
-                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{item.presentacionNombre}</td>
-                  <td style={{ padding: 8, border: "1px solid #ddd", textAlign: "right" }}>
-                    {item.cantidad}
-                  </td>
-                  <td style={{ padding: 8, border: "1px solid #ddd", textAlign: "right" }}>
-                    C$ {item.precioUnitario.toFixed(2)}
-                  </td>
-                  <td style={{ padding: 8, border: "1px solid #ddd", textAlign: "right" }}>
-                    C$ {item.subtotal.toFixed(2)}
-                  </td>
+          <div>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                marginBottom: 15,
+                backgroundColor: "#1b2631",
+              }}
+            >
+              <thead>
+                <tr style={{ backgroundColor: "#000", color: "white" }}>
+                  <th style={{ padding: 8, border: "1px solid #ddd" }}>
+                    Venta
+                  </th>
+                  <th style={{ padding: 8, border: "1px solid #ddd" }}>
+                    Fecha
+                  </th>
+                  <th style={{ padding: 8, border: "1px solid #ddd" }}>
+                    Cliente
+                  </th>
+                  <th style={{ padding: 8, border: "1px solid #ddd" }}>
+                    Producto
+                  </th>
+                  <th style={{ padding: 8, border: "1px solid #ddd" }}>
+                    Presentación
+                  </th>
+                  <th style={{ padding: 8, border: "1px solid #ddd" }}>
+                    Cantidad
+                  </th>
+                  <th style={{ padding: 8, border: "1px solid #ddd" }}>
+                    Precio Unitario
+                  </th>
+                  <th style={{ padding: 8, border: "1px solid #ddd" }}>
+                    Subtotal
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filasPagina.map((item, i) => (
+                  <tr key={`${item.idVenta}-${i}`}>
+                    <td
+                      style={{
+                        padding: 8,
+                        border: "1px solid #ddd",
+                        textAlign: "center",
+                      }}
+                    >
+                      {item.idVenta}
+                    </td>
+                    <td
+                      style={{
+                        padding: 8,
+                        border: "1px solid #ddd",
+                        textAlign: "center",
+                      }}
+                    >
+                      {new Date(item.fechaVenta).toLocaleDateString()}
+                    </td>
+                    <td style={{ padding: 8, border: "1px solid #ddd" }}>
+                      {item.clienteNombre}
+                    </td>
+                    <td style={{ padding: 8, border: "1px solid #ddd" }}>
+                      {item.productoNombre}
+                    </td>
+                    <td style={{ padding: 8, border: "1px solid #ddd" }}>
+                      {item.presentacionNombre}
+                    </td>
+                    <td
+                      style={{
+                        padding: 8,
+                        border: "1px solid #ddd",
+                        textAlign: "right",
+                      }}
+                    >
+                      {item.cantidad}
+                    </td>
+                    <td
+                      style={{
+                        padding: 8,
+                        border: "1px solid #ddd",
+                        textAlign: "right",
+                      }}
+                    >
+                      C$ {item.precioUnitario.toFixed(2)}
+                    </td>
+                    <td
+                      style={{
+                        padding: 8,
+                        border: "1px solid #ddd",
+                        textAlign: "right",
+                      }}
+                    >
+                      C$ {item.subtotal.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           <div
             style={{
@@ -250,27 +331,57 @@ export default function Reportes() {
               marginBottom: 40,
             }}
           >
-            <button
+            <Button
+              sx={{
+                marginTop: "15px",
+                color: "white",
+                fontWeight: "bold",
+                fontSize: "15px",
+                width: "100%",
+                backgroundColor: "#007bff",
+                "&:hover": { backgroundColor: "#0056b3" },
+              }}
               onClick={() => irAPagina(paginaActual - 1)}
               disabled={paginaActual === 0}
             >
               Anterior
-            </button>
+            </Button>
             <span>
               Página {paginaActual + 1} de {totalPaginas}
             </span>
-            <button
+            <Button
+              sx={{
+                marginTop: "15px",
+                color: "white",
+                fontWeight: "bold",
+                fontSize: "15px",
+                width: "100%",
+                backgroundColor: "#007bff",
+                "&:hover": { backgroundColor: "#0056b3" },
+              }}
               onClick={() => irAPagina(paginaActual + 1)}
               disabled={paginaActual + 1 === totalPaginas}
             >
               Siguiente
-            </button>
+            </Button>
           </div>
 
-          <button onClick={descargarPDF}>Descargar PDF Completo</button>
+          <Button
+            sx={{
+              marginTop: "15px",
+              color: "white",
+              fontWeight: "bold",
+              fontSize: "15px",
+              width: "100%",
+              backgroundColor: "#007bff",
+              "&:hover": { backgroundColor: "#0056b3" },
+            }}
+            onClick={descargarPDF}
+          >
+            Descargar PDF Completo
+          </Button>
         </>
       )}
     </div>
   );
 }
-

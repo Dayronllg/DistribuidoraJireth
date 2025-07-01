@@ -26,7 +26,6 @@ type PropsTablaCompras = {
   rows: FilaCompra[];
   setRows: React.Dispatch<React.SetStateAction<FilaCompra[]>>;
   nuevaFila: FilaCompra | null;
- 
 };
 
 // Toolbar de Agregar
@@ -61,9 +60,11 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
   };
 }
 
-
-
-export default function TablaCompras({ nuevaFila,rows,setRows }: PropsTablaCompras) {
+export default function TablaCompras({
+  nuevaFila,
+  rows,
+  setRows,
+}: PropsTablaCompras) {
   //const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
@@ -75,7 +76,8 @@ export default function TablaCompras({ nuevaFila,rows,setRows }: PropsTablaCompr
       const filaConId = {
         // Este random ID se genera random para la tabla ya que si no ponia eso al darle click al boton Agregar daba conflicto con el DOM porque la tabla esperaba un ID
         // ya cuando vos lo conectes a la API con el ID autonumerico me imagino que no dara conflicto y no se necesitará ese randomID
-        id: randomId(),
+        id: nuevaFila.id,
+        idDetalle: nuevaFila.id,
         cantidad: nuevaFila.cantidad,
         idProducto: nuevaFila.idProducto,
         idPresentacion: nuevaFila.idPresentacion,
@@ -134,6 +136,15 @@ export default function TablaCompras({ nuevaFila,rows,setRows }: PropsTablaCompr
   const rol = localStorage.getItem("rol");
 
   const baseColumns: GridColDef[] = [
+    {
+      field: "idDetalle",
+      headerName: "ID Detalle",
+      headerAlign: "center",
+      align: "center",
+      type: "string",
+      flex: 0.5,
+      editable: false,
+    },
     {
       field: "cantidad",
       headerName: "Cantidad",
