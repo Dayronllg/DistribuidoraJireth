@@ -21,7 +21,7 @@ import type {
 } from "@mui/x-data-grid";
 import { randomId } from "@mui/x-data-grid-generator";
 
-import type { FilaCompra } from "../pages/Compras";
+import type { FilaCompra } from "../pages/GestionarCompras";
 type PropsTablaCompras = {
   rows: FilaCompra[];
   setRows: React.Dispatch<React.SetStateAction<FilaCompra[]>>;
@@ -60,7 +60,7 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
   };
 }
 
-export default function TablaCompras({
+export default function TablaGestionarCompras({
   nuevaFila,
   rows,
   setRows,

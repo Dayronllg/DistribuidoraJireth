@@ -1,4 +1,4 @@
-import TablaPedidos from "../components/TablaPedidos";
+import TablaPedidos from "../components/TablaGestionarPedidos";
 import ProductoInput from "../components/ProveedorInput";
 import { useState } from "react";
 import TablaFiltroProveedores from "../components/TablaFiltroProveedores";
@@ -49,7 +49,7 @@ const enviarPedido = async (venta: CrearPedido) => {
   }
 };
 
-function Pedidos() {
+function GestionarPedidos() {
   // FilaProductos
   const [FilasSeleccionadas, setFilasSeleccionadas] = useState<FilaProductos[]>(
     []
@@ -101,13 +101,13 @@ function Pedidos() {
               estado: "En espera",
               idUsuario: Number(localStorage.getItem("idUsuario")),
               detallePedidos: FilasSeleccionadas.map((item) => ({
-              cantidadProducto:item.cantidad,
-               estado: "En espera",
-               idProducto:item.id,
-               idPresentacion:item.idPresentacion
+                cantidadProducto: item.cantidad,
+                estado: "En espera",
+                idProducto: item.id,
+                idPresentacion: item.idPresentacion,
               })),
             };
-                
+
             try {
               const resultado = await enviarPedido(pedido);
               console.log("Pedido registrado con éxito:", resultado);
@@ -179,4 +179,4 @@ function Pedidos() {
   );
 }
 
-export default Pedidos;
+export default GestionarPedidos;

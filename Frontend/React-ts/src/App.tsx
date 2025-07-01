@@ -3,8 +3,10 @@ import Login from "./features/Login/pages/Login";
 import GestionarVentas from "./features/GestionarVentas/pages/GestionarVentas";
 import NoFoundPage from "./features/NoFoundPage";
 import Inicio from "./features/Inicio/pages/Inicio";
-import Pedidos from "./features/Pedidos/pages/Pedidos";
-import Compras from "./features/Compras/pages/Compras";
+import GestionarPedidos from "./features/GestionarPedidos/pages/GestionarPedidos";
+import RegistroPedidos from "./features/RegistroPedidos/pages/RegistroPedidos";
+import GestionarCompras from "./features/GestionarCompras/pages/GestionarCompras";
+import RegistroCompras from "./features/RegistroCompras/pages/RegistroCompras";
 import RegistroVentas from "./features/RegistroVentas/pages/RegistroVentas";
 import DevolucionesVentas from "./features/DevolucionesVentas/pages/DevolucionesVentas";
 import DevolucionesCompras from "./features/DevolucionesCompras/pages/DevolucionesCompras";
@@ -60,19 +62,21 @@ export default function App() {
           {/* <Route index element={<AdminVentas />} /> Página por defecto */}
           <Route path="gestionarVentas" element={<GestionarVentas />} />
           <Route path="registroVentas" element={<RegistroVentas />} />
-          <Route path="pedidos" element={<Pedidos />} />
-          <Route path="compras" element={<Compras />} />
+          <Route path="gestionarPedidos" element={<GestionarPedidos />} />
+          <Route path="registroPedidos" element={<RegistroPedidos />} />
+          <Route path="gestionarCompras" element={<GestionarCompras />} />
+          <Route path="registroCompras" element={<RegistroCompras />} />
           <Route path="devolucionesVentas" element={<DevolucionesVentas />} />
           <Route path="devolucionesCompras" element={<DevolucionesCompras />} />
           <Route path="productos" element={<Productos />} />
           <Route path="marcas" element={<Marcas />} />
           <Route path="presentaciones" element={<Presentaciones />} />
+          <Route path="proveedores" element={<Proveedores />} />
+          <Route path="clientesNaturales" element={<ClientesNaturales />} />
+          <Route path="clientesJuridicos" element={<ClientesJuridicos />} />
           <Route path="usuarios" element={<Usuarios />} />
           <Route path="trabajadores" element={<Trabajadores />} />
           <Route path="reportes" element={<Reportes />} />
-          <Route path="clientesNaturales" element={<ClientesNaturales />} />
-          <Route path="clientesJuridicos" element={<ClientesJuridicos />} />
-          <Route path="proveedores" element={<Proveedores />} />
           <Route path="*" element={<NoFoundPage />} />
         </Route>
 
@@ -81,19 +85,18 @@ export default function App() {
           {/* <Route index element={<AdminVentas />} /> Página por defecto */}
           <Route path="gestionarVentas" element={<GestionarVentas />} />
           <Route path="registroVentas" element={<RegistroVentas />} />
-          <Route path="pedidos" element={<Pedidos />} />
-          <Route path="compras" element={<Compras />} />
+          <Route path="gestionarPedidos" element={<GestionarPedidos />} />
+          <Route path="registroPedidos" element={<RegistroPedidos />} />
+          <Route path="gestionarCompras" element={<GestionarCompras />} />
+          <Route path="registroCompras" element={<RegistroCompras />} />
           <Route path="devolucionesVentas" element={<DevolucionesVentas />} />
           <Route path="devolucionesCompras" element={<DevolucionesCompras />} />
           <Route path="productos" element={<Productos />} />
           <Route path="marcas" element={<Marcas />} />
           <Route path="presentaciones" element={<Presentaciones />} />
-          <Route path="usuarios" element={<Usuarios />} />
-          <Route path="trabajadores" element={<Trabajadores />} />
-          <Route path="reportes" element={<Reportes />} />
+          <Route path="proveedores" element={<Proveedores />} />
           <Route path="clientesNaturales" element={<ClientesNaturales />} />
           <Route path="clientesJuridicos" element={<ClientesJuridicos />} />
-          <Route path="proveedores" element={<Proveedores />} />
           <Route path="*" element={<NoFoundPage />} />
         </Route>
 
