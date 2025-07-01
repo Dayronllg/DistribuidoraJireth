@@ -108,7 +108,17 @@ namespace Api.Controllers
 
             return Ok(respuestPagDetallePedidoCompra);
         }
+
+        [HttpGet("ObtenerTodosPedidos")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ObtenerTodosPedidos(int Pagina, int TamanioPagina)
+        {
+            var RespuestaTrabajadores = await _pedidoService.PaginarTodosPedidos(Pagina, TamanioPagina);
+
+            return Ok(RespuestaTrabajadores);
+        }
+
+
     }
-
-
 }

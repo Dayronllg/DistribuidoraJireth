@@ -95,6 +95,8 @@ public class MapConfig:Profile
         CreateMap<DetalleCompraDto, DetalleCompra>().ReverseMap();
         CreateMap<CrearCompraDto, Compra>().ForMember(dest => dest.DetalleCompras, opt => opt.MapFrom(src => src.DetalleCompras)).ReverseMap();
         CreateMap<Compra, CompraDto>().ReverseMap();
+         CreateMap<PagDetalleCompra, DetalleCompra>().ForMember(dest => dest.IdProductoNavigation, opt => opt.MapFrom(src => src.IdProductoNavigation)).
+        ForMember(src => src.IdPresentacionNavigation, opt => opt.MapFrom(src => src.IdPresentacionNavigation)).ReverseMap();
     
     }
 }

@@ -5,6 +5,7 @@ using Api.Models;
 using Api.Repositery.IRepositery;
 using Api.Validaciones;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Api.Repositery.ServiceRepositery;
@@ -14,7 +15,7 @@ public class PedidoService : Service<Pedido>, IPedidoRepositery
     private readonly DistribuidoraContext _context;
     private readonly IMapper _mapper;
 
-    public PedidoService(DistribuidoraContext context, IMapper mapper):base(context)
+    public PedidoService(DistribuidoraContext context, IMapper mapper) : base(context)
     {
         _context = context;
         _mapper = mapper;
@@ -42,6 +43,9 @@ public class PedidoService : Service<Pedido>, IPedidoRepositery
         if (PedidoExistente.Failed)
             return ResultNoValue.Fail(PedidoExistente.Error, PedidoExistente.status);
 
+        if (await _context.Compras.AnyAsync(x => x.IdPedido == PedidoExistente.Value.IdPedido) == true)
+            return ResultNoValue.Fail("No se puede cancelar un pedido con una compra asociada ");
+
         PedidoExistente.Value.Estado = "Cancelado";
         var PedidoActualizado = await UpdateEntity(PedidoExistente.Value);
 
@@ -49,8 +53,8 @@ public class PedidoService : Service<Pedido>, IPedidoRepositery
             return ResultNoValue.Fail(PedidoActualizado.Error, PedidoActualizado.status);
 
         return ResultNoValue.Ok();
-       
-         
+
+
     }
 
     public async Task<Result<PedidoDto>> CrearPedido(CrearPedidoDto CrearPedido)
@@ -60,7 +64,7 @@ public class PedidoService : Service<Pedido>, IPedidoRepositery
         if (PedidoCreado.Failed)
             return Result<PedidoDto>.Fail(PedidoCreado.Error, PedidoCreado.status);
 
-        return Result<PedidoDto>.Ok(_mapper.Map<PedidoDto>(PedidoCreado.Value)); 
+        return Result<PedidoDto>.Ok(_mapper.Map<PedidoDto>(PedidoCreado.Value));
     }
 
     public async Task<PaginacionResultado<PedidoDto>> PaginarPedido(int pagina, int tamanioPagina)
@@ -68,6 +72,16 @@ public class PedidoService : Service<Pedido>, IPedidoRepositery
         var query = _context.Pedidos.AsQueryable();
         var PaginacionPedido = await PaginarAsync(query, pagina, tamanioPagina, x => x.Estado == "En espera");
 
-        return MapearPaginador.MapearPaginacion<Pedido, PedidoDto>(PaginacionPedido,_mapper);
+        return MapearPaginador.MapearPaginacion<Pedido, PedidoDto>(PaginacionPedido, _mapper);
     }
+
+    public async Task<PaginacionResultado<PedidoDto>> PaginarTodosPedidos(int pagina, int tamanioPagina)
+    {
+        var query = _context.Pedidos.AsQueryable();
+        var PaginacionPedido = await PaginarAsync(query, pagina, tamanioPagina, x => x.Estado == "En espera" || x.Estado=="Recibido" || x.Estado == "Cancelado");
+
+        return MapearPaginador.MapearPaginacion<Pedido, PedidoDto>(PaginacionPedido, _mapper);
+    }
+
+   
 }

@@ -12,8 +12,5 @@ public class CompraDto
     public int IdPedido { get; set; }
 
     public string Estado { get; set; } = null!;
-
-    public virtual ICollection<DetalleCompraDto> DetalleCompras { get; set; } = new List<DetalleCompraDto>();
-    
-    
+        
 }

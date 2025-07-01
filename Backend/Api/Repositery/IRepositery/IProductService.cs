@@ -16,4 +16,6 @@ public interface IProductService : IService<Producto>
     Task<ResultNoValue> BajaProducto(int id);
     Task<Result<ProductoDto>> ActualizarProducto(ActualizarProductoDto ActualizarProducto);
     Task<PaginacionResultado<ProductoDto>> PaginarSoloProducto(int pagina, int tamanioPagina);
+
+    
 }
