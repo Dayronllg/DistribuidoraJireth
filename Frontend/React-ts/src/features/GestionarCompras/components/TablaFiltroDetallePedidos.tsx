@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from "react";
-import type { FilaPedidos } from "../pages/Compras";
+import type { FilaPedidos } from "../pages/GestionarCompras";
 import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
 import axios from "axios";
-import type { RowModel } from "../pages/Compras"
+import type { RowModel } from "../pages/GestionarCompras";
 import type { Presentacion } from "../../Productos/components/TablaProductos";
 import type { Producto } from "../../Productos/components/TablaProductos";
 
@@ -14,8 +14,8 @@ type FilaDetallePedido = {
   idPedido: number;
   idProducto: number;
   idPresentacion: number;
- nombreProducto:string;
- nombrePresentacion:string
+  nombreProducto: string;
+  nombrePresentacion: string;
 };
 
 type DetallePedido = {
@@ -25,8 +25,8 @@ type DetallePedido = {
   idPedido: number;
   idProducto: number;
   idPresentacion: number;
-  idPresentacionNavigation:Presentacion
-  idProductoNavigation:Producto
+  idPresentacionNavigation: Presentacion;
+  idProductoNavigation: Producto;
 };
 
 // Lista temporal solo para probar
@@ -53,40 +53,40 @@ export default function TablaFiltroDetallePedidos({
   const [isNextClicked, setIsNextClicked] = useState(false);
   const [paginaActual, setpaginaActual] = useState(1);
   const [mensajeError, setMensajeError] = useState<string | null>(null);
-React.useEffect(() => {
-  if (!pedido) return; // Si no hay pedido, no ejecutes la llamada
+  React.useEffect(() => {
+    if (!pedido) return; // Si no hay pedido, no ejecutes la llamada
 
-  const obtenerDetalles = async () => {
-    try {
-      const response = await axios.get<PaginacionResultado<DetallePedido>>(
-        "http://localhost:5187/api/Pedidos/ObtenerDetallePedidoCompra",
-        {
-          params: {
-            id: pedido.idPedido,
-          },
-        }
-      );
+    const obtenerDetalles = async () => {
+      try {
+        const response = await axios.get<PaginacionResultado<DetallePedido>>(
+          "http://localhost:5187/api/Pedidos/ObtenerDetallePedidoCompra",
+          {
+            params: {
+              id: pedido.idPedido,
+            },
+          }
+        );
 
-      const filas: FilaDetallePedido[] = response.data.datos.map((t) => ({
-        idDetalle: `${t.idPedido}-${t.idProducto}-${t.idPresentacion}`,
-        idPedido: t.idPedido,
-        idProducto: t.idProducto,
-        idPresentacion: t.idPresentacion,
-        cantidadProducto: t.cantidadProducto,
-        estado: t.estado,
-        nombreProducto: t.idProductoNavigation.nombre,
-        nombrePresentacion: t.idPresentacionNavigation.nombre,
-      }));
+        const filas: FilaDetallePedido[] = response.data.datos.map((t) => ({
+          idDetalle: `${t.idPedido}-${t.idProducto}-${t.idPresentacion}`,
+          idPedido: t.idPedido,
+          idProducto: t.idProducto,
+          idPresentacion: t.idPresentacion,
+          cantidadProducto: t.cantidadProducto,
+          estado: t.estado,
+          nombreProducto: t.idProductoNavigation.nombre,
+          nombrePresentacion: t.idPresentacionNavigation.nombre,
+        }));
 
-      setRows(filas);
-    } catch (error) {
-      console.error("Error al obtener detalle del pedido:", error);
-      setMensajeError("Hubo un error al cargar el detalle del pedido.");
-    }
-  };
+        setRows(filas);
+      } catch (error) {
+        console.error("Error al obtener detalle del pedido:", error);
+        setMensajeError("Hubo un error al cargar el detalle del pedido.");
+      }
+    };
 
-  obtenerDetalles();
-}, [pedido]);
+    obtenerDetalles();
+  }, [pedido]);
 
   const FilasFiltradas = useMemo(() => {
     const lowerFilter = textoFiltrado.toLowerCase();
@@ -168,7 +168,7 @@ React.useEffect(() => {
         background: "#121212",
         color: "#fff",
         maxWidth: "720px",
-        marginBottom: "0" 
+        marginBottom: "0",
       }}
     >
       <h3 style={{ textAlign: "center", marginTop: 6, marginBottom: 15 }}>
@@ -271,7 +271,7 @@ React.useEffect(() => {
                 <td style={tdStyle}>{row.idProducto}</td>
                 <td style={tdStyle}>{row.nombreProducto}</td>
                 <td style={tdStyle}>{row.idPresentacion}</td>
-                  <td style={tdStyle}>{row.nombrePresentacion}</td>
+                <td style={tdStyle}>{row.nombrePresentacion}</td>
               </tr>
             ))
           ) : (

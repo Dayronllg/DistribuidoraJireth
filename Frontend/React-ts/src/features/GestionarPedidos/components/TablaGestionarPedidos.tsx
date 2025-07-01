@@ -17,7 +17,11 @@ type Props = {
   Editar: (filaEditada: Row) => void; // Función para editar un producto
 };
 
-export default function TablaPedidos({ data, Eliminar, Editar }: Props) {
+export default function TablaGestionarPedidos({
+  data,
+  Eliminar,
+  Editar,
+}: Props) {
   const [editarID, setEditarID] = useState<number | null>(null); // Almacena el id de la fila que está siendo editada actualmente.
   const [editForm, setEditForm] = useState<Partial<Row>>({}); // Almacena temporalmente los valores del formulario de edición.
 
