@@ -2,7 +2,9 @@ import React, { useState, useMemo, useEffect } from "react";
 import type { FilaPedidos } from "../pages/Compras";
 import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
 import axios from "axios";
-import type { RowModel } from "../pages/Compras";
+import type { RowModel } from "../pages/Compras"
+import type { Presentacion } from "../../Productos/components/TablaProductos";
+import type { Producto } from "../../Productos/components/TablaProductos";
 
 // Definir el tipo de valor de cada fila (producto)
 type FilaDetallePedido = {
@@ -12,6 +14,8 @@ type FilaDetallePedido = {
   idPedido: number;
   idProducto: number;
   idPresentacion: number;
+ nombreProducto:string;
+ nombrePresentacion:string
 };
 
 type DetallePedido = {
@@ -21,6 +25,8 @@ type DetallePedido = {
   idPedido: number;
   idProducto: number;
   idPresentacion: number;
+  idPresentacionNavigation:Presentacion
+  idProductoNavigation:Producto
 };
 
 // Lista temporal solo para probar
@@ -47,33 +53,40 @@ export default function TablaFiltroDetallePedidos({
   const [isNextClicked, setIsNextClicked] = useState(false);
   const [paginaActual, setpaginaActual] = useState(1);
   const [mensajeError, setMensajeError] = useState<string | null>(null);
+React.useEffect(() => {
+  if (!pedido) return; // Si no hay pedido, no ejecutes la llamada
 
-  React.useEffect(() => {
-    axios
-      .get<PaginacionResultado<DetallePedido>>(
+  const obtenerDetalles = async () => {
+    try {
+      const response = await axios.get<PaginacionResultado<DetallePedido>>(
         "http://localhost:5187/api/Pedidos/ObtenerDetallePedidoCompra",
         {
           params: {
-            id: pedido?.idPedido,
+            id: pedido.idPedido,
           },
         }
-      )
-      .then((response) => {
-        setRows(
-          response.data.datos.map((t) => ({
-            ...t,
-            idPedido: t.idPedido,
-            idDetalle: `${t.idPedido}-${t.idProducto}-${t.idPresentacion}`,
-            idProducto: t.idProducto,
-            idPresentacion: t.idPresentacion,
-            cantidadProducto: t.cantidadProducto,
-          }))
-        );
-      })
-      .catch((error) => {
-        console.error("Error al obtener Marcas:", error);
-      });
-  }, [pedido]);
+      );
+
+      const filas: FilaDetallePedido[] = response.data.datos.map((t) => ({
+        idDetalle: `${t.idPedido}-${t.idProducto}-${t.idPresentacion}`,
+        idPedido: t.idPedido,
+        idProducto: t.idProducto,
+        idPresentacion: t.idPresentacion,
+        cantidadProducto: t.cantidadProducto,
+        estado: t.estado,
+        nombreProducto: t.idProductoNavigation.nombre,
+        nombrePresentacion: t.idPresentacionNavigation.nombre,
+      }));
+
+      setRows(filas);
+    } catch (error) {
+      console.error("Error al obtener detalle del pedido:", error);
+      setMensajeError("Hubo un error al cargar el detalle del pedido.");
+    }
+  };
+
+  obtenerDetalles();
+}, [pedido]);
 
   const FilasFiltradas = useMemo(() => {
     const lowerFilter = textoFiltrado.toLowerCase();
@@ -154,8 +167,8 @@ export default function TablaFiltroDetallePedidos({
         padding: "1rem",
         background: "#121212",
         color: "#fff",
-        maxWidth: "700px",
-        margin: "0",
+        maxWidth: "720px",
+        marginBottom: "0" 
       }}
     >
       <h3 style={{ textAlign: "center", marginTop: 6, marginBottom: 15 }}>
@@ -226,10 +239,11 @@ export default function TablaFiltroDetallePedidos({
             <th style={thStyle}></th>
             <th style={thStyle}>ID Detalle</th>
             <th style={thStyle}>Cantidad</th>
-            <th style={thStyle}>Estado</th>
             <th style={thStyle}>ID Pedido</th>
             <th style={thStyle}>ID Producto</th>
+            <th style={thStyle}>Nombre Producto</th>
             <th style={thStyle}>ID Presentacion</th>
+            <th style={thStyle}>Presentacion</th>
           </tr>
         </thead>
         <tbody>
@@ -253,15 +267,16 @@ export default function TablaFiltroDetallePedidos({
                 </td>
                 <td style={tdStyle}>{row.idDetalle}</td>
                 <td style={tdStyle}>{row.cantidadProducto}</td>
-                <td style={tdStyle}>{row.estado}</td>
                 <td style={tdStyle}>{row.idPedido}</td>
                 <td style={tdStyle}>{row.idProducto}</td>
+                <td style={tdStyle}>{row.nombreProducto}</td>
                 <td style={tdStyle}>{row.idPresentacion}</td>
+                  <td style={tdStyle}>{row.nombrePresentacion}</td>
               </tr>
             ))
           ) : (
             <tr>
-              <td style={tdStyle} colSpan={7} align="center">
+              <td style={tdStyle} colSpan={9} align="center">
                 Sin resultados encontrados
               </td>
             </tr>

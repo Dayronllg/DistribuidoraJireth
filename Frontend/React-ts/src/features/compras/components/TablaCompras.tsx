@@ -81,8 +81,8 @@ export default function TablaCompras({
         cantidad: nuevaFila.cantidad,
         idProducto: nuevaFila.idProducto,
         idPresentacion: nuevaFila.idPresentacion,
-        nombreProducto: "", // Texto Vacio
-        nombrePresentacion: "", // Texto Vacio
+        nombreProducto: nuevaFila.nombreProducto, // Texto Vacio
+        nombrePresentacion: nuevaFila.nombrePresentacion, // Texto Vacio
         isNew: true,
       };
       setRows((prev) => [...prev, filaConId]);

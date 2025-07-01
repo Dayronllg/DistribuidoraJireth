@@ -32,14 +32,18 @@ export type FilaDetallePedido = {
   estado: string;
   idPedido: number;
   idProducto: number;
+   nombreProducto:string;
   idPresentacion: number;
+   nombrePresentacion:string;
 };
 
 export interface FilaCompra {
   id: string;
   cantidad: number;
   idProducto: number;
+  nombreProducto:string;
   idPresentacion: number;
+  nombrePresentacion:string;
   isNew: boolean;
 }
 
@@ -161,7 +165,9 @@ function Compras() {
       id: detalleSeleccionado.idDetalle,
       cantidad,
       idProducto: detalleSeleccionado.idProducto,
+      nombreProducto:detalleSeleccionado.nombreProducto,
       idPresentacion: detalleSeleccionado.idPresentacion,
+      nombrePresentacion:detalleSeleccionado.nombrePresentacion,
       isNew: true,
     };
 

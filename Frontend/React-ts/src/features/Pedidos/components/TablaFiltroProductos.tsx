@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import type { PaginacionResultado } from "../../Trabajadores/components/TablaTrabajadores";
 import axios from "axios";
-import type { Producto } from "../../Productos/components/TablaProductos";
+import type { Producto } from "../../GestionarVentas/components/TablaFiltroProductos";
 
 // Definir el tipo de valor de cada fila (producto)
 type FilaProductos = {
