@@ -124,7 +124,7 @@ public class CompraService : Service<Compra>, ICompraService
             {
                 await transaction.RollbackAsync();
                 return Result<CompraDto>.Fail(
-                    $"Cantidad de compra para Producto ID {detalle.IdProducto} / Presentación ID {detalle.IdPresentacion} excede la solicitada en el pedido. Pedido: {detallePedido.CantidadProducto}, Intentado: {detalle.Cantidad}");
+                    $"Cantidad de compra para Producto ID {detalle.IdProducto} / Presentación ID {detalle.IdPresentacion} excede la solicitada en el pedido. Pedido: {detallePedido.CantidadProducto}, Intentado: {detalle.Cantidad}",Status.Conflict);
             }
 
             // Actualizar inventario
