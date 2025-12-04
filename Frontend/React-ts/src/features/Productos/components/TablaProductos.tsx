@@ -351,16 +351,21 @@ export default function TablaRegistroProductos({ marca }: Props) {
         return;
       }
       if (marca !== null) {
-        const ProductoCreado = await crearProducto(
-          mapRowToProducto(newRow, marca)
-        );
-
-        updatedRow = {
-          ...newRow,
-          ...ProductoCreado,
-          id: ProductoCreado.idProducto,
-          isNew: false,
-        };
+        try {
+          const ProductoCreado = await crearProducto(
+            mapRowToProducto(newRow, marca)
+          );
+  
+          updatedRow = {
+            ...newRow,
+            ...ProductoCreado,
+            id: ProductoCreado.idProducto,
+            isNew: false,
+          };
+        } catch (error:any) {
+          toast.error( error.response.data);
+          throw error
+        }
       }
     } else {
       const ProductoActualizado = await actualizarProducto(

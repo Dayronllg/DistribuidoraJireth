@@ -81,66 +81,59 @@ function GestionarCompras() {
   const [nuevaFila, setNuevaFila] = useState<FilaCompra | null>(null);
   const [cantidad, setCantidad] = useState<number>(0);
   const [filasCompra, setFilasCompra] = useState<RowModel[]>([]);
-  const [totalCompra, setTotalCompra] = useState(0);
+  const [totalCompra, setTotalCompra] = useState<number>(0);
 
-  const handleGuardarCompra = () => {
-    if (filasCompra.length === 0) {
-      toast.error("Debe agregar al menos un producto a la compra");
-      return;
-    }
+ const handleGuardarCompra = () => {
+  if (filasCompra.length === 0) {
+    toast.error("Debe agregar al menos un producto a la compra");
+    return;
+  }
 
-    confirmAlert({
-      title: "¿Confirmar compra?",
-      message: "¿Estás seguro que deseas registrar esta compra?",
-      buttons: [
-        {
-          label: "Sí, confirmar",
-          onClick: async () => {
-            try {
-              // Obtén el total desde el input (o estado)
-              const totalInput = document.getElementById(
-                "totalCompraInput"
-              ) as HTMLInputElement;
-              const totalCompra = totalInput
-                ? parseFloat(totalInput.value) || 0
-                : 0;
+  if (!totalCompra || totalCompra <= 0) {
+    toast.error("El Total no puede ser 0 o negativo");
+    return;
+  }
 
-              const compra: crearCompra = {
-                totalCompra,
-                idPedido: pedidoSeleccionado?.idPedido || 0,
-                detalleCompras: filasCompra.map((item) => ({
-                  cantidad: item.cantidad,
-                  idProducto: item.idProducto,
-                  idPresentacion: item.idPresentacion,
-                })),
-              };
+  confirmAlert({
+    title: "¿Confirmar compra?",
+    message: "¿Estás seguro que deseas registrar esta compra?",
+    buttons: [
+      {
+        label: "Sí, confirmar",
+        onClick: async () => {
+          try {
+            const compra: crearCompra = {
+              totalCompra: totalCompra, // usa estado directamente
+              idPedido: pedidoSeleccionado?.idPedido || 0,
+              detalleCompras: filasCompra.map((item) => ({
+                cantidad: item.cantidad,
+                idProducto: item.idProducto,
+                idPresentacion: item.idPresentacion,
+              })),
+            };
 
-              await axios.post(
-                "http://localhost:5187/api/Compras/CrearCompra",
-                compra
-              );
+            await axios.post(
+              "http://localhost:5187/api/Compras/CrearCompra",
+              compra
+            );
 
-              toast.success("Compra registrada con éxito");
-              setFilasCompra([]);
-              setPedidoSeleccionado(null);
-            } catch (error: any) {
-              toast.error("Error al registrar la compra");
-              if (error.response?.data?.message) {
-                toast.error(error.response.data.message);
-              } else {
-                toast.error(error.message || "Error inesperado");
-              }
-            }
-          },
+            toast.success("Compra registrada con éxito");
+            setFilasCompra([]);
+            setPedidoSeleccionado(null);
+            setTotalCompra(0);
+          } catch (error: any) {
+            toast.error("Error al registrar la compra");
+             toast.error(error.response.data)
+          }
         },
-        {
-          label: "Cancelar",
-          onClick: () => toast.info("Registro cancelado"),
-        },
-      ],
-    });
-  };
-
+      },
+      {
+        label: "Cancelar",
+        onClick: () => toast.info("Registro cancelado"),
+      },
+    ],
+  });
+};
   // VALIDACIONES
   const handleAgregar = () => {
     if (!pedidoSeleccionado || !detalleSeleccionado) {
@@ -149,7 +142,7 @@ function GestionarCompras() {
       );
       return;
     }
-    if (totalCompra <= 0) {
+    if (totalCompra<= 0) {
       toast.error("El Total no puede ser 0 o negativo");
       return;
     }
